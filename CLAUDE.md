@@ -130,6 +130,11 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 - Thème sombre dérivé (fond vert nuit, textes crème) ; respect du réglage système,
   avec choix manuel dans les réglages. Pas de couleurs dynamiques Material You par
   défaut (l'identité prime), option possible.
+- **Marges système (edge-to-edge)** : aucun contenu sous la barre d'état (haut) ni sous
+  la barre de navigation Android (bas). Le padding `WindowInsets.safeDrawing` est
+  appliqué une fois dans `MonNoelApp` ; tout écran affiché hors de cette structure
+  (plein écran, dialogue plein écran, bienvenue…) doit appliquer `safeDrawingPadding()`
+  lui-même, en haut **et** en bas. Les listes gardent une marge basse pour le bouton flottant.
 - Accessibilité : contrastes AA, tailles de police système, `contentDescription`
   sur les images, cibles tactiles ≥ 48 dp.
 

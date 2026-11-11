@@ -1,6 +1,11 @@
 package com.aktawind.monnoel.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -9,7 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -64,7 +72,17 @@ fun MonNoelApp(hasEditions: Boolean) {
         }
     }
 
+    val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+    // Marges système (barre d'état en haut, barre de navigation Android en bas) : le contenu
+    // ne doit jamais passer dessous. Avec la barre du bas (téléphone), c'est elle qui gère le bas.
+    val contentInsets = if (layoutType == NavigationSuiteType.NavigationBar) {
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+    } else {
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Bottom + WindowInsetsSides.End)
+    }
+
     NavigationSuiteScaffold(
+        layoutType = layoutType,
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 val selected = current?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
@@ -77,7 +95,7 @@ fun MonNoelApp(hasEditions: Boolean) {
             }
         },
     ) {
-        Surface(Modifier, color = MaterialTheme.colorScheme.background) {
+        Surface(Modifier.windowInsetsPadding(contentInsets), color = MaterialTheme.colorScheme.background) {
             NavHost(navController = navController, startDestination = HomeDestination) {
                 homeScreen()
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
