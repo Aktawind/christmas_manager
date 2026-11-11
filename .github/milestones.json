@@ -1,0 +1,13 @@
+[
+  { "title": "v0.1.0", "description": "Les fondations — socle, CI, thème, navigation, années, accueil, export/import, sauvegarde automatique." },
+  { "title": "v0.2.0", "description": "La hotte — personnes, idées, cadeaux, statuts rapides, photos, ajout rapide, budget cadeaux." },
+  { "title": "v0.3.0", "description": "Les calendriers de l'Avent — grille des 24 cases, glisser-déposer, fournitures, modèles, duplication." },
+  { "title": "v0.4.0", "description": "Ma liste de lutin — tâches sans dates, automatisations, accueil complet, recherche globale." },
+  { "title": "v0.5.0", "description": "Le fournil — recettes et productions pâtissières." },
+  { "title": "v0.6.0", "description": "La table de fête — repas et menus." },
+  { "title": "v0.7.0", "description": "Les comptes du Père Noël — budget complet." },
+  { "title": "v0.8.0", "description": "Les traditions — catalogue, suivi annuel, inspirations." },
+  { "title": "v0.9.0", "description": "L'atelier des lutins — activités, DIY, décoration." },
+  { "title": "v0.10.0", "description": "La boîte à souvenirs — journal, archives, bilans, export PDF." },
+  { "title": "v1.0.0", "description": "Noël magique — finitions, accessibilité, performances." }
+]

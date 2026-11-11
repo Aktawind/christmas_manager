@@ -28,12 +28,13 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 
 - `main` : uniquement des versions validées par l'utilisateur, chacune taguée `vX.Y.Z`.
 - `develop` : branche d'intégration ; chaque push déclenche vérifications, tests et
-  publication de l'APK de test en pré-version GitHub `develop-latest`.
+  build de l'APK signé (artefact de CI). **Pas de pré-version dans les Releases** :
+  l'APK de test est envoyé directement dans la conversation (décision utilisateur).
 - Le travail d'une session peut se faire sur une branche de travail puis être
   fusionné dans `develop`.
 - Une version = un jalon GitHub (`v0.1.0`, …) + une checklist de test
   `docs/test-checklists/vX.Y.Z.md` + des notes de version `docs/release-notes/vX.Y.Z.md`.
-- Validation : l'utilisateur teste l'APK `develop-latest`, fait ses retours ; une fois
+- Validation : l'utilisateur teste l'APK reçu dans la conversation, fait ses retours ; une fois
   validé → merge `develop` → `main`, tag `vX.Y.Z` → la CI publie l'APK signé dans
   les Releases avec les notes de version.
 - Versionnage SemVer `0.x.y` jusqu'à la v1.0.0. `versionName` = version du tag
@@ -68,7 +69,7 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 ## Architecture (voir ADR 0002)
 
 - Kotlin, Jetpack Compose (Material 3), MVVM + Clean Architecture, Hilt, Room,
-  Navigation Compose, WorkManager, DataStore, Coil, kotlinx.serialization.
+  Navigation Compose, WorkManager, DataStore, Coil, kotlinx.serialization, `java.time`.
 - Projet Gradle multi-modules avec convention plugins dans `build-logic/` :
   - `:app` — point d'entrée, navigation globale, injection.
   - `:core:model` — modèles métier purs (pas de dépendance Android).
@@ -134,7 +135,20 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 
 ## Qualité et tests
 
-- Avant chaque push : `./gradlew lint ktlintCheck testDebugUnitTest assembleRelease`.
+- Avant chaque push : `./gradlew ktlintCheck lint testDebugUnitTest assembleRelease`
+  (zéro avertissement lint visé).
+- Test de fumée Robolectric (`app/src/test/.../AppSmokeTest.kt`) : lance la vraie app.
+- Captures d'écran tablette : `SHOT_DIR=<dossier> ./gradlew :app:testDebugUnitTest
+  --tests '*ScreenshotTool*'` (à regarder avant chaque livraison).
+
+## Environnement de développement (session cloud)
+
+- SDK Android : `/opt/android-sdk` (`local.properties`, non commité).
+- Signature locale : `keystore.properties` (non commité) pointant vers la clé.
+- Maven Central renvoie parfois 429 : réessayer. Robolectric hors ligne avec
+  `ROBOLECTRIC_DEPS_DIR=/opt/robolectric` (jar `android-all-instrumented` téléchargé
+  depuis `maven-central.storage-download.googleapis.com`).
+- Pas d'émulateur (pas de KVM) : on s'appuie sur Robolectric + captures.
 - Tests unitaires obligatoires pour : cas d'usage, calculs de budget, export/import
   (aller-retour complet), migrations Room.
 - Chaque version livre `docs/test-checklists/vX.Y.Z.md` : quoi tester, pas à pas,

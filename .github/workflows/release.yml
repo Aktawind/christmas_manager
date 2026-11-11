@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publier la version
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MONNOEL_RELEASE: 'true'
+      SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+      SIGNING_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Vérifier le tag, la version et les notes
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION=$(grep '^monnoel.version=' gradle.properties | cut -d= -f2)
+          if [ "v${VERSION}" != "${TAG}" ]; then
+            echo "::error::Le tag ${TAG} ne correspond pas à monnoel.version=${VERSION}"; exit 1
+          fi
+          if [ ! -f "docs/release-notes/${TAG}.md" ]; then
+            echo "::error::Notes de version manquantes : docs/release-notes/${TAG}.md"; exit 1
+          fi
+          if [ -z "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "::error::Secrets de signature absents"; exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Clé de signature
+        run: |
+          echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "SIGNING_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Tests et APK signé
+        run: ./gradlew testDebugUnitTest assembleRelease
+
+      - name: Préparer l'APK
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/release/*.apk "dist/mon-noel-${GITHUB_REF_NAME}.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Mon Noël ${{ github.ref_name }}
+          body_path: docs/release-notes/${{ github.ref_name }}.md
+          files: dist/*.apk
+          make_latest: true

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
+    <string name="settings_title">Réglages</string>
+    <string name="settings_theme">Apparence</string>
+    <string name="settings_theme_system">Comme le système</string>
+    <string name="settings_theme_light">Clair (ivoire et sapin)</string>
+    <string name="settings_theme_dark">Sombre (nuit de Noël)</string>
+    <string name="settings_backup">Sauvegarde et restauration</string>
+    <string name="settings_backup_explain">Exporte toutes tes données dans un fichier (.zip) que tu peux garder sur Drive, dans tes téléchargements… Pour changer de tablette : exporte ici, puis restaure ce fichier sur le nouvel appareil.</string>
+    <string name="settings_export">Exporter mes données</string>
+    <string name="settings_import">Restaurer une sauvegarde</string>
+    <string name="settings_export_done">Sauvegarde exportée ✨</string>
+    <string name="settings_import_done">Données restaurées 🎄</string>
+    <string name="settings_auto">Sauvegarde automatique</string>
+    <string name="settings_auto_explain">Une fois par jour, Mon Noël range une copie de tes données dans le dossier de ton choix. Les 10 dernières sont conservées.</string>
+    <string name="settings_auto_enabled">Sauvegarde quotidienne</string>
+    <string name="settings_auto_folder">Dossier : %1$s</string>
+    <string name="settings_auto_no_folder">Aucun dossier choisi pour l’instant.</string>
+    <string name="settings_auto_choose_folder">Choisir un dossier</string>
+    <string name="settings_auto_change_folder">Changer de dossier</string>
+    <string name="settings_auto_now">Sauvegarder maintenant</string>
+    <string name="settings_auto_folder_done">Dossier enregistré, première sauvegarde faite ✨</string>
+    <string name="settings_auto_now_done">Sauvegarde faite ✨</string>
+    <string name="settings_auto_last_success">Dernière sauvegarde : %1$s ✔</string>
+    <string name="settings_auto_last_error">⚠ La dernière sauvegarde a échoué : %1$s</string>
+    <string name="settings_auto_never">Aucune sauvegarde automatique pour l’instant.</string>
+    <string name="settings_about">À propos</string>
+    <string name="settings_about_text">Mon Noël — ton carnet de Noël, hors connexion. Tes données restent sur ton appareil.</string>
+    <string name="settings_version">Version %1$s (%2$d)</string>
+</resources>

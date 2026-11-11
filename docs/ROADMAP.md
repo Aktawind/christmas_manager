@@ -12,7 +12,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 
 | Version | Nom                         | Contenu principal                                                     | Statut |
 | ------- | --------------------------- | --------------------------------------------------------------------- | ------ |
-| v0.1.0  | Les fondations              | Socle technique, CI/APK, thème, navigation, années, accueil, export/import, sauvegarde auto | ⬜ |
+| v0.1.0  | Les fondations              | Socle technique, CI/APK, thème, navigation, années, accueil, export/import, sauvegarde auto | 🧪 |
 | v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts rapides, photos, ajout rapide, budget cadeaux | ⬜ |
 | v0.3.0  | Les calendriers de l'Avent  | Calendriers, 24 cases en grille, glisser-déposer, fournitures, modèles, duplication | ⬜ |
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ⬜ |
@@ -33,20 +33,20 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| F-001 | Projet Android multi-modules (Kotlin, Compose, Hilt, Room, convention plugins) | ⬜ |
-| F-002 | CI : vérifications + tests à chaque push sur `develop`, APK de test signé       | ⬜ |
-| F-003 | CI : APK signé publié dans les Releases à chaque tag `v*`, avec notes de version | ⬜ |
-| F-004 | Création automatique des jalons GitHub                                          | ⬜ |
-| F-005 | Identité graphique « Mon Noël » : icône, palette, typographie, thème clair/sombre/système | ⬜ |
-| F-006 | Navigation adaptative (rail latéral sur tablette, barre du bas sur téléphone)   | ⬜ |
-| F-007 | Premier lancement : accueil de bienvenue, création du Noël 2026                 | ⬜ |
-| F-008 | Mes Noëls : créer, choisir l'année affichée, archiver / désarchiver, supprimer  | ⬜ |
-| F-009 | Accueil v1 : année, compte à rebours, message du jour, aperçu des modules à venir | ⬜ |
-| F-010 | Export complet des données (.zip) vers un emplacement choisi                    | ⬜ |
-| F-011 | Import d'une sauvegarde (vérification + sauvegarde de sécurité préalable)       | ⬜ |
-| F-012 | Sauvegarde automatique quotidienne dans un dossier choisi, 10 dernières gardées | ⬜ |
-| F-013 | Gestion centralisée des erreurs (messages clairs, état de la dernière sauvegarde) | ⬜ |
-| F-014 | Réglages : thème, sauvegarde, à propos (version)                                | ⬜ |
+| F-001 | Projet Android multi-modules (Kotlin, Compose, Hilt, Room, convention plugins) | 🧪 |
+| F-002 | CI : vérifications + tests à chaque push sur `develop`, APK de test signé       | 🧪 |
+| F-003 | CI : APK signé publié dans les Releases à chaque tag `v*`, avec notes de version | 🧪 |
+| F-004 | Création automatique des jalons GitHub                                          | 🧪 |
+| F-005 | Identité graphique « Mon Noël » : icône, palette, typographie, thème clair/sombre/système | 🧪 |
+| F-006 | Navigation adaptative (rail latéral sur tablette, barre du bas sur téléphone)   | 🧪 |
+| F-007 | Premier lancement : accueil de bienvenue, création du Noël 2026                 | 🧪 |
+| F-008 | Mes Noëls : créer, choisir l'année affichée, archiver / désarchiver, supprimer  | 🧪 |
+| F-009 | Accueil v1 : année, compte à rebours, message du jour, aperçu des modules à venir | 🧪 |
+| F-010 | Export complet des données (.zip) vers un emplacement choisi                    | 🧪 |
+| F-011 | Import d'une sauvegarde (vérification + sauvegarde de sécurité préalable)       | 🧪 |
+| F-012 | Sauvegarde automatique quotidienne dans un dossier choisi, 10 dernières gardées | 🧪 |
+| F-013 | Gestion centralisée des erreurs (messages clairs, état de la dernière sauvegarde) | 🧪 |
+| F-014 | Réglages : thème, sauvegarde, à propos (version)                                | 🧪 |
 
 ## v0.2.0 — La hotte 🎁
 

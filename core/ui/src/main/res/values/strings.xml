@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
+    <string name="error_year_exists">Le Noël %1$d existe déjà.</string>
+    <string name="error_not_found">Cet élément n’existe plus.</string>
+    <string name="error_read_only">Cette année est archivée : elle se consulte, mais ne se modifie plus.</string>
+    <string name="error_invalid_input">Cette valeur n’est pas valable.</string>
+    <string name="error_unexpected">Un petit lutin a trébuché… Réessaie dans un instant.</string>
+    <string name="error_backup_folder">Le dossier de sauvegarde n’est plus accessible. Choisis-le à nouveau dans les réglages.</string>
+    <string name="error_backup_write">La sauvegarde n’a pas pu être écrite. Vérifie l’espace disponible.</string>
+    <string name="error_backup_read">Le fichier n’a pas pu être lu.</string>
+    <string name="error_backup_not_backup">Ce fichier n’est pas une sauvegarde Mon Noël.</string>
+    <string name="error_backup_corrupted">Cette sauvegarde est abîmée ou incomplète : rien n’a été modifié.</string>
+    <string name="error_backup_too_recent">Cette sauvegarde vient d’une version plus récente de Mon Noël. Mets l’application à jour pour l’importer.</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="import_dialog_title">Restaurer cette sauvegarde ?</string>
+    <string name="import_dialog_date">Sauvegarde du %1$s</string>
+    <plurals name="import_dialog_editions">
+        <item quantity="one">%1$d Noël</item>
+        <item quantity="many">%1$d Noëls</item>
+        <item quantity="other">%1$d Noëls</item>
+    </plurals>
+    <string name="import_dialog_version">Créée avec Mon Noël %1$s</string>
+    <string name="import_dialog_warning">Toutes les données actuelles seront remplacées. Une sauvegarde de sécurité est faite juste avant, par précaution.</string>
+    <string name="import_dialog_confirm">Restaurer</string>
+</resources>

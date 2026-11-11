@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sapin de Noël stylisé, étoile dorée (zone sûre de l'icône adaptative : 66 dp centrés). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Étoile -->
+    <path
+        android:fillColor="@color/champagne"
+        android:pathData="M54,25 L56.6,31.4 L63.5,31.9 L58.2,36.3 L59.9,43 L54,39.4 L48.1,43 L49.8,36.3 L44.5,31.9 L51.4,31.4 Z" />
+    <!-- Étages du sapin -->
+    <path
+        android:fillColor="@color/sage_light"
+        android:pathData="M54,40 L66,55 L59,55 L70,67 L61,67 L74,80 L34,80 L47,67 L38,67 L49,55 L42,55 Z" />
+    <!-- Tronc -->
+    <path
+        android:fillColor="@color/champagne"
+        android:pathData="M50,80 L58,80 L58,86 L50,86 Z" />
+    <!-- Boules -->
+    <path
+        android:fillColor="@color/champagne"
+        android:pathData="M51,60 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="@color/champagne"
+        android:pathData="M60,72 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="@color/champagne"
+        android:pathData="M46,74 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+</vector>

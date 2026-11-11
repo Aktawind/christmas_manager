@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Vérifications, tests et APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+      SIGNING_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # versionCode = nombre de commits
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Clé de signature
+        if: env.SIGNING_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "SIGNING_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Style (ktlint)
+        run: ./gradlew ktlintCheck
+
+      - name: Tests unitaires
+        run: ./gradlew testDebugUnitTest
+
+      - name: Lint Android
+        run: ./gradlew lint
+
+      - name: APK signé
+        run: ./gradlew assembleRelease
+
+      - name: Renommer l'APK
+        run: |
+          VERSION=$(grep '^monnoel.version=' gradle.properties | cut -d= -f2)
+          mkdir -p dist
+          cp app/build/outputs/apk/release/*.apk "dist/mon-noel-${VERSION}-dev.${GITHUB_RUN_NUMBER}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mon-noel-apk
+          path: dist/*.apk
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapports
+          path: |
+            **/build/reports/
+            **/build/test-results/
+          retention-days: 7

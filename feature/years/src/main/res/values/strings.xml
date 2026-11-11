@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
+    <string name="years_title">Mes Noëls</string>
+    <string name="years_edition">Noël %1$d</string>
+    <string name="years_current">Affiché</string>
+    <string name="years_status_archived">Archivé</string>
+    <string name="years_tap_to_show">Touche pour afficher ce Noël</string>
+    <string name="years_actions">Actions pour Noël %1$d</string>
+    <string name="years_new">Nouveau Noël</string>
+    <string name="years_new_title">Un nouveau Noël</string>
+    <string name="years_new_label">Année</string>
+    <string name="years_new_invalid">Entre une année entre %1$d et %2$d.</string>
+    <string name="years_new_confirm">Créer</string>
+    <string name="years_cancel">Annuler</string>
+    <string name="years_created">Noël %1$d est prêt ✨</string>
+    <string name="years_archive">Archiver</string>
+    <string name="years_unarchive">Désarchiver</string>
+    <string name="years_archived">Noël %1$d est rangé dans les archives.</string>
+    <string name="years_unarchived">Noël %1$d est de nouveau modifiable.</string>
+    <string name="years_delete">Supprimer</string>
+    <string name="years_delete_title">Supprimer Noël %1$d ?</string>
+    <string name="years_delete_message">Tout ce qui concerne cette année sera effacé. Pense à exporter une sauvegarde avant, si besoin.</string>
+    <string name="years_delete_confirm">Supprimer définitivement</string>
+    <string name="years_deleted">Noël %1$d a été supprimé.</string>
+    <string name="years_empty_title">Aucun Noël pour l’instant</string>
+    <string name="years_empty_message">Crée ton premier Noël pour commencer ton carnet.</string>
+    <string name="welcome_title">Bienvenue dans Mon Noël</string>
+    <string name="welcome_message">Ton carnet de Noël : idées, cadeaux, calendriers de l’Avent, recettes, traditions et souvenirs, réunis au même endroit, année après année. Sans pression, juste la magie.</string>
+    <string name="welcome_start">Commencer mon Noël %1$d</string>
+    <string name="welcome_restore">Restaurer une sauvegarde</string>
+</resources>

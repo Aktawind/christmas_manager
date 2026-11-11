@@ -13,9 +13,10 @@ jamais être perdues entre deux versions.
 
 - Branches : `main` (versions validées et taguées), `develop` (intégration).
 - GitHub Actions :
-  - `ci.yml` — sur push `develop` et pull requests : lint, tests unitaires, build de
-    l'APK signé, publication en pré-version GitHub `develop-latest`
-    (le tag `develop-latest` est déplacé à chaque build, l'APK est remplacé).
+  - `ci.yml` — sur push `develop`/`main` et pull requests : ktlint, tests unitaires,
+    lint, build de l'APK signé conservé 14 jours comme artefact de CI.
+    *(Révisé le 2026-11-11 : pas de pré-version `develop-latest` ; l'APK de test est
+    envoyé dans la conversation.)*
   - `release.yml` — sur tag `v*` : build `release` signé, publication d'une Release
     GitHub avec `docs/release-notes/<tag>.md` comme description.
   - `milestones.yml` — crée les jalons manquants listés dans `.github/milestones.json`.

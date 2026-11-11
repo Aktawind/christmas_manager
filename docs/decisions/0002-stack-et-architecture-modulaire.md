@@ -7,8 +7,9 @@
 
 - Kotlin, Jetpack Compose + Material 3 (dont `material3-adaptive` pour tablette),
   MVVM + Clean Architecture, Hilt, Room, Navigation Compose (routes typées),
-  WorkManager, DataStore, Coil, kotlinx.serialization, kotlinx.datetime.
-- `minSdk 26` (Android 8), `targetSdk` = dernière API stable.
+  WorkManager, DataStore, Coil, kotlinx.serialization ; dates avec `java.time`
+  (disponible nativement dès minSdk 26, inutile d'ajouter kotlinx-datetime).
+- `minSdk 26` (Android 8), `compileSdk`/`targetSdk` 36. AGP 8.12, Kotlin 2.2, Gradle 8.14.
 - Gradle multi-modules (`:app`, `:core:*`, `:feature:*`) avec version catalog
   (`gradle/libs.versions.toml`) et convention plugins (`build-logic/`).
 - Une **seule base Room** dans `:core:database` (les relations entre modules — tâches

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
+    <string name="home_edition_title">Noël %1$d</string>
+    <string name="home_archived">Année archivée · souvenirs</string>
+    <!-- Toujours au pluriel : à 1 jour de Noël, l'accueil affiche « C'est le réveillon ». -->
+    <string name="home_days_left">jours avant Noël</string>
+    <string name="home_advent_day">Jour %1$d de l’Avent ✨</string>
+    <string name="home_christmas_eve">C’est le réveillon ! 🌟</string>
+    <string name="home_christmas_day">Joyeux Noël ! 🎄</string>
+    <string name="home_past">Noël %1$d est passé.\nIl reste dans les souvenirs ❤️</string>
+    <string name="home_upcoming_title">Bientôt dans ton carnet</string>
+    <string name="home_upcoming_subtitle">Les pages de ton carnet arriveront au fil des versions.</string>
+    <string name="home_coming_in">Arrive en v%1$s</string>
+    <string name="module_gifts">Cadeaux</string>
+    <string name="module_advent">Calendriers de l’Avent</string>
+    <string name="module_tasks">Ma liste de lutin</string>
+    <string name="module_recipes">Pâtisseries &amp; recettes</string>
+    <string name="module_meals">Repas de fête</string>
+    <string name="module_budget">Budget</string>
+    <string name="module_traditions">Traditions</string>
+    <string name="module_activities">Activités, DIY &amp; déco</string>
+    <string name="module_memories">Souvenirs</string>
+    <string-array name="home_daily_messages">
+        <item>Prends le temps d’une tasse de chocolat chaud aujourd’hui.</item>
+        <item>Noël, c’est d’abord les gens qu’on aime.</item>
+        <item>Une petite idée notée aujourd’hui, c’est un souci de moins demain.</item>
+        <item>Et si tu écoutais une chanson de Noël en préparant le dîner ?</item>
+        <item>Pas besoin que tout soit parfait pour que ce soit magique.</item>
+        <item>Les plus beaux souvenirs naissent souvent des petits moments.</item>
+        <item>Une bougie, une couverture, un bon film : c’est déjà Noël.</item>
+        <item>Respire. Il y a le temps.</item>
+        <item>Le meilleur cadeau, c’est souvent le temps passé ensemble.</item>
+        <item>Une guirlande lumineuse suffit à réchauffer une soirée.</item>
+        <item>Aujourd’hui, laisse-toi émerveiller par quelque chose de simple.</item>
+        <item>L’odeur des biscuits à la cannelle, ça se partage.</item>
+        <item>Une carte écrite à la main fait toujours plaisir.</item>
+        <item>Les lutins travaillent mieux après une petite pause.</item>
+        <item>Fais une liste, puis oublie-la : ton carnet s’en souvient pour toi.</item>
+        <item>Regarde les illuminations du quartier ce soir.</item>
+        <item>Un sourire offert, c’est un cadeau qui ne coûte rien.</item>
+        <item>Noël se prépare doucement, comme une pâte qui lève.</item>
+        <item>Raconte une histoire de Noël à quelqu’un que tu aimes.</item>
+        <item>Les traditions, ce sont les souvenirs qu’on choisit de refaire.</item>
+        <item>Un peu de paillettes, beaucoup de tendresse.</item>
+        <item>Ce qui compte, ce n’est pas la liste, c’est la joie.</item>
+        <item>Allume une bougie et savoure le calme.</item>
+        <item>Chaque jour de décembre a sa petite magie.</item>
+        <item>Un chocolat, un plaid, une histoire : le trio parfait.</item>
+        <item>Les étoiles brillent aussi pour toi.</item>
+        <item>Tu fais déjà de ton mieux, et c’est merveilleux.</item>
+        <item>Les rires autour de la table valent tous les menus du monde.</item>
+        <item>Laisse un peu de place à l’imprévu, c’est là que la magie se cache.</item>
+        <item>Noël, c’est maintenant : profite du chemin.</item>
+    </string-array>
+</resources>
