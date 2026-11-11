@@ -35,8 +35,10 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 - Une version = un jalon GitHub (`v0.1.0`, …) + une checklist de test
   `docs/test-checklists/vX.Y.Z.md` + des notes de version `docs/release-notes/vX.Y.Z.md`.
 - Validation : l'utilisateur teste l'APK reçu dans la conversation, fait ses retours ; une fois
-  validé → merge `develop` → `main`, tag `vX.Y.Z` → la CI publie l'APK signé dans
-  les Releases avec les notes de version.
+  validé → merge `develop` → `main` → le workflow `release.yml` crée le tag `vX.Y.Z`
+  (d'après `monnoel.version`) et publie l'APK signé dans les Releases avec les notes de
+  version. La session cloud ne peut pas pousser de tag (403) : ne pas essayer.
+- Juste après une publication : passer `monnoel.version` à la version suivante sur `develop`.
 - Versionnage SemVer `0.x.y` jusqu'à la v1.0.0. `versionName` = version du tag
   (`0.2.0-dev+<sha>` sur develop). `versionCode` = nombre de commits
   (`git rev-list --count HEAD`) : toujours croissant, donc un APK develop et un APK

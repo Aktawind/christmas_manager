@@ -17,8 +17,10 @@ jamais être perdues entre deux versions.
     lint, build de l'APK signé conservé 14 jours comme artefact de CI.
     *(Révisé le 2026-11-11 : pas de pré-version `develop-latest` ; l'APK de test est
     envoyé dans la conversation.)*
-  - `release.yml` — sur tag `v*` : build `release` signé, publication d'une Release
-    GitHub avec `docs/release-notes/<tag>.md` comme description.
+  - `release.yml` — sur push `main` (ou tag `v*`) : si la Release `v<monnoel.version>`
+    n'existe pas, build `release` signé, création du tag et de la Release GitHub avec
+    `docs/release-notes/<tag>.md` comme description. *(Révisé le 2026-11-11 : la session
+    cloud ne peut pas pousser de tag, c'est donc la CI qui le crée.)*
   - `milestones.yml` — crée les jalons manquants listés dans `.github/milestones.json`.
 - Signature : une seule clé (RSA 4096, validité 30 ans) générée au démarrage. Stockée
   uniquement dans les secrets GitHub et dans une copie de sauvegarde conservée par
