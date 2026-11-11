@@ -1,11 +1,11 @@
 # ADR 0004 — Format de sauvegarde, export et import
 
 - Date : 2026-11-11
-- Statut : proposé
+- Statut : accepté
 
 ## Décision
 
-- Fichier `.zip` nommé `carnet-de-noel-AAAA-MM-JJ-HHmm.zip` contenant :
+- Fichier `.zip` nommé `mon-noel-AAAA-MM-JJ-HHmm.zip` contenant :
   - `manifest.json` : `formatVersion`, `appVersion`, `schemaVersion`, `exportedAt`,
     nombre d'éléments par table, empreinte SHA-256 de `data.json`.
   - `data.json` : toutes les tables, sérialisées avec kotlinx.serialization dans des

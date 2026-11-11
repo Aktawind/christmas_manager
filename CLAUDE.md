@@ -1,4 +1,4 @@
-# CLAUDE.md — Mémoire du projet « Carnet de Noël »
+# CLAUDE.md — Mémoire du projet « Mon Noël »
 
 Ce fichier est relu au début de chaque session. Il contient les conventions et les
 décisions qui ne doivent pas être redemandées. Les détails de chaque décision sont
@@ -7,7 +7,7 @@ dans `docs/decisions/`, la liste des fonctionnalités dans `docs/ROADMAP.md`.
 ## Le projet en une phrase
 
 Application Android native, hors connexion, qui sert de **carnet de Noël numérique** :
-idées, cadeaux, calendriers de l'Avent, recettes, repas, planning, budget, traditions,
+idées, cadeaux, calendriers de l'Avent, recettes, repas, petites listes à faire, budget, traditions,
 activités, décoration et souvenirs, organisés **par Noël annuel** et conservés année
 après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de projet ».
 
@@ -36,9 +36,10 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 - Validation : l'utilisateur teste l'APK `develop-latest`, fait ses retours ; une fois
   validé → merge `develop` → `main`, tag `vX.Y.Z` → la CI publie l'APK signé dans
   les Releases avec les notes de version.
-- Versionnage SemVer `0.x.y` jusqu'à la v1.0.0. `versionCode` = calculé depuis la
-  version (`major*10000 + minor*100 + patch`) ; les builds develop utilisent le
-  numéro de run CI.
+- Versionnage SemVer `0.x.y` jusqu'à la v1.0.0. `versionName` = version du tag
+  (`0.2.0-dev+<sha>` sur develop). `versionCode` = nombre de commits
+  (`git rev-list --count HEAD`) : toujours croissant, donc un APK develop et un APK
+  release s'installent l'un par-dessus l'autre sans perte de données.
 - Commits : messages en français, à l'impératif, préfixés par le module
   (`cadeaux: ajoute le changement rapide de statut`).
 
@@ -49,12 +50,20 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
   `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`.
 - `*.jks`, `*.keystore`, `keystore.properties` sont dans `.gitignore`.
 
-## Variantes de l'application
+## Une seule application
 
-- `release` : `applicationId` définitif, nom « Carnet de Noël ».
-- `beta` (APK `develop-latest`) : suffixe `.beta`, nom « Carnet de Noël β », signé avec
-  la même clé. Les deux s'installent côte à côte ; les données passent de l'une à
-  l'autre par export / import.
+- Nom : **« Mon Noël »**. `applicationId` : `com.aktawind.monnoel` (définitif).
+- Pas de variante de test séparée : l'APK de test (develop) et l'APK validé sont la
+  même application, signée avec la même clé, et se mettent à jour l'un l'autre en
+  conservant les données.
+
+## Philosophie produit (décisions de l'utilisateur, à respecter)
+
+- **Aucune pression** : pas de dates d'échéance ni de priorités sur les tâches, pas
+  de retard affiché en rouge, pas de notifications insistantes. Les tâches sont une
+  simple liste « à faire / fait » (voir ADR 0006).
+- Les seules dates sont celles qui existent naturellement (date d'un repas, ouverture
+  des calendriers le 1er décembre, Noël).
 
 ## Architecture (voir ADR 0002)
 
@@ -72,7 +81,7 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
   - `:core:media` — import, redimensionnement et stockage des photos.
   - `:core:backup` — export / import / sauvegarde automatique.
   - `:feature:<module>` — un module par domaine (home, years, gifts, advent, recipes,
-    meals, planning, budget, traditions, activities, decoration, memories, search,
+    meals, tasks, budget, traditions, activities, decoration, memories, search,
     settings).
 - Un module `feature` ne dépend jamais d'un autre module `feature`.
 - Les ViewModels exposent un `StateFlow<UiState>` unique ; les écrans sont des
@@ -125,7 +134,7 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 
 ## Qualité et tests
 
-- Avant chaque push : `./gradlew lint ktlintCheck testDebugUnitTest assembleBeta`.
+- Avant chaque push : `./gradlew lint ktlintCheck testDebugUnitTest assembleRelease`.
 - Tests unitaires obligatoires pour : cas d'usage, calculs de budget, export/import
   (aller-retour complet), migrations Room.
 - Chaque version livre `docs/test-checklists/vX.Y.Z.md` : quoi tester, pas à pas,

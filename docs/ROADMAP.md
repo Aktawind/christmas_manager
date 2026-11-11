@@ -1,4 +1,4 @@
-# Roadmap — Carnet de Noël
+# Roadmap — Mon Noël
 
 Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Validé · ⏸️ Reporté
 
@@ -15,7 +15,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.1.0  | Les fondations              | Socle technique, CI/APK, thème, navigation, années, accueil, export/import, sauvegarde auto | ⬜ |
 | v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts rapides, photos, ajout rapide, budget cadeaux | ⬜ |
 | v0.3.0  | Les calendriers de l'Avent  | Calendriers, 24 cases en grille, glisser-déposer, fournitures, modèles, duplication | ⬜ |
-| v0.4.0  | Le planning                 | Tâches, vues mois/semaine/liste, automatisations, accueil complet, recherche globale | ⬜ |
+| v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ⬜ |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes, productions pâtissières                     | ⬜ |
 | v0.6.0  | La table de fête            | Repas, menus par catégories, liens recettes                           | ⬜ |
 | v0.7.0  | Les comptes du Père Noël    | Budget complet : catégories, dépassements, graphiques, comparaison    | ⬜ |
@@ -34,19 +34,19 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
 | F-001 | Projet Android multi-modules (Kotlin, Compose, Hilt, Room, convention plugins) | ⬜ |
-| F-002 | CI : vérifications + tests à chaque push sur `develop`                         | ⬜ |
-| F-003 | CI : APK de test signé publié en pré-version `develop-latest`                  | ⬜ |
-| F-004 | CI : APK release signé publié dans les Releases à chaque tag `v*`              | ⬜ |
-| F-005 | Création automatique des jalons GitHub depuis la roadmap                       | ⬜ |
-| F-006 | Identité graphique : palette, typographie, thème clair/sombre/système          | ⬜ |
-| F-007 | Navigation adaptative (rail latéral sur tablette, barre du bas sur téléphone)   | ⬜ |
-| F-008 | Gestion des années : créer, choisir l'année active, consulter, archiver         | ⬜ |
-| F-009 | Accueil v1 : année en cours, compte à rebours avant le 25 décembre             | ⬜ |
-| F-010 | Export complet des données (.zip) vers un fichier choisi                        | ⬜ |
-| F-011 | Import d'une sauvegarde (avec sauvegarde de sécurité préalable)                 | ⬜ |
-| F-012 | Sauvegarde automatique périodique dans un dossier choisi, rotation             | ⬜ |
-| F-013 | Gestion centralisée des erreurs (messages clairs, erreurs de sauvegarde)       | ⬜ |
-| F-014 | Écran Réglages (thème, sauvegarde, à propos / version)                          | ⬜ |
+| F-002 | CI : vérifications + tests à chaque push sur `develop`, APK de test signé       | ⬜ |
+| F-003 | CI : APK signé publié dans les Releases à chaque tag `v*`, avec notes de version | ⬜ |
+| F-004 | Création automatique des jalons GitHub                                          | ⬜ |
+| F-005 | Identité graphique « Mon Noël » : icône, palette, typographie, thème clair/sombre/système | ⬜ |
+| F-006 | Navigation adaptative (rail latéral sur tablette, barre du bas sur téléphone)   | ⬜ |
+| F-007 | Premier lancement : accueil de bienvenue, création du Noël 2026                 | ⬜ |
+| F-008 | Mes Noëls : créer, choisir l'année affichée, archiver / désarchiver, supprimer  | ⬜ |
+| F-009 | Accueil v1 : année, compte à rebours, message du jour, aperçu des modules à venir | ⬜ |
+| F-010 | Export complet des données (.zip) vers un emplacement choisi                    | ⬜ |
+| F-011 | Import d'une sauvegarde (vérification + sauvegarde de sécurité préalable)       | ⬜ |
+| F-012 | Sauvegarde automatique quotidienne dans un dossier choisi, 10 dernières gardées | ⬜ |
+| F-013 | Gestion centralisée des erreurs (messages clairs, état de la dernière sauvegarde) | ⬜ |
+| F-014 | Réglages : thème, sauvegarde, à propos (version)                                | ⬜ |
 
 ## v0.2.0 — La hotte 🎁
 
@@ -79,18 +79,19 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 | A-009 | Dupliquer un calendrier d'une année à l'autre                                   | ⬜ |
 | A-010 | Modèles personnels : enregistrer / créer depuis un modèle, réutiliser des cases | ⬜ |
 
-## v0.4.0 — Le planning 📅
+## v0.4.0 — Ma liste de lutin 📝
+
+Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                    | Statut |
 | ----- | --------------------------------------------------------------------------------- | ------ |
-| P-001 | Tâches : titre, description, échéance, priorité, statut, module, éléments liés, notes | ⬜ |
-| P-002 | Vues mensuelle, hebdomadaire, liste chronologique                                 | ⬜ |
-| P-003 | Filtres par module, statut, priorité                                              | ⬜ |
-| P-004 | Automatisations : cadeau commandé → vérifier la livraison ; case non prête → préparer | ⬜ |
-| P-005 | Réglage d'activation / désactivation de chaque automatisation ; suggestions modifiables | ⬜ |
-| P-006 | Accueil complet : avancement des préparatifs, prochaines échéances, tâches du jour | ⬜ |
-| P-007 | Recherche globale v1 : personnes, idées, cadeaux, calendriers, tâches, résultats groupés | ⬜ |
-| P-008 | Rappels par notification (facultatifs)                                            | ⬜ |
+| P-001 | Tâches : titre, description, statut, module, éléments liés, notes                 | ⬜ |
+| P-002 | Liste regroupée par module, cases à cocher, filtre par statut                     | ⬜ |
+| P-003 | Automatisations : cadeau commandé → vérifier la livraison ; case non prête → préparer | ⬜ |
+| P-004 | Les automatisations proposent, l'utilisateur accepte / modifie / ignore ; activables une à une | ⬜ |
+| P-005 | Accueil complet : avancement des préparatifs, « Le chemin vers Noël », tâches à faire | ⬜ |
+| P-006 | Recherche globale v1 : personnes, idées, cadeaux, calendriers, tâches, résultats groupés | ⬜ |
+| ~~—~~ | ~~Vues mensuelle / hebdomadaire, priorités, rappels~~ — supprimés (ADR 0006)       | — |
 
 ## v0.5.0 — Le fournil 🧁
 

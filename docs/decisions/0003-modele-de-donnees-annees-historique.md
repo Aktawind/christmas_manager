@@ -1,7 +1,7 @@
 # ADR 0003 — Modèle de données : éditions annuelles et historique figé
 
 - Date : 2026-11-11
-- Statut : proposé
+- Statut : accepté
 
 ## Décision
 

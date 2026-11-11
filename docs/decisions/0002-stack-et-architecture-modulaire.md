@@ -1,7 +1,7 @@
 # ADR 0002 — Stack technique et architecture modulaire
 
 - Date : 2026-11-11
-- Statut : proposé
+- Statut : accepté
 
 ## Décision
 
