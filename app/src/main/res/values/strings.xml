@@ -2,6 +2,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
     <string name="app_name">Mon Noël</string>
     <string name="nav_home">Accueil</string>
+    <string name="nav_gifts">Cadeaux</string>
     <string name="nav_years">Mes Noëls</string>
     <string name="nav_settings">Réglages</string>
+    <string name="share_as_idea">Ajouter comme idée</string>
+    <string name="share_saved">Idée notée dans Mon Noël ✨</string>
 </resources>

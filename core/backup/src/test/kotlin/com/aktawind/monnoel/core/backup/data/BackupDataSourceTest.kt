@@ -6,6 +6,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.aktawind.monnoel.core.backup.format.BackupArchive
 import com.aktawind.monnoel.core.backup.format.BackupData
 import com.aktawind.monnoel.core.backup.format.EditionDto
+import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
+import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
+import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
+import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
+import com.aktawind.monnoel.core.backup.format.PersonDto
+import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
+import com.aktawind.monnoel.core.backup.format.WishItemDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -55,6 +62,31 @@ class BackupDataSourceTest {
 
         source.replaceAll(BackupArchive.read(ByteArrayInputStream(out.toByteArray()), null).data)
         assertEquals(data.editions.sortedBy { it.year }, source.snapshot().editions.sortedBy { it.year })
+    }
+
+    @Test
+    fun `aller-retour complet avec personnes, idees, cadeaux et enveloppes`() = runTest {
+        val data = BackupData(
+            editions = listOf(EditionDto("e", 2026, "ACTIVE", null, 1L, 1L)),
+            giftCategories = listOf(GiftCategoryDto("c", "Livres", 0)),
+            persons = listOf(PersonDto("p", "Léa", "Martin", "photos/p.jpg", "lecture", "", 1L, 1L)),
+            wishItems = listOf(WishItemDto("w", "p", "Un roman", false, 0)),
+            giftIdeas = listOf(GiftIdeaDto("i", "Roman", "", null, 1_500, "https://x", "Librairie", "", "c", 1L, 1L)),
+            ideaPersons = listOf(IdeaPersonDto("i", "p")),
+            plannedGifts = listOf(
+                PlannedGiftDto(
+                    "g", "e", "p", "Léa Martin", "i", "Roman", "", "photos/g.jpg", 1_500, 20_400L, "Librairie",
+                    "https://x", "SUIVI", "", "c", "ORDERED", 1L, 2L,
+                ),
+            ),
+            personBudgets = listOf(PersonBudgetDto("e", "p", 5_000)),
+        )
+        source.replaceAll(data)
+        val out = ByteArrayOutputStream()
+        BackupArchive.write(out, source.snapshot(), null, "0.2.0", 1, Instant.EPOCH)
+        source.replaceAll(BackupData())
+        source.replaceAll(BackupArchive.read(ByteArrayInputStream(out.toByteArray()), null).data)
+        assertEquals(data, source.snapshot())
     }
 
     @Test

@@ -13,7 +13,15 @@ import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.common.UuidGenerator
 import com.aktawind.monnoel.core.data.repository.DataStoreUserPreferences
 import com.aktawind.monnoel.core.data.repository.RoomEditionRepository
+import com.aktawind.monnoel.core.data.repository.RoomGiftCategoryRepository
+import com.aktawind.monnoel.core.data.repository.RoomGiftIdeaRepository
+import com.aktawind.monnoel.core.data.repository.RoomPersonRepository
+import com.aktawind.monnoel.core.data.repository.RoomPlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
+import com.aktawind.monnoel.core.domain.repository.GiftCategoryRepository
+import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
+import com.aktawind.monnoel.core.domain.repository.PersonRepository
+import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
 import dagger.Binds
 import dagger.Module
@@ -36,6 +44,18 @@ abstract class DataBindsModule {
     @Binds
     @Singleton
     abstract fun bindPreferences(impl: DataStoreUserPreferences): UserPreferencesRepository
+
+    @Binds
+    abstract fun bindPersons(impl: RoomPersonRepository): PersonRepository
+
+    @Binds
+    abstract fun bindCategories(impl: RoomGiftCategoryRepository): GiftCategoryRepository
+
+    @Binds
+    abstract fun bindIdeas(impl: RoomGiftIdeaRepository): GiftIdeaRepository
+
+    @Binds
+    abstract fun bindGifts(impl: RoomPlannedGiftRepository): PlannedGiftRepository
 
     @Binds
     abstract fun bindTime(impl: SystemTimeProvider): TimeProvider

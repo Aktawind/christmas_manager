@@ -8,6 +8,11 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+android {
+    // Schémas exportés disponibles pour les tests de migration.
+    sourceSets["test"].assets.srcDir("$projectDir/schemas")
+}
+
 dependencies {
     api(libs.room.runtime)
     api(libs.room.ktx)

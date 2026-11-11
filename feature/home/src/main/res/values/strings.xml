@@ -11,7 +11,6 @@
     <string name="home_upcoming_title">Bientôt dans ton carnet</string>
     <string name="home_upcoming_subtitle">Les pages de ton carnet arriveront au fil des versions.</string>
     <string name="home_coming_in">Arrive en v%1$s</string>
-    <string name="module_gifts">Cadeaux</string>
     <string name="module_advent">Calendriers de l’Avent</string>
     <string name="module_tasks">Ma liste de lutin</string>
     <string name="module_recipes">Pâtisseries &amp; recettes</string>
@@ -52,4 +51,12 @@
         <item>Laisse un peu de place à l’imprévu, c’est là que la magie se cache.</item>
         <item>Noël, c’est maintenant : profite du chemin.</item>
     </string-array>
+    <string name="home_gifts_title">Les cadeaux</string>
+    <string name="home_quick_idea">✨ Noter une idée</string>
+    <string name="home_gifts_empty">Aucun cadeau prévu pour l’instant · %1$d idées dans le carnet</string>
+    <string name="home_gifts_line">%1$d cadeaux prévus · %2$s</string>
+    <string name="home_gifts_to_buy">%1$d à acheter</string>
+    <string name="home_gifts_awaiting">%1$d en livraison</string>
+    <string name="home_gifts_to_wrap">%1$d à emballer</string>
+    <string name="home_gifts_given">%1$d offerts</string>
 </resources>

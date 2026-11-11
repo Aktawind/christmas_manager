@@ -36,7 +36,7 @@ class BackupArchiveTest {
 
         assertEquals(sample, decoded.data)
         assertEquals(BACKUP_FORMAT_VERSION, decoded.manifest.formatVersion)
-        assertEquals(mapOf("editions" to 2), decoded.manifest.counts)
+        assertEquals(2, decoded.manifest.counts["editions"])
         assertEquals(1, decoded.manifest.mediaFiles)
         assertEquals(listOf<Byte>(1, 2, 3), java.io.File(target, "gifts/photo1.jpg").readBytes().toList())
     }
@@ -79,6 +79,30 @@ class BackupArchiveTest {
         val target = Files.createTempDirectory("restore").toFile()
         val e = assertFailsWith<BackupException> { BackupArchive.read(ByteArrayInputStream(bytes), target) }
         assertEquals(BackupFailureReason.CORRUPTED, e.reason)
+    }
+
+    @Test
+    fun `une sauvegarde v1 (v0_1_0) est convertie et recoit les categories`() {
+        val data = """{"editions":[{"id":"a","year":2026,"status":"ACTIVE","createdAt":1,"updatedAt":1}]}"""
+        val sha = java.security.MessageDigest.getInstance("SHA-256").digest(data.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+        val manifest = BackupManifest(
+            formatVersion = 1,
+            appVersion = "0.1.0",
+            appVersionCode = 4,
+            exportedAt = "2026-11-11T10:00:00Z",
+            counts = mapOf("editions" to 1),
+            mediaFiles = 0,
+            dataSha256 = sha,
+        )
+        val bytes = zipOf(
+            MANIFEST_ENTRY to backupJson.encodeToString(BackupManifest.serializer(), manifest),
+            DATA_ENTRY to data,
+        )
+        val decoded = BackupArchive.read(ByteArrayInputStream(bytes), null)
+        assertEquals(2026, decoded.data.editions.single().year)
+        assertEquals(11, decoded.data.giftCategories.size)
+        assertEquals(0, decoded.data.persons.size)
     }
 
     private fun zipOf(vararg entries: Pair<String, String>): ByteArray {

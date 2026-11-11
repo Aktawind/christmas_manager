@@ -2,16 +2,30 @@ package com.aktawind.monnoel.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
 import com.aktawind.monnoel.core.domain.countdown.christmasCountdown
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
+import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
+import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
+import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
+import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.ui.UiMessage
+import com.aktawind.monnoel.core.ui.toUiMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
@@ -24,22 +38,72 @@ sealed interface HomeUiState {
         val countdown: CountdownState,
         /** Jour de l'année, pour choisir le message du jour. */
         val dayOfYear: Int,
+        val gifts: GiftsSummary = GiftsSummary(),
+        val message: UiMessage? = null,
     ) : HomeUiState
 }
 
+/** Résumé des cadeaux de l'année pour l'accueil. */
+data class GiftsSummary(
+    val total: Int = 0,
+    val toBuy: Int = 0,
+    val awaiting: Int = 0,
+    val toWrap: Int = 0,
+    val given: Int = 0,
+    val plannedCents: Long = 0,
+    val ideas: Int = 0,
+)
+
 @HiltViewModel
-class HomeViewModel @Inject constructor(observeEditions: ObserveEditionsUseCase, private val time: TimeProvider) :
-    ViewModel() {
-    val uiState: StateFlow<HomeUiState> = observeEditions()
-        .map { state ->
-            val edition = state.current ?: return@map HomeUiState.NoEdition
-            val today = time.today()
-            HomeUiState.Ready(
-                year = edition.year,
-                isArchived = edition.isArchived,
-                countdown = christmasCountdown(today, edition.year),
-                dayOfYear = today.dayOfYear,
-            )
+class HomeViewModel @Inject constructor(
+    observeEditions: ObserveEditionsUseCase,
+    gifts: PlannedGiftRepository,
+    ideas: GiftIdeaRepository,
+    private val saveIdea: SaveIdeaUseCase,
+    private val time: TimeProvider,
+) : ViewModel() {
+    private val message = MutableStateFlow<UiMessage?>(null)
+
+    private val editionGifts = observeEditions().flatMapLatest { state ->
+        val edition = state.current ?: return@flatMapLatest flowOf(null to emptyList<PlannedGift>())
+        gifts.observeGifts(edition.id).map { edition to it }
+    }
+
+    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), message) {
+            (edition, list),
+            ideaList,
+            msg,
+        ->
+        if (edition == null) return@combine HomeUiState.NoEdition
+        val today = time.today()
+        HomeUiState.Ready(
+            year = edition.year,
+            isArchived = edition.isArchived,
+            countdown = christmasCountdown(today, edition.year),
+            dayOfYear = today.dayOfYear,
+            gifts = GiftsSummary(
+                total = list.size,
+                toBuy = list.count { it.status == GiftStatus.TO_BUY },
+                awaiting = list.count { it.status.isAwaitingDelivery },
+                toWrap = list.count { it.status == GiftStatus.TO_WRAP || it.status == GiftStatus.RECEIVED },
+                given = list.count { it.status == GiftStatus.GIVEN },
+                plannedCents = list.sumOf { it.priceCents ?: 0 },
+                ideas = ideaList.size,
+            ),
+            message = msg,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)
+
+    fun quickIdea(title: String, url: String) {
+        viewModelScope.launch {
+            message.value = when (val result = saveIdea(null, IdeaDraft(title = title, url = url))) {
+                is AppResult.Success -> UiMessage(com.aktawind.monnoel.core.ui.R.string.quick_idea_saved)
+                is AppResult.Failure -> result.error.toUiMessage()
+            }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)
+    }
+
+    fun messageShown() {
+        message.value = null
+    }
 }

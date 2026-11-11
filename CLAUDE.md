@@ -156,6 +156,9 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
   `ROBOLECTRIC_DEPS_DIR=/opt/robolectric` (jar `android-all-instrumented` téléchargé
   depuis `maven-central.storage-download.googleapis.com`).
 - Pas d'émulateur (pas de KVM) : on s'appuie sur Robolectric + captures.
+- `ktlintFormat` reformate le code (ex. constructeurs sur une ligne) : relire un fichier
+  avant de le modifier par remplacement de texte.
+- Données d'exemple pour les captures : `TestDataEntryPoint` (app) + `ScreenshotTool`.
 - Tests unitaires obligatoires pour : cas d'usage, calculs de budget, export/import
   (aller-retour complet), migrations Room.
 - Chaque version livre `docs/test-checklists/vX.Y.Z.md` : quoi tester, pas à pas,

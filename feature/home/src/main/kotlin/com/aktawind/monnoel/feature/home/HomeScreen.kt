@@ -16,14 +16,23 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -42,25 +51,50 @@ import com.aktawind.monnoel.core.designsystem.theme.Ivory
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.designsystem.theme.MonNoelTheme
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
+import com.aktawind.monnoel.core.domain.gifts.formatEuro
+import com.aktawind.monnoel.core.ui.QuickIdeaDialog
+import com.aktawind.monnoel.core.ui.resolve
 
 @Composable
-fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeRoute(onOpenGifts: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeScreen(state)
-}
-
-@Composable
-internal fun HomeScreen(state: HomeUiState) {
-    when (state) {
-        HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    var quickIdea by rememberSaveable { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val message = (state as? HomeUiState.Ready)?.message
+    LaunchedEffect(message) {
+        message?.let {
+            snackbar.showSnackbar(it.resolve(context))
+            viewModel.messageShown()
         }
-        is HomeUiState.Ready -> HomeContent(state)
+    }
+    Box(Modifier.fillMaxSize()) {
+        HomeScreen(state, onOpenGifts = onOpenGifts, onQuickIdea = { quickIdea = true })
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+    }
+    if (quickIdea) {
+        QuickIdeaDialog(
+            onSave = { title, url ->
+                viewModel.quickIdea(title, url)
+                quickIdea = false
+            },
+            onDismiss = { quickIdea = false },
+        )
     }
 }
 
 @Composable
-private fun HomeContent(state: HomeUiState.Ready) {
+internal fun HomeScreen(state: HomeUiState, onOpenGifts: () -> Unit = {}, onQuickIdea: () -> Unit = {}) {
+    when (state) {
+        HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onQuickIdea)
+    }
+}
+
+@Composable
+private fun HomeContent(state: HomeUiState.Ready, onOpenGifts: () -> Unit, onQuickIdea: () -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 170.dp),
         modifier = Modifier.fillMaxSize(),
@@ -70,6 +104,7 @@ private fun HomeContent(state: HomeUiState.Ready) {
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) { CountdownCard(state) }
         item(span = { GridItemSpan(maxLineSpan) }) { DailyMessage(state.dayOfYear) }
+        item(span = { GridItemSpan(maxLineSpan) }) { GiftsSummaryCard(state.gifts, onOpenGifts, onQuickIdea) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -187,6 +222,44 @@ private fun DailyMessage(dayOfYear: Int) {
             modifier = Modifier.fillMaxWidth(),
         )
         StarDivider()
+    }
+}
+
+@Composable
+private fun GiftsSummaryCard(summary: GiftsSummary, onOpen: () -> Unit, onQuickIdea: () -> Unit) {
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "🎁  " + stringResource(R.string.home_gifts_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f).semantics { heading() },
+                )
+                FilledTonalButton(onClick = onQuickIdea) { Text(stringResource(R.string.home_quick_idea)) }
+            }
+            if (summary.total == 0) {
+                Text(
+                    stringResource(R.string.home_gifts_empty, summary.ideas),
+                    color = LocalMonNoelColors.current.secondaryText,
+                )
+            } else {
+                Text(
+                    stringResource(R.string.home_gifts_line, summary.total, formatEuro(summary.plannedCents)),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                val details = listOfNotNull(
+                    summary.toBuy.takeIf { it > 0 }?.let { stringResource(R.string.home_gifts_to_buy, it) },
+                    summary.awaiting.takeIf { it > 0 }?.let { stringResource(R.string.home_gifts_awaiting, it) },
+                    summary.toWrap.takeIf { it > 0 }?.let { stringResource(R.string.home_gifts_to_wrap, it) },
+                    summary.given.takeIf { it > 0 }?.let { stringResource(R.string.home_gifts_given, it) },
+                ).joinToString(" · ")
+                if (details.isNotBlank()) Text(details, color = LocalMonNoelColors.current.secondaryText)
+            }
+        }
     }
 }
 

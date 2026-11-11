@@ -83,11 +83,13 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:data"))
     implementation(project(":core:backup"))
+    implementation(project(":core:media"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))
     implementation(project(":feature:home"))
     implementation(project(":feature:years"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:gifts"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

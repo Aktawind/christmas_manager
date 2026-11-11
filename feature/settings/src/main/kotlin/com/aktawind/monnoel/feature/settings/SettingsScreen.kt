@@ -92,6 +92,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             Column(Modifier.widthIn(max = 720.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 ThemeSection(state.theme, viewModel::setTheme)
+                CategoriesSection()
                 BackupSection(
                     busy = state.busy,
                     onExport = { exportLauncher.launch(viewModel.suggestedExportName()) },
@@ -124,7 +125,7 @@ private fun folderLabel(uri: Uri): String? =
     uri.lastPathSegment?.substringAfter(':')?.ifBlank { null } ?: uri.lastPathSegment
 
 @Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
+internal fun SettingsCard(title: String, content: @Composable () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         modifier = Modifier.fillMaxWidth(),
@@ -138,7 +139,7 @@ private fun SectionCard(title: String, content: @Composable () -> Unit) {
 
 @Composable
 private fun ThemeSection(selected: ThemePreference, onSelect: (ThemePreference) -> Unit) {
-    SectionCard(stringResource(R.string.settings_theme)) {
+    SettingsCard(stringResource(R.string.settings_theme)) {
         Column(Modifier.selectableGroup()) {
             listOf(
                 ThemePreference.SYSTEM to R.string.settings_theme_system,
@@ -164,7 +165,7 @@ private fun ThemeSection(selected: ThemePreference, onSelect: (ThemePreference) 
 
 @Composable
 private fun BackupSection(busy: Boolean, onExport: () -> Unit, onImport: () -> Unit) {
-    SectionCard(stringResource(R.string.settings_backup)) {
+    SettingsCard(stringResource(R.string.settings_backup)) {
         Text(
             stringResource(R.string.settings_backup_explain),
             style = MaterialTheme.typography.bodyMedium,
@@ -185,7 +186,7 @@ private fun AutoBackupSection(
     onToggle: (Boolean) -> Unit,
     onBackupNow: () -> Unit,
 ) {
-    SectionCard(stringResource(R.string.settings_auto)) {
+    SettingsCard(stringResource(R.string.settings_auto)) {
         Text(
             stringResource(R.string.settings_auto_explain),
             style = MaterialTheme.typography.bodyMedium,
@@ -239,7 +240,7 @@ private fun AutoBackupStatus(settings: AutoBackupSettings) {
 
 @Composable
 private fun AboutSection(versionName: String, versionCode: Long) {
-    SectionCard(stringResource(R.string.settings_about)) {
+    SettingsCard(stringResource(R.string.settings_about)) {
         Text(stringResource(R.string.settings_about_text))
         Text(
             stringResource(R.string.settings_version, versionName, versionCode),

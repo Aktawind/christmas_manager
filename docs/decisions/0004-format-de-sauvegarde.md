@@ -29,3 +29,10 @@
 - Changement de téléphone : exporter (ou utiliser le dossier de sauvegarde auto sur
   Drive), installer l'app, importer.
 - Un test automatisé vérifie l'aller-retour export → import sur un jeu de données complet.
+
+## Historique du format
+
+| formatVersion | Version de l'app | Changement |
+| ------------- | ---------------- | ---------- |
+| 1 | v0.1.0 | Années |
+| 2 | v0.2.0 | Personnes, souhaits, catégories, idées (+ liens personnes), cadeaux, enveloppes, photos dans `media/photos/`. Conversion 1 → 2 : ajout des catégories par défaut. |

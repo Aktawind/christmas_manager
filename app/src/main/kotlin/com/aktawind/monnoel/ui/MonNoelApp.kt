@@ -30,6 +30,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aktawind.monnoel.R
+import com.aktawind.monnoel.core.designsystem.icon.MonNoelIcons
+import com.aktawind.monnoel.feature.gifts.navigation.GiftEditDestination
+import com.aktawind.monnoel.feature.gifts.navigation.GiftsDestination
+import com.aktawind.monnoel.feature.gifts.navigation.IdeaEditDestination
+import com.aktawind.monnoel.feature.gifts.navigation.PersonDestination
+import com.aktawind.monnoel.feature.gifts.navigation.PersonEditDestination
+import com.aktawind.monnoel.feature.gifts.navigation.giftsGraph
 import com.aktawind.monnoel.feature.home.navigation.HomeDestination
 import com.aktawind.monnoel.feature.home.navigation.homeScreen
 import com.aktawind.monnoel.feature.settings.navigation.SettingsDestination
@@ -41,13 +48,25 @@ import kotlin.reflect.KClass
 
 private enum class TopLevelDestination(
     val route: Any,
-    val routeClass: KClass<*>,
+    val routeClasses: List<KClass<*>>,
     val icon: ImageVector,
     @StringRes val label: Int,
 ) {
-    HOME(HomeDestination, HomeDestination::class, Icons.Filled.Home, R.string.nav_home),
-    YEARS(YearsDestination, YearsDestination::class, Icons.Filled.Star, R.string.nav_years),
-    SETTINGS(SettingsDestination, SettingsDestination::class, Icons.Filled.Settings, R.string.nav_settings),
+    HOME(HomeDestination, listOf(HomeDestination::class), Icons.Filled.Home, R.string.nav_home),
+    GIFTS(
+        GiftsDestination,
+        listOf(
+            GiftsDestination::class,
+            GiftEditDestination::class,
+            IdeaEditDestination::class,
+            PersonDestination::class,
+            PersonEditDestination::class,
+        ),
+        MonNoelIcons.Gift,
+        R.string.nav_gifts,
+    ),
+    YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
+    SETTINGS(SettingsDestination, listOf(SettingsDestination::class), Icons.Filled.Settings, R.string.nav_settings),
 }
 
 /**
@@ -85,7 +104,7 @@ fun MonNoelApp(hasEditions: Boolean) {
         layoutType = layoutType,
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
-                val selected = current?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
+                val selected = current?.hierarchy?.any { d -> destination.routeClasses.any { d.hasRoute(it) } } == true
                 item(
                     selected = selected,
                     onClick = { navigate(destination) },
@@ -97,7 +116,8 @@ fun MonNoelApp(hasEditions: Boolean) {
     ) {
         Surface(Modifier.windowInsetsPadding(contentInsets), color = MaterialTheme.colorScheme.background) {
             NavHost(navController = navController, startDestination = HomeDestination) {
-                homeScreen()
+                homeScreen(onOpenGifts = { navigate(TopLevelDestination.GIFTS) })
+                giftsGraph(navController)
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
                 settingsScreen()
             }
