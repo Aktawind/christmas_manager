@@ -36,6 +36,7 @@
     <string name="ideas_empty_message">Note tes idées au fil de l’année, même sans savoir pour qui.</string>
     <string name="idea_for">Pour %1$s</string>
     <string name="idea_offer">Offrir à…</string>
+    <string name="idea_offer_to">Offrir « %1$s » à…</string>
     <string name="offer_title">Offrir « %1$s » à…</string>
     <string name="offer_no_recipient">Sans destinataire pour l’instant</string>
     <string name="gift_for">Pour %1$s</string>

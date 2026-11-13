@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
                 MonNoelApp(hasEditions = ready.hasEditions)
                 val shared by viewModel.sharedIdea.collectAsStateWithLifecycle()
                 shared?.let { idea ->
+                    val persons by viewModel.persons.collectAsStateWithLifecycle()
                     QuickIdeaDialog(
+                        persons = persons,
                         initialTitle = idea.title,
                         initialUrl = idea.url,
                         onSave = viewModel::saveSharedIdea,

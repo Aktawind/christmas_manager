@@ -10,8 +10,10 @@ import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
+import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
@@ -61,7 +63,11 @@ class HomeViewModel @Inject constructor(
     ideas: GiftIdeaRepository,
     private val saveIdea: SaveIdeaUseCase,
     private val time: TimeProvider,
+    personRepository: PersonRepository,
 ) : ViewModel() {
+    val persons: StateFlow<List<Person>> =
+        personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     private val message = MutableStateFlow<UiMessage?>(null)
 
     private val editionGifts = observeEditions().flatMapLatest { state ->
@@ -94,12 +100,13 @@ class HomeViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)
 
-    fun quickIdea(title: String, url: String) {
+    fun quickIdea(title: String, url: String, personIds: Set<String>) {
         viewModelScope.launch {
-            message.value = when (val result = saveIdea(null, IdeaDraft(title = title, url = url))) {
-                is AppResult.Success -> UiMessage(com.aktawind.monnoel.core.ui.R.string.quick_idea_saved)
-                is AppResult.Failure -> result.error.toUiMessage()
-            }
+            message.value =
+                when (val result = saveIdea(null, IdeaDraft(title = title, url = url, personIds = personIds))) {
+                    is AppResult.Success -> UiMessage(com.aktawind.monnoel.core.ui.R.string.quick_idea_saved)
+                    is AppResult.Failure -> result.error.toUiMessage()
+                }
         }
     }
 

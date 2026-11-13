@@ -29,6 +29,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -95,17 +97,18 @@ fun PersonAvatar(path: String?, initials: String, modifier: Modifier = Modifier,
         } else {
             Text(
                 initials.ifBlank { "🎅" },
-                style = if (size >=
-                    72.dp
-                ) {
-                    MaterialTheme.typography.headlineMedium
-                } else {
-                    MaterialTheme.typography.titleMedium
-                },
+                style = initialsStyle(size),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }
+}
+
+/** Initiales en police système, plus grandes sur les grands avatars. */
+@Composable
+private fun initialsStyle(size: Dp): TextStyle {
+    val base = if (size >= 72.dp) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleMedium
+    return base.copy(fontFamily = FontFamily.Default)
 }
 
 /**

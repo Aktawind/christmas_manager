@@ -22,17 +22,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -54,6 +59,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aktawind.monnoel.core.designsystem.icon.MonNoelIcons
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.model.GiftIdea
@@ -264,11 +270,18 @@ private fun GiftsTabContent(state: GiftsUiState, onOpenGift: (String) -> Unit, o
                 )
             }
         }
-        groups.forEach { (title, list) ->
+        groups.forEachIndexed { index, (title, list) ->
             item(key = "header-$grouping-$title") {
                 val header = if (grouping == Grouping.STATUS) statusLabels[title.toInt()] else title
-                val person = if (grouping == Grouping.PERSON) list.first().personId else null
-                GroupHeader(header, list.size, person?.let { state.budget.byPerson[it] }, grouping == Grouping.PERSON)
+                val personId = if (grouping == Grouping.PERSON) list.first().personId else null
+                GroupHeader(
+                    title = header,
+                    count = list.size,
+                    person = personId?.let { id -> state.persons.firstOrNull { it.id == id } },
+                    budget = personId?.let { state.budget.byPerson[it] },
+                    showAvatar = grouping == Grouping.PERSON,
+                    first = index == 0,
+                )
             }
             items(list, key = { it.id }) { gift ->
                 GiftRow(
@@ -329,16 +342,50 @@ private fun BudgetFigure(@StringRes label: Int, value: String) {
 private fun GroupHeader(
     title: String,
     count: Int,
+    person: Person?,
     budget: com.aktawind.monnoel.core.domain.gifts.PersonGiftBudget?,
-    showBudget: Boolean,
+    showAvatar: Boolean,
+    first: Boolean,
 ) {
-    Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            "$title · $count",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.semantics { heading() },
-        )
-        if (showBudget && budget != null) EnvelopeProgress(budget, Modifier.fillMaxWidth())
+    Column(Modifier.padding(top = if (first) 8.dp else 20.dp)) {
+        if (!first) {
+            HorizontalDivider(
+                Modifier.padding(bottom = 20.dp),
+                color = LocalMonNoelColors.current.gold.copy(alpha = 0.4f),
+            )
+        }
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (showAvatar) PersonAvatar(person?.photoPath, person?.initials ?: "", size = 48.dp)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    if (showAvatar && budget != null) EnvelopeProgress(budget, Modifier.fillMaxWidth())
+                }
+                Badge(
+                    containerColor = LocalMonNoelColors.current.gold,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ) {
+                    Text(
+                        count.toString(),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -380,7 +427,7 @@ private fun PersonCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PersonAvatar(person.photoPath, person.initials, size = 56.dp)
+            PersonAvatar(person.photoPath, person.initials, size = 84.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     person.displayName,
@@ -405,10 +452,10 @@ private fun IdeasTabContent(state: GiftsUiState, onOpenIdea: (String) -> Unit, o
     val visible = state.ideas.filter { categoryFilter == null || it.categoryId == categoryFilter }
     val personNames = state.persons.associate { it.id to it.firstName.ifBlank { it.displayName } }
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(260.dp),
+        columns = GridCells.Adaptive(300.dp),
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
         fullWidth {
@@ -448,6 +495,7 @@ private fun LazyGridScope.fullWidth(content: @Composable () -> Unit) {
     item(span = { GridItemSpan(maxLineSpan) }) { content() }
 }
 
+/** Carte d'idée compacte : beaucoup d'idées tiennent à l'écran, la photo reste bien visible. */
 @Composable
 private fun IdeaCard(
     idea: GiftIdea,
@@ -460,34 +508,38 @@ private fun IdeaCard(
         onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                PhotoImage(idea.photoPath, null, size = 64.dp, placeholder = "💡")
-                Column(Modifier.weight(1f)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PhotoImage(idea.photoPath, null, size = 84.dp, shape = RectangleShape, placeholder = "💡")
+            Column(
+                Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    idea.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                val details = listOfNotNull(
+                    idea.estimatedPriceCents?.let { formatEuro(it) },
+                    forNames.takeIf {
+                        it.isNotEmpty()
+                    }?.let { stringResource(R.string.idea_for, it.joinToString(", ")) },
+                ).joinToString(" · ")
+                if (details.isNotBlank()) {
                     Text(
-                        idea.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 2,
+                        details,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalMonNoelColors.current.secondaryText,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    idea.estimatedPriceCents?.let {
-                        Text(
-                            formatEuro(it),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LocalMonNoelColors.current.secondaryText,
-                        )
-                    }
                 }
             }
-            if (forNames.isNotEmpty()) {
-                Text(
-                    stringResource(R.string.idea_for, forNames.joinToString(", ")),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LocalMonNoelColors.current.secondaryText,
-                )
-            }
             if (canOffer) {
-                TextButton(onClick = onOffer) { Text(stringResource(R.string.idea_offer)) }
+                IconButton(onClick = onOffer) {
+                    Icon(MonNoelIcons.Gift, contentDescription = stringResource(R.string.idea_offer_to, idea.title))
+                }
             }
         }
     }

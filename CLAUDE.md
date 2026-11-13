@@ -132,6 +132,12 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 - Thème sombre dérivé (fond vert nuit, textes crème) ; respect du réglage système,
   avec choix manuel dans les réglages. Pas de couleurs dynamiques Material You par
   défaut (l'identité prime), option possible.
+- **Polices** : police à empattements réservée aux grands titres (display, headline : « Noël 2026 »,
+  compte à rebours). Titres de sections, de groupes, barres et initiales : police système
+  (retour utilisatrice : pas de « Times » pour les noms de groupes).
+- **Listes denses** (idées en vrac…) : cartes compactes, photo bien visible, actions en icône.
+- **Réglages** : l'écran principal reste court ; tout réglage détaillé va dans un sous-écran
+  (ex. Catégories de cadeaux). Choix simples en liste déroulante plutôt qu'en boutons radio.
 - **Marges système (edge-to-edge)** : aucun contenu sous la barre d'état (haut) ni sous
   la barre de navigation Android (bas). Le padding `WindowInsets.safeDrawing` est
   appliqué une fois dans `MonNoelApp` ; tout écran affiché hors de cette structure

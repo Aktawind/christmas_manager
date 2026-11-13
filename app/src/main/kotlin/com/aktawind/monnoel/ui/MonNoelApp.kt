@@ -39,6 +39,7 @@ import com.aktawind.monnoel.feature.gifts.navigation.PersonEditDestination
 import com.aktawind.monnoel.feature.gifts.navigation.giftsGraph
 import com.aktawind.monnoel.feature.home.navigation.HomeDestination
 import com.aktawind.monnoel.feature.home.navigation.homeScreen
+import com.aktawind.monnoel.feature.settings.navigation.CategoriesDestination
 import com.aktawind.monnoel.feature.settings.navigation.SettingsDestination
 import com.aktawind.monnoel.feature.settings.navigation.settingsScreen
 import com.aktawind.monnoel.feature.years.WelcomeRoute
@@ -66,7 +67,12 @@ private enum class TopLevelDestination(
         R.string.nav_gifts,
     ),
     YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
-    SETTINGS(SettingsDestination, listOf(SettingsDestination::class), Icons.Filled.Settings, R.string.nav_settings),
+    SETTINGS(
+        SettingsDestination,
+        listOf(SettingsDestination::class, CategoriesDestination::class),
+        Icons.Filled.Settings,
+        R.string.nav_settings,
+    ),
 }
 
 /**
@@ -119,7 +125,7 @@ fun MonNoelApp(hasEditions: Boolean) {
                 homeScreen(onOpenGifts = { navigate(TopLevelDestination.GIFTS) })
                 giftsGraph(navController)
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
-                settingsScreen()
+                settingsScreen(navController)
             }
         }
     }

@@ -31,6 +31,7 @@
     <string name="quick_idea_title">✨ Noter une idée</string>
     <string name="quick_idea_name">Idée</string>
     <string name="quick_idea_link">Lien (facultatif)</string>
+    <string name="quick_idea_for_whom">Pour qui ? (facultatif)</string>
     <string name="quick_idea_hint">Tu pourras compléter le reste plus tard dans Cadeaux → Idées.</string>
     <string name="quick_idea_save">Noter</string>
     <string name="quick_idea_saved">Idée notée ✨</string>

@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 
 private val base = Typography()
 
-/** Titres en police à empattements (esprit carnet), textes courants en police système. */
+/** Grands titres en police à empattements (esprit carnet), le reste en police système. */
 val MonNoelTypography = Typography(
     displayLarge = base.displayLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
     displayMedium = base.displayMedium.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
@@ -17,7 +17,8 @@ val MonNoelTypography = Typography(
     headlineLarge = base.headlineLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
     headlineMedium = base.headlineMedium.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
     headlineSmall = base.headlineSmall.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
-    titleLarge = base.titleLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
+    // Titres de sections et de groupes : police système (préférence utilisatrice), en semi-gras.
+    titleLarge = base.titleLarge.copy(fontWeight = FontWeight.SemiBold),
 )
 
 val MonNoelShapes = Shapes(

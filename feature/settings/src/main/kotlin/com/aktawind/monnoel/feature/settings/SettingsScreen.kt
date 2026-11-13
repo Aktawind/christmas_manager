@@ -3,6 +3,7 @@ package com.aktawind.monnoel.feature.settings
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,18 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -46,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.model.AutoBackupSettings
 import com.aktawind.monnoel.core.model.ThemePreference
+import com.aktawind.monnoel.core.ui.DropdownField
 import com.aktawind.monnoel.core.ui.ImportBackupDialog
 import com.aktawind.monnoel.core.ui.formatDateTime
 import com.aktawind.monnoel.core.ui.resolve
@@ -54,7 +57,7 @@ import com.aktawind.monnoel.core.ui.toUiMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsRoute(onOpenCategories: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
@@ -91,8 +94,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         ) {
             Column(Modifier.widthIn(max = 720.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-                ThemeSection(state.theme, viewModel::setTheme)
-                CategoriesSection()
+                PersonalizeSection(state.theme, viewModel::setTheme, onOpenCategories)
                 BackupSection(
                     busy = state.busy,
                     onExport = { exportLauncher.launch(viewModel.suggestedExportName()) },
@@ -138,28 +140,49 @@ internal fun SettingsCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun ThemeSection(selected: ThemePreference, onSelect: (ThemePreference) -> Unit) {
-    SettingsCard(stringResource(R.string.settings_theme)) {
-        Column(Modifier.selectableGroup()) {
-            listOf(
-                ThemePreference.SYSTEM to R.string.settings_theme_system,
-                ThemePreference.LIGHT to R.string.settings_theme_light,
-                ThemePreference.DARK to R.string.settings_theme_dark,
-            ).forEach { (theme, label) ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .selectable(selected = theme == selected, onClick = {
-                            onSelect(theme)
-                        }, role = Role.RadioButton)
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = theme == selected, onClick = null)
-                    Text(stringResource(label), modifier = Modifier.padding(start = 12.dp))
-                }
-            }
+private fun PersonalizeSection(
+    selected: ThemePreference,
+    onSelect: (ThemePreference) -> Unit,
+    onOpenCategories: () -> Unit,
+) {
+    val labels = mapOf(
+        ThemePreference.SYSTEM to R.string.settings_theme_system,
+        ThemePreference.LIGHT to R.string.settings_theme_light,
+        ThemePreference.DARK to R.string.settings_theme_dark,
+    )
+    SettingsCard(stringResource(R.string.settings_personalize)) {
+        DropdownField(
+            label = stringResource(R.string.settings_theme),
+            selected = selected,
+            options = ThemePreference.entries,
+            optionLabel = { stringResource(labels.getValue(it)) },
+            onSelect = onSelect,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        SettingsLink(
+            title = stringResource(R.string.settings_categories),
+            subtitle = stringResource(R.string.settings_categories_explain),
+            onClick = onOpenCategories,
+        )
+    }
+}
+
+/** Ligne qui ouvre un sous-écran de réglages. */
+@Composable
+private fun SettingsLink(title: String, subtitle: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick, role = Role.Button)
+            .padding(vertical = 12.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = LocalMonNoelColors.current.secondaryText)
         }
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
     }
 }
 

@@ -3,17 +3,27 @@ package com.aktawind.monnoel.feature.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,7 +76,39 @@ class CategoriesViewModel @Inject constructor(
     }
 }
 
-/** Catégories de cadeaux : ajouter, renommer, supprimer. */
+/** Sous-écran des réglages : catégories de cadeaux (ajouter, renommer, supprimer). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoriesRoute(onBack: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.settings_categories)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.settings_back),
+                        )
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(Modifier.widthIn(max = 720.dp).fillMaxWidth()) { CategoriesSection() }
+        }
+    }
+}
+
 @Composable
 internal fun CategoriesSection(viewModel: CategoriesViewModel = hiltViewModel()) {
     val categories by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,7 +116,7 @@ internal fun CategoriesSection(viewModel: CategoriesViewModel = hiltViewModel())
     var renaming by remember { mutableStateOf<GiftCategory?>(null) }
     var deleting by remember { mutableStateOf<GiftCategory?>(null) }
 
-    SettingsCard(stringResource(R.string.settings_categories)) {
+    SettingsCard(stringResource(R.string.settings_categories_mine)) {
         Text(
             stringResource(R.string.settings_categories_explain),
             style = MaterialTheme.typography.bodyMedium,

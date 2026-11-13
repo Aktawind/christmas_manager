@@ -8,7 +8,9 @@ import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.SharedIdea
 import com.aktawind.monnoel.core.domain.gifts.parseSharedText
+import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
+import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.ThemePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -31,7 +33,11 @@ class MainViewModel @Inject constructor(
     preferences: UserPreferencesRepository,
     observeEditions: ObserveEditionsUseCase,
     private val saveIdea: SaveIdeaUseCase,
+    personRepository: PersonRepository,
 ) : ViewModel() {
+    val persons: StateFlow<List<Person>> =
+        personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     val uiState: StateFlow<MainUiState> = combine(preferences.theme, observeEditions()) { theme, editions ->
         MainUiState.Ready(theme = theme, hasEditions = editions.editions.isNotEmpty())
     }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState.Loading)
@@ -47,10 +53,11 @@ class MainViewModel @Inject constructor(
         parseSharedText(text, subject)?.let { _sharedIdea.value = it }
     }
 
-    fun saveSharedIdea(title: String, url: String) {
+    fun saveSharedIdea(title: String, url: String, personIds: Set<String>) {
         _sharedIdea.value = null
         viewModelScope.launch {
-            if (saveIdea(null, IdeaDraft(title = title, url = url)) is AppResult.Success) _ideaSaved.value = true
+            val draft = IdeaDraft(title = title, url = url, personIds = personIds)
+            if (saveIdea(null, draft) is AppResult.Success) _ideaSaved.value = true
         }
     }
 

@@ -148,5 +148,11 @@ class ScreenshotTool {
         click("Léa Martin")
         waitText("Liste de souhaits")
         shot("15-person")
+        click("Réglages")
+        waitText("Personnaliser")
+        shot("16-settings")
+        click("Catégories de cadeaux")
+        waitText("Mes catégories")
+        shot("17-categories")
     }
 }

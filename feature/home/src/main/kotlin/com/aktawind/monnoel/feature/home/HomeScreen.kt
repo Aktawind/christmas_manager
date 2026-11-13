@@ -73,9 +73,11 @@ fun HomeRoute(onOpenGifts: () -> Unit, viewModel: HomeViewModel = hiltViewModel(
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
     if (quickIdea) {
+        val persons by viewModel.persons.collectAsStateWithLifecycle()
         QuickIdeaDialog(
-            onSave = { title, url ->
-                viewModel.quickIdea(title, url)
+            persons = persons,
+            onSave = { title, url, personIds ->
+                viewModel.quickIdea(title, url, personIds)
                 quickIdea = false
             },
             onDismiss = { quickIdea = false },
