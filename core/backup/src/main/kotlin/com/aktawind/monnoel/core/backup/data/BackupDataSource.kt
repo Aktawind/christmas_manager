@@ -1,6 +1,12 @@
 package com.aktawind.monnoel.core.backup.data
 
 import androidx.room.withTransaction
+import com.aktawind.monnoel.core.backup.format.AdventBoxDto
+import com.aktawind.monnoel.core.backup.format.AdventCalendarDto
+import com.aktawind.monnoel.core.backup.format.AdventCalendarPersonDto
+import com.aktawind.monnoel.core.backup.format.AdventSupplyDto
+import com.aktawind.monnoel.core.backup.format.AdventTemplateBoxDto
+import com.aktawind.monnoel.core.backup.format.AdventTemplateDto
 import com.aktawind.monnoel.core.backup.format.BackupData
 import com.aktawind.monnoel.core.backup.format.EditionDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
@@ -10,6 +16,12 @@ import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
 import com.aktawind.monnoel.core.backup.format.PersonDto
 import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
+import com.aktawind.monnoel.core.database.entity.AdventBoxEntity
+import com.aktawind.monnoel.core.database.entity.AdventCalendarEntity
+import com.aktawind.monnoel.core.database.entity.AdventCalendarPersonEntity
+import com.aktawind.monnoel.core.database.entity.AdventSupplyEntity
+import com.aktawind.monnoel.core.database.entity.AdventTemplateBoxEntity
+import com.aktawind.monnoel.core.database.entity.AdventTemplateEntity
 import com.aktawind.monnoel.core.database.entity.EditionEntity
 import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
@@ -32,6 +44,30 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             personBudgets = db.plannedGiftDao().getAllBudgets().map {
                 PersonBudgetDto(it.editionId, it.personId, it.amountCents)
             },
+            adventCalendars = db.adventDao().getAllCalendars().map {
+                AdventCalendarDto(
+                    it.id, it.editionId, it.name, it.description, it.coverPhotoPath, it.theme, it.budgetCents, it.notes,
+                    it.boxCount, it.createdAt, it.updatedAt,
+                )
+            },
+            adventCalendarPersons = db.adventDao().getAllCalendarPersons().map {
+                AdventCalendarPersonDto(it.calendarId, it.personId)
+            },
+            adventSupplies = db.adventDao().getAllSupplies().map {
+                AdventSupplyDto(it.id, it.calendarId, it.name, it.quantity, it.priceCents, it.bought, it.sortOrder)
+            },
+            adventBoxes = db.adventDao().getAllBoxes().map {
+                AdventBoxDto(
+                    it.id, it.calendarId, it.number, it.type, it.title, it.photoPath, it.priceCents, it.supplier, it.url,
+                    it.status, it.notes, it.supplyId,
+                )
+            },
+            adventTemplates = db.adventDao().getAllTemplates().map {
+                AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
+            },
+            adventTemplateBoxes = db.adventDao().getAllTemplateBoxes().map {
+                AdventTemplateBoxDto(it.id, it.templateId, it.number, it.type, it.title, it.priceCents, it.supplier, it.url, it.notes)
+            },
         )
     }
 
@@ -39,6 +75,8 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
     suspend fun replaceAll(data: BackupData) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
+            db.adventDao().deleteAllCalendars()
+            db.adventDao().deleteAllTemplates()
             db.plannedGiftDao().deleteAll()
             db.giftIdeaDao().deleteAll()
             db.personDao().deleteAll()
@@ -53,6 +91,51 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             db.plannedGiftDao().insertAll(data.plannedGifts.map { it.toEntity() })
             db.plannedGiftDao().insertBudgets(
                 data.personBudgets.map { PersonBudgetEntity(it.editionId, it.personId, it.amountCents) },
+            )
+            val advent = db.adventDao()
+            advent.insertCalendars(
+                data.adventCalendars.map {
+                    AdventCalendarEntity(
+                        it.id, it.editionId, it.name, it.description, it.coverPhotoPath, it.theme, it.budgetCents, it.notes,
+                        it.boxCount, it.createdAt, it.updatedAt,
+                    )
+                },
+            )
+            advent.insertCalendarPersons(
+                data.adventCalendarPersons.map {
+                    AdventCalendarPersonEntity(it.calendarId, it.personId)
+                },
+            )
+            advent.insertSupplies(
+                data.adventSupplies.map {
+                    AdventSupplyEntity(
+                        it.id,
+                        it.calendarId,
+                        it.name,
+                        it.quantity,
+                        it.priceCents,
+                        it.bought,
+                        it.sortOrder,
+                    )
+                },
+            )
+            advent.insertBoxes(
+                data.adventBoxes.map {
+                    AdventBoxEntity(
+                        it.id, it.calendarId, it.number, it.type, it.title, it.photoPath, it.priceCents, it.supplier, it.url,
+                        it.status, it.notes, it.supplyId,
+                    )
+                },
+            )
+            advent.insertTemplates(
+                data.adventTemplates.map {
+                    AdventTemplateEntity(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
+                },
+            )
+            advent.insertTemplateBoxes(
+                data.adventTemplateBoxes.map {
+                    AdventTemplateBoxEntity(it.id, it.templateId, it.number, it.type, it.title, it.priceCents, it.supplier, it.url, it.notes)
+                },
             )
         }
     }

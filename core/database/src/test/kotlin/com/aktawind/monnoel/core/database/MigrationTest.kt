@@ -77,4 +77,31 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun `migration 3 vers 4 ajoute les calendriers et garde les donnees`() {
+        helper.createDatabase(dbName, 3).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 4, true, Migrations.MIGRATION_3_4).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals(2026, db.editionDao().getAll().single().year)
+            assertEquals(0, db.adventDao().getAllCalendars().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `toutes les migrations depuis la v0_1_0`() {
+        helper.createDatabase(dbName, 1).close()
+        helper.runMigrationsAndValidate(dbName, 4, true, *Migrations.ALL).close()
+    }
 }

@@ -3,6 +3,12 @@ package com.aktawind.monnoel.core.backup.data
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.aktawind.monnoel.core.backup.format.AdventBoxDto
+import com.aktawind.monnoel.core.backup.format.AdventCalendarDto
+import com.aktawind.monnoel.core.backup.format.AdventCalendarPersonDto
+import com.aktawind.monnoel.core.backup.format.AdventSupplyDto
+import com.aktawind.monnoel.core.backup.format.AdventTemplateBoxDto
+import com.aktawind.monnoel.core.backup.format.AdventTemplateDto
 import com.aktawind.monnoel.core.backup.format.BackupArchive
 import com.aktawind.monnoel.core.backup.format.BackupData
 import com.aktawind.monnoel.core.backup.format.EditionDto
@@ -78,6 +84,15 @@ class BackupDataSourceTest {
                 ),
             ),
             personBudgets = listOf(PersonBudgetDto("e", "p", 5_000)),
+            adventCalendars = listOf(AdventCalendarDto("c", "e", "Lucas", "", null, "Lutin", 3_000, "", 24, 1L, 1L)),
+            adventCalendarPersons = listOf(AdventCalendarPersonDto("c", "p")),
+            adventSupplies = listOf(AdventSupplyDto("s", "c", "Sachets", 24, 500, true, 0)),
+            adventBoxes = listOf(
+                AdventBoxDto("b1", "c", 1, "TREAT", "Chocolat", null, 150, "", "", "READY", "", "s"),
+                AdventBoxDto("b2", "c", 2, null, "", null, null, "", "", "TO_FIND", "", null),
+            ),
+            adventTemplates = listOf(AdventTemplateDto("t", "Modèle lutin", "Lutin", "", 24, 1L)),
+            adventTemplateBoxes = listOf(AdventTemplateBoxDto("tb", "t", 3, "GAME", "Énigme", null, "", "", "")),
         )
         source.replaceAll(data)
         val out = ByteArrayOutputStream()

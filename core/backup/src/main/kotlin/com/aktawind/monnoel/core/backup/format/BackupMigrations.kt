@@ -24,6 +24,8 @@ internal object BackupMigrations {
             }
             JsonObject(json + ("giftCategories" to JsonArray(categories)))
         },
+        // v2 (v0.2.0) -> v3 (v0.3.0) : calendriers de l'Avent, absents des anciennes sauvegardes.
+        3 to { json -> json },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

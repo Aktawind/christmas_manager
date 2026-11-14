@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.aktawind.monnoel.core.database.DefaultData
 import com.aktawind.monnoel.core.database.MonNoelDatabase
+import com.aktawind.monnoel.core.database.dao.AdventDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
@@ -47,6 +48,9 @@ object DatabaseModule {
 
     @Provides
     fun provideGiftIdeaDao(db: MonNoelDatabase): GiftIdeaDao = db.giftIdeaDao()
+
+    @Provides
+    fun provideAdventDao(db: MonNoelDatabase): AdventDao = db.adventDao()
 
     @Provides
     fun providePlannedGiftDao(db: MonNoelDatabase): PlannedGiftDao = db.plannedGiftDao()
