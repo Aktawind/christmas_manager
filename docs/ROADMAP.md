@@ -14,7 +14,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | ------- | --------------------------- | --------------------------------------------------------------------- | ------ |
 | v0.1.0  | Les fondations              | Socle technique, CI/APK, thème, navigation, années, accueil, export/import, sauvegarde auto | ✅ |
 | v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts, photos, ajout rapide, budget et enveloppes, catégories | ✅ |
-| v0.3.0  | Les calendriers de l'Avent  | Calendriers, 24 cases en grille, glisser-déposer, fournitures, modèles, duplication | ⬜ |
+| v0.3.0  | Les calendriers de l'Avent  | Calendriers, cases en grille, glisser-déposer, fournitures, modèles, duplication | 🚧 |
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ⬜ |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes, productions pâtissières                     | ⬜ |
 | v0.6.0  | La table de fête            | Repas, menus par catégories, liens recettes                           | ⬜ |
@@ -68,20 +68,21 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 | G-014 | « Noter une idée » : choix des personnes et prix                                 | ✅ |
 | G-015 | Vue Cadeaux façon carnet : lignes sans encadré, en-têtes sobres, une seule rangée de filtres | ✅ |
 
-## v0.3.0 — Les calendriers de l'Avent
+## v0.3.0 — Les calendriers de l'Avent 🗓️
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| A-001 | Calendriers multiples : nom, destinataire, description, couverture, thème, budget, notes | ⬜ |
-| A-002 | Grille des 24 cases avec état visuel de préparation                            | ⬜ |
-| A-003 | Fiche case : type de surprise, photo, prix, fournisseur, lien, statut, notes   | ⬜ |
-| A-004 | Réorganisation des cases par glisser-déposer                                    | ⬜ |
-| A-005 | Filtre « cases à préparer »                                                     | ⬜ |
-| A-006 | Fournitures nécessaires par calendrier                                          | ⬜ |
-| A-007 | Un achat partagé entre plusieurs cases (prix réparti)                           | ⬜ |
-| A-008 | Suivi de réalisation et budget par calendrier                                   | ⬜ |
-| A-009 | Dupliquer un calendrier d'une année à l'autre                                   | ⬜ |
-| A-010 | Modèles personnels : enregistrer / créer depuis un modèle, réutiliser des cases | ⬜ |
+| A-001 | Calendriers multiples : nom, destinataires, description, couverture, thème, budget, notes | 🚧 |
+| A-002 | Nombre de cases au choix (24 par défaut), grille avec état visuel               | 🚧 |
+| A-003 | Fiche case : type de surprise, contenu, photo, prix, fournisseur, lien, état (À trouver → À préparer → Prête), notes | 🚧 |
+| A-004 | Réorganisation par glisser-déposer (échange de deux cases)                      | 🚧 |
+| A-005 | Filtre « cases à préparer »                                                     | 🚧 |
+| A-006 | Fournitures par calendrier (quantité, prix, acheté)                             | 🚧 |
+| A-007 | Achat groupé réparti sur plusieurs cases                                        | 🚧 |
+| A-008 | Avancement et budget par calendrier (prévu / dépensé)                           | 🚧 |
+| A-009 | Dupliquer un calendrier d'une année à l'autre                                   | 🚧 |
+| A-010 | Modèles personnels : enregistrer / créer depuis un modèle, réutiliser des cases | 🚧 |
+| A-011 | Accueil : avancement des calendriers et « case du jour » en décembre           | 🚧 |
 
 ## v0.4.0 — Ma liste de lutin 📝
 
