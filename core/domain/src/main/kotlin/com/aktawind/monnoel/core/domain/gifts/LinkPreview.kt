@@ -12,6 +12,10 @@ private val titleTag =
 private val jsonLdPrice = Regex(""""price"\s*:\s*"?([0-9]+(?:[.,][0-9]{1,2})?)"?""")
 private val jsonLdCurrency = Regex(""""priceCurrency"\s*:\s*"([A-Z]{3})"""")
 private val jsonLdImage = Regex(""""image"\s*:\s*(?:\[\s*)?"([^"]+)"""")
+private val jsonLdImageObject = Regex(""""image"\s*:\s*(?:\[\s*)?\{[^}]*?"(?:url|contentUrl)"\s*:\s*"([^"]+)"""")
+private val linkImageSrc = Regex("""<link\b[^>]*rel\s*=\s*["']image_src["'][^>]*>""", RegexOption.IGNORE_CASE)
+private val imgItemprop = Regex("""<img\b[^>]*itemprop\s*=\s*["']image["'][^>]*>""", RegexOption.IGNORE_CASE)
+private val hrefOrSrc = Regex("""\b(?:href|data-src|src)\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
 private val itempropPrice =
     Regex("""itemprop\s*=\s*["']price["'][^>]*content\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
 
@@ -34,7 +38,11 @@ fun parseLinkPreview(html: String, pageUrl: String): LinkPreview {
         ?: titleTag.find(html)?.groupValues?.get(1)?.let { decodeHtml(it).replace(Regex("\\s+"), " ").trim() }
     val image = metas["og:image:secure_url"] ?: metas["og:image"] ?: metas["og:image:url"]
         ?: metas["twitter:image"] ?: metas["twitter:image:src"]
+        ?: metas["image"] ?: metas["thumbnail"]
         ?: jsonLdImage.find(html)?.groupValues?.get(1)
+        ?: jsonLdImageObject.find(html)?.groupValues?.get(1)
+        ?: linkImageSrc.find(html)?.let { hrefOrSrc.find(it.value)?.groupValues?.get(1) }
+        ?: imgItemprop.find(html)?.let { hrefOrSrc.find(it.value)?.groupValues?.get(1) }
 
     val currency = metas["product:price:currency"] ?: metas["og:price:currency"]
         ?: jsonLdCurrency.find(html)?.groupValues?.get(1)
@@ -54,11 +62,15 @@ fun parseLinkPreview(html: String, pageUrl: String): LinkPreview {
 }
 
 private fun resolveUrl(base: String, href: String): String? = runCatching {
+    val decoded = decodeHtml(href.trim())
     when {
-        href.startsWith("//") -> "https:$href"
-        else -> URI(base).resolve(href.trim().replace(" ", "%20")).toString()
+        decoded.startsWith("//") -> "https:$decoded"
+        else -> URI(base).resolve(decoded.replace(" ", "%20")).toString()
     }
-}.getOrNull()?.takeIf { it.startsWith("http") }
+}.getOrNull()
+    ?.takeIf { it.startsWith("http") }
+    // Android refuse les connexions non chiffrées : on passe en https.
+    ?.replaceFirst("http://", "https://")
 
 private val namedEntities = mapOf(
     "amp" to "&", "lt" to "<", "gt" to ">", "quot" to "\"", "apos" to "'", "nbsp" to " ",

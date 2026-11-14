@@ -45,4 +45,16 @@ class LinkPreviewTest {
         assertNull(empty.title)
         assertNull(empty.imageUrl)
     }
+
+    @Test
+    fun `images de secours et passage en https`() {
+        val itemprop = """<img class="cover" itemprop="image" src="http://cdn.x.fr/cover.jpg" alt="">"""
+        assertEquals("https://cdn.x.fr/cover.jpg", parseLinkPreview(itemprop, "https://x.fr/p").imageUrl)
+        val link = """<link rel="image_src" href="/img/a.png">"""
+        assertEquals("https://x.fr/img/a.png", parseLinkPreview(link, "https://x.fr/p/1").imageUrl)
+        val json = """{"@type":"Product","image":{"@type":"ImageObject","url":"https://x.fr/b.jpg"}}"""
+        assertEquals("https://x.fr/b.jpg", parseLinkPreview(json, "https://x.fr").imageUrl)
+        val amp = """<meta property="og:image" content="https://x.fr/i.jpg?w=1&amp;h=2">"""
+        assertEquals("https://x.fr/i.jpg?w=1&h=2", parseLinkPreview(amp, "https://x.fr").imageUrl)
+    }
 }

@@ -34,6 +34,10 @@
     <string name="quick_idea_price">Prix (facultatif)</string>
     <string name="quick_idea_loading">Je récupère les infos de la page…</string>
     <string name="quick_idea_skip">Passer</string>
+    <string name="preview_refused">ℹ️ Le site n’a pas voulu donner sa page (réponse %1$d) : photo et prix à compléter à la main.</string>
+    <string name="preview_unreachable">ℹ️ La page n’a pas pu être lue (connexion ?) : photo et prix à compléter à la main.</string>
+    <string name="preview_no_image">ℹ️ Pas de photo trouvée sur cette page.</string>
+    <string name="preview_image_failed">ℹ️ La photo de la page n’a pas pu être téléchargée.</string>
     <string name="quick_idea_for_whom">Pour qui ? (facultatif)</string>
     <string name="quick_idea_hint">Tu pourras compléter le reste plus tard dans Cadeaux → Idées.</string>
     <string name="quick_idea_save">Noter</string>

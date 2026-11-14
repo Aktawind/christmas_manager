@@ -134,6 +134,7 @@ class ScreenshotTool {
         shot("10-home")
         click("Cadeaux")
         waitText("Grouper")
+        waitText("Coffret de feutres")
         shot("11-gifts-by-person")
         click("Grouper : par personne")
         click("par statut")

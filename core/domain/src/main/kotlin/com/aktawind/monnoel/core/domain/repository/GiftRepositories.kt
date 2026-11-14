@@ -73,8 +73,8 @@ interface PhotoRepository {
 
 /** Lecture d'une page web pour pré-remplir une idée partagée (facultatif, nécessite Internet). */
 interface LinkPreviewRepository {
-    suspend fun fetch(url: String): com.aktawind.monnoel.core.domain.gifts.LinkPreview?
+    suspend fun fetch(url: String): com.aktawind.monnoel.core.domain.gifts.PageFetch
 
     /** Télécharge une image dans le cache ; renvoie une URI locale lisible, ou null. */
-    suspend fun downloadImage(url: String): String?
+    suspend fun downloadImage(url: String, referer: String): String?
 }

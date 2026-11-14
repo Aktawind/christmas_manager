@@ -43,6 +43,8 @@ fun QuickIdeaDialog(
     initialUrl: String = "",
     initialPriceCents: Long? = null,
     photoPath: String? = null,
+    /** Petite explication quand la page n'a pas tout donné (photo, prix…). */
+    note: String? = null,
 ) {
     var title by rememberSaveable { mutableStateOf(initialTitle) }
     var url by rememberSaveable { mutableStateOf(initialUrl) }
@@ -55,6 +57,13 @@ fun QuickIdeaDialog(
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (photoPath != null) {
                     PhotoImage(photoPath, stringResource(R.string.photo_current), size = 120.dp, placeholder = "💡")
+                }
+                if (note != null) {
+                    Text(
+                        note,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalMonNoelColors.current.secondaryText,
+                    )
                 }
                 TextInput(title, { title = it }, stringResource(R.string.quick_idea_name), Modifier.fillMaxWidth())
                 MoneyInput(price, { price = it }, stringResource(R.string.quick_idea_price), Modifier.fillMaxWidth())

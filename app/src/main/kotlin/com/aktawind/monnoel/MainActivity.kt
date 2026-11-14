@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.MonNoelTheme
+import com.aktawind.monnoel.core.domain.gifts.PreviewIssue
 import com.aktawind.monnoel.core.model.ThemePreference
 import com.aktawind.monnoel.core.ui.QuickIdeaDialog
 import com.aktawind.monnoel.ui.MonNoelApp
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
                             initialUrl = idea.url,
                             initialPriceCents = idea.priceCents,
                             photoPath = idea.photoPath,
+                            note = previewNote(idea.previewIssue, idea.previewCode),
                             onSave = viewModel::saveSharedIdea,
                             onDismiss = viewModel::dismissSharedIdea,
                         )
@@ -106,4 +108,13 @@ private fun SharedLoadingDialog(onSkip: () -> Unit) {
             TextButton(onClick = onSkip) { Text(stringResource(com.aktawind.monnoel.core.ui.R.string.quick_idea_skip)) }
         },
     )
+}
+
+@Composable
+private fun previewNote(issue: PreviewIssue?, code: Int?): String? = when (issue) {
+    null -> null
+    PreviewIssue.PAGE_REFUSED -> stringResource(com.aktawind.monnoel.core.ui.R.string.preview_refused, code ?: 0)
+    PreviewIssue.PAGE_UNREACHABLE -> stringResource(com.aktawind.monnoel.core.ui.R.string.preview_unreachable)
+    PreviewIssue.IMAGE_NOT_FOUND -> stringResource(com.aktawind.monnoel.core.ui.R.string.preview_no_image)
+    PreviewIssue.IMAGE_NOT_LOADED -> stringResource(com.aktawind.monnoel.core.ui.R.string.preview_image_failed)
 }

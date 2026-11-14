@@ -30,6 +30,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -254,7 +255,7 @@ private fun GiftsTabContent(state: GiftsUiState, onOpenGift: (String) -> Unit, o
                     message = stringResource(R.string.gifts_empty_message),
                 )
             }
-        } else if (visible.isEmpty()) {
+        } else if (visible.isEmpty() && !state.loading) {
             item {
                 Text(
                     stringResource(R.string.gifts_filter_empty),
@@ -344,9 +345,16 @@ private fun GroupHeader(
     first: Boolean,
 ) {
     Column(
-        Modifier.padding(top = if (first) 20.dp else 36.dp, bottom = 4.dp),
+        Modifier.padding(top = if (first) 20.dp else 24.dp, bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        // Séparation légère entre deux groupes (fil doré estompé).
+        if (!first) {
+            HorizontalDivider(
+                Modifier.padding(bottom = 18.dp),
+                color = LocalMonNoelColors.current.gold.copy(alpha = 0.35f),
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             if (showAvatar) PersonAvatar(person?.photoPath, person?.initials ?: "", size = 40.dp)
             Text(
