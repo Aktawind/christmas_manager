@@ -13,7 +13,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | Version | Nom                         | Contenu principal                                                     | Statut |
 | ------- | --------------------------- | --------------------------------------------------------------------- | ------ |
 | v0.1.0  | Les fondations              | Socle technique, CI/APK, thème, navigation, années, accueil, export/import, sauvegarde auto | ✅ |
-| v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts, photos, ajout rapide, budget et enveloppes, catégories | 🧪 |
+| v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts, photos, ajout rapide, budget et enveloppes, catégories | ✅ |
 | v0.3.0  | Les calendriers de l'Avent  | Calendriers, 24 cases en grille, glisser-déposer, fournitures, modèles, duplication | ⬜ |
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ⬜ |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes, productions pâtissières                     | ⬜ |
@@ -52,21 +52,21 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 
 | ID    | Fonctionnalité                                                                    | Statut |
 | ----- | --------------------------------------------------------------------------------- | ------ |
-| G-001 | Fiches personnes : nom, photo, goûts, notes (liste de souhaits retirée : doublon avec les idées) | 🧪 |
-| G-002 | Historique des cadeaux reçus par personne (toutes années)                         | 🧪 |
-| G-003 | Catalogue d'idées indépendant des années (titre, description, photo, prix, lien, boutique, notes, catégorie) | 🧪 |
-| G-004 | Une idée liée à plusieurs personnes / plusieurs années (« Offrir cette idée à… ») | 🧪 |
-| G-005 | Cadeaux prévus : instance d'une idée pour une personne et une année (snapshot)    | 🧪 |
-| G-006 | Statuts À acheter → Commandé → Reçu → À emballer → Emballé → Offert, choisis dans un **menu déroulant** | 🧪 |
-| G-007 | Vues : par destinataire, par statut, par catégorie ; filtres achetés, à emballer, non reçus | 🧪 |
-| G-008 | Budget cadeaux : prévu / dépensé, total et par personne, **enveloppe par personne et par année** (affichage doux, jamais en rouge) | 🧪 |
-| G-009 | Photos : galerie, appareil photo, redimensionnement, incluses dans les sauvegardes | 🧪 |
-| G-010 | Ajout rapide d'une idée depuis l'accueil                                          | 🧪 |
-| G-011 | Partage Android → « Ajouter comme idée », pré-rempli depuis la page (titre, photo, prix, boutique) | 🧪 |
-| G-012 | Catégories de cadeaux modifiables dans les Réglages (ajouter, renommer, supprimer) | 🧪 |
-| G-013 | Accueil : résumé des cadeaux de l'année                                           | 🧪 |
-| G-014 | « Noter une idée » : choix des personnes et prix                                 | 🧪 |
-| G-015 | Vue Cadeaux façon carnet : lignes sans encadré, en-têtes sobres, une seule rangée de filtres | 🧪 |
+| G-001 | Fiches personnes : nom, photo, goûts, notes (liste de souhaits retirée : doublon avec les idées) | ✅ |
+| G-002 | Historique des cadeaux reçus par personne (toutes années)                         | ✅ |
+| G-003 | Catalogue d'idées indépendant des années (titre, description, photo, prix, lien, boutique, notes, catégorie) | ✅ |
+| G-004 | Une idée liée à plusieurs personnes / plusieurs années (« Offrir cette idée à… ») | ✅ |
+| G-005 | Cadeaux prévus : instance d'une idée pour une personne et une année (snapshot)    | ✅ |
+| G-006 | Statuts À acheter → Commandé → Reçu → À emballer → Emballé → Offert, choisis dans un **menu déroulant** | ✅ |
+| G-007 | Vues : par destinataire, par statut, par catégorie ; filtres achetés, à emballer, non reçus | ✅ |
+| G-008 | Budget cadeaux : prévu / dépensé, total et par personne, **enveloppe par personne et par année** (affichage doux, jamais en rouge) | ✅ |
+| G-009 | Photos : galerie, appareil photo, redimensionnement, incluses dans les sauvegardes | ✅ |
+| G-010 | Ajout rapide d'une idée depuis l'accueil                                          | ✅ |
+| G-011 | Partage Android → « Ajouter comme idée », pré-rempli depuis la page (titre, photo, prix, boutique) | ✅ |
+| G-012 | Catégories de cadeaux modifiables dans les Réglages (ajouter, renommer, supprimer) | ✅ |
+| G-013 | Accueil : résumé des cadeaux de l'année                                           | ✅ |
+| G-014 | « Noter une idée » : choix des personnes et prix                                 | ✅ |
+| G-015 | Vue Cadeaux façon carnet : lignes sans encadré, en-têtes sobres, une seule rangée de filtres | ✅ |
 
 ## v0.3.0 — Les calendriers de l'Avent
 
