@@ -12,7 +12,6 @@ import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
 import com.aktawind.monnoel.core.backup.format.PersonDto
 import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
-import com.aktawind.monnoel.core.backup.format.WishItemDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -70,7 +69,6 @@ class BackupDataSourceTest {
             editions = listOf(EditionDto("e", 2026, "ACTIVE", null, 1L, 1L)),
             giftCategories = listOf(GiftCategoryDto("c", "Livres", 0)),
             persons = listOf(PersonDto("p", "Léa", "Martin", "photos/p.jpg", "lecture", "", 1L, 1L)),
-            wishItems = listOf(WishItemDto("w", "p", "Un roman", false, 0)),
             giftIdeas = listOf(GiftIdeaDto("i", "Roman", "", null, 1_500, "https://x", "Librairie", "", "c", 1L, 1L)),
             ideaPersons = listOf(IdeaPersonDto("i", "p")),
             plannedGifts = listOf(

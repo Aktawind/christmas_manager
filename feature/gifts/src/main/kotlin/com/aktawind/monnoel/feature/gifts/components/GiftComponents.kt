@@ -1,18 +1,17 @@
 package com.aktawind.monnoel.feature.gifts.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -20,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,7 +61,7 @@ val GiftStatus.emoji: String
         GiftStatus.GIVEN -> "🎁"
     }
 
-/** Badge de statut : un appui ouvre le menu déroulant des statuts. */
+/** Statut en petit texte coloré : un appui ouvre le menu déroulant des statuts. */
 @Composable
 fun StatusMenuChip(
     status: GiftStatus,
@@ -69,24 +70,17 @@ fun StatusMenuChip(
     modifier: Modifier = Modifier,
 ) {
     var open by remember { mutableStateOf(false) }
+    val color = if (status == GiftStatus.GIVEN) LocalMonNoelColors.current.gold else MaterialTheme.colorScheme.primary
     Box(modifier) {
-        AssistChip(
+        TextButton(
             onClick = { open = true },
             enabled = enabled,
-            label = { Text("${status.emoji} ${stringResource(status.label)}") },
-            trailingIcon = if (enabled) {
-                { Icon(Icons.Filled.ArrowDropDown, contentDescription = stringResource(R.string.status_change)) }
-            } else {
-                null
-            },
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = if (status == GiftStatus.GIVEN) {
-                    MaterialTheme.colorScheme.tertiaryContainer
-                } else {
-                    MaterialTheme.colorScheme.secondaryContainer
-                },
-            ),
-        )
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+            colors = ButtonDefaults.textButtonColors(contentColor = color, disabledContentColor = color),
+        ) {
+            Text("${status.emoji} ${stringResource(status.label)}", style = MaterialTheme.typography.labelLarge)
+            if (enabled) Icon(Icons.Filled.ArrowDropDown, contentDescription = stringResource(R.string.status_change))
+        }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             GiftStatus.entries.forEach { option ->
                 DropdownMenuItem(
@@ -102,18 +96,11 @@ fun StatusMenuChip(
                     },
                 )
             }
-            HorizontalDivider()
-            DropdownMenuItem(
-                text = { Text("🏬  ${stringResource(R.string.status_bought_in_store)}") },
-                onClick = {
-                    open = false
-                    onChange(GiftStatus.TO_WRAP)
-                },
-            )
         }
     }
 }
 
+/** Ligne de cadeau, façon carnet : pas d'encadré, une fine ligne de séparation. */
 @Composable
 fun GiftRow(
     gift: PlannedGift,
@@ -122,22 +109,23 @@ fun GiftRow(
     onClick: () -> Unit,
     onStatus: (GiftStatus) -> Unit,
     modifier: Modifier = Modifier,
+    showDivider: Boolean = true,
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
+    Column(modifier.fillMaxWidth()) {
         Row(
-            Modifier.padding(12.dp),
+            Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.small)
+                .clickable(onClick = onClick)
+                .padding(vertical = 10.dp, horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            PhotoImage(gift.photoPath, null, size = 56.dp)
+            PhotoImage(gift.photoPath, null, size = 48.dp, shape = MaterialTheme.shapes.small)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     gift.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -151,13 +139,14 @@ fun GiftRow(
                 if (details.isNotBlank()) {
                     Text(
                         details,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = LocalMonNoelColors.current.secondaryText,
                     )
                 }
             }
             StatusMenuChip(gift.status, enabled = !readOnly, onChange = onStatus)
         }
+        if (showDivider) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
     }
 }
 

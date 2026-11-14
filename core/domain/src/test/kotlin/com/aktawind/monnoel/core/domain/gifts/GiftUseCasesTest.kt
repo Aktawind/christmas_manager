@@ -16,7 +16,6 @@ import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PersonBudget
 import com.aktawind.monnoel.core.model.PlannedGift
-import com.aktawind.monnoel.core.model.WishItem
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.test.Test
@@ -24,7 +23,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
@@ -45,12 +43,6 @@ private class FakePersons : PersonRepository {
     override suspend fun delete(id: String) {
         items.value = items.value.filterNot { it.id == id }
     }
-
-    override fun observeWishes(personId: String): Flow<List<WishItem>> = MutableStateFlow(emptyList())
-
-    override suspend fun upsertWish(item: WishItem) = Unit
-
-    override suspend fun deleteWish(id: String) = Unit
 }
 
 private class FakeIdeas : GiftIdeaRepository {

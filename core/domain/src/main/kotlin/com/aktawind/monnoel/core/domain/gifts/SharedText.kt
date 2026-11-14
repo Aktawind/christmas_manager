@@ -1,7 +1,14 @@
 package com.aktawind.monnoel.core.domain.gifts
 
 /** Idée reçue par le partage Android (titre et lien proposés). */
-data class SharedIdea(val title: String, val url: String)
+data class SharedIdea(
+    val title: String,
+    val url: String,
+    val priceCents: Long? = null,
+    val shop: String = "",
+    /** Photo déjà importée dans l'application (chemin relatif), si la page en proposait une. */
+    val photoPath: String? = null,
+)
 
 private val urlRegex = Regex("""https?://\S+""")
 

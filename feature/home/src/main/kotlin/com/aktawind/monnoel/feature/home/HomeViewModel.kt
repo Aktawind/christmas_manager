@@ -15,6 +15,7 @@ import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.ui.QuickIdeaInput
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -100,13 +101,18 @@ class HomeViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)
 
-    fun quickIdea(title: String, url: String, personIds: Set<String>) {
+    fun quickIdea(input: QuickIdeaInput) {
         viewModelScope.launch {
-            message.value =
-                when (val result = saveIdea(null, IdeaDraft(title = title, url = url, personIds = personIds))) {
-                    is AppResult.Success -> UiMessage(com.aktawind.monnoel.core.ui.R.string.quick_idea_saved)
-                    is AppResult.Failure -> result.error.toUiMessage()
-                }
+            val draft = IdeaDraft(
+                title = input.title,
+                url = input.url,
+                estimatedPriceCents = input.priceCents,
+                personIds = input.personIds,
+            )
+            message.value = when (val result = saveIdea(null, draft)) {
+                is AppResult.Success -> UiMessage(com.aktawind.monnoel.core.ui.R.string.quick_idea_saved)
+                is AppResult.Failure -> result.error.toUiMessage()
+            }
         }
     }
 

@@ -6,7 +6,6 @@ import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PersonBudget
 import com.aktawind.monnoel.core.model.PlannedGift
-import com.aktawind.monnoel.core.model.WishItem
 import kotlinx.coroutines.flow.Flow
 
 interface PersonRepository {
@@ -19,12 +18,6 @@ interface PersonRepository {
     suspend fun upsert(person: Person)
 
     suspend fun delete(id: String)
-
-    fun observeWishes(personId: String): Flow<List<WishItem>>
-
-    suspend fun upsertWish(item: WishItem)
-
-    suspend fun deleteWish(id: String)
 }
 
 interface GiftCategoryRepository {
@@ -76,4 +69,12 @@ interface PhotoRepository {
     suspend fun copyPhoto(relativePath: String): String?
 
     suspend fun deletePhoto(relativePath: String)
+}
+
+/** Lecture d'une page web pour pré-remplir une idée partagée (facultatif, nécessite Internet). */
+interface LinkPreviewRepository {
+    suspend fun fetch(url: String): com.aktawind.monnoel.core.domain.gifts.LinkPreview?
+
+    /** Télécharge une image dans le cache ; renvoie une URI locale lisible, ou null. */
+    suspend fun downloadImage(url: String): String?
 }

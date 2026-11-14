@@ -21,14 +21,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +37,6 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,9 +52,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -231,21 +233,12 @@ private fun GiftsTabContent(state: GiftsUiState, onOpenGift: (String) -> Unit, o
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (state.readOnly) item { ReadOnlyBanner() }
         item { BudgetCard(state) }
         item {
-            ChipRow {
-                Grouping.entries.forEach { g ->
-                    FilterChip(selected = grouping == g, onClick = {
-                        grouping = g
-                    }, label = { Text(stringResource(g.label)) })
-                }
-            }
-        }
-        item {
-            ChipRow {
+            ChipRow(Modifier.padding(top = 12.dp)) {
+                GroupingSelector(grouping, onSelect = { grouping = it })
                 QuickFilter.entries.forEach { f ->
                     FilterChip(selected = filter == f, onClick = {
                         filter = f
@@ -290,6 +283,7 @@ private fun GiftsTabContent(state: GiftsUiState, onOpenGift: (String) -> Unit, o
                     readOnly = state.readOnly,
                     onClick = { onOpenGift(gift.id) },
                     onStatus = { onStatus(gift.id, it) },
+                    showDivider = gift.id != list.last().id,
                 )
             }
         }
@@ -297,9 +291,10 @@ private fun GiftsTabContent(state: GiftsUiState, onOpenGift: (String) -> Unit, o
 }
 
 @Composable
-private fun ChipRow(content: @Composable () -> Unit) {
+private fun ChipRow(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) { content() }
 }
@@ -338,6 +333,7 @@ private fun BudgetFigure(@StringRes label: Int, value: String) {
     }
 }
 
+/** En-tête de groupe sobre : pas d'encadré, juste un titre aéré (et la personne). */
 @Composable
 private fun GroupHeader(
     title: String,
@@ -347,43 +343,47 @@ private fun GroupHeader(
     showAvatar: Boolean,
     first: Boolean,
 ) {
-    Column(Modifier.padding(top = if (first) 8.dp else 20.dp)) {
-        if (!first) {
-            HorizontalDivider(
-                Modifier.padding(bottom = 20.dp),
-                color = LocalMonNoelColors.current.gold.copy(alpha = 0.4f),
+    Column(
+        Modifier.padding(top = if (first) 20.dp else 36.dp, bottom = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (showAvatar) PersonAvatar(person?.photoPath, person?.initials ?: "", size = 40.dp)
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.weight(1f).semantics { heading() },
+            )
+            Text(
+                pluralStringResource(R.plurals.group_count, count, count),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LocalMonNoelColors.current.secondaryText,
             )
         }
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(
-                Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (showAvatar) PersonAvatar(person?.photoPath, person?.initials ?: "", size = 48.dp)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.semantics { heading() },
-                    )
-                    if (showAvatar && budget != null) EnvelopeProgress(budget, Modifier.fillMaxWidth())
-                }
-                Badge(
-                    containerColor = LocalMonNoelColors.current.gold,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
-                ) {
-                    Text(
-                        count.toString(),
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    )
-                }
+        if (showAvatar && budget != null) EnvelopeProgress(budget, Modifier.fillMaxWidth())
+    }
+}
+
+/** Choix du regroupement, en liste déroulante compacte. */
+@Composable
+private fun GroupingSelector(selected: Grouping, onSelect: (Grouping) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        FilterChip(
+            selected = true,
+            onClick = { open = true },
+            label = { Text(stringResource(R.string.group_label, stringResource(selected.label))) },
+            trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            Grouping.entries.forEach { g ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(g.label)) },
+                    onClick = {
+                        onSelect(g)
+                        open = false
+                    },
+                )
             }
         }
     }

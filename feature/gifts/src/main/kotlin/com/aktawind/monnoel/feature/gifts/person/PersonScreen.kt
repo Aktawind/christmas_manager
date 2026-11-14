@@ -5,14 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -25,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,7 +28,6 @@ import com.aktawind.monnoel.core.domain.gifts.centsToInput
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.ui.MoneyInput
 import com.aktawind.monnoel.core.ui.PersonAvatar
-import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.feature.gifts.R
 import com.aktawind.monnoel.feature.gifts.components.EditorScaffold
 import com.aktawind.monnoel.feature.gifts.components.EnvelopeProgress
@@ -120,33 +113,6 @@ fun PersonRoute(
             }
             if (!state.readOnly) {
                 OutlinedButton(onClick = { onNewGift(person.id) }) { Text(stringResource(R.string.person_add_gift)) }
-            }
-        }
-
-        SectionTitle(stringResource(R.string.person_wishes_title))
-        var newWish by rememberSaveable { mutableStateOf("") }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextInput(newWish, { newWish = it }, stringResource(R.string.person_wish_new), Modifier.weight(1f))
-            Button(onClick = {
-                viewModel.addWish(newWish)
-                newWish = ""
-            }, enabled = newWish.isNotBlank()) { Text(stringResource(R.string.action_add)) }
-        }
-        state.wishes.forEach { wish ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = wish.done, onCheckedChange = { viewModel.toggleWish(wish) })
-                Text(
-                    wish.text,
-                    modifier = Modifier.weight(1f),
-                    textDecoration = if (wish.done) TextDecoration.LineThrough else null,
-                    color = if (wish.done) secondary else MaterialTheme.colorScheme.onSurface,
-                )
-                IconButton(onClick = { viewModel.deleteWish(wish) }) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.person_wish_delete, wish.text),
-                    )
-                }
             }
         }
 

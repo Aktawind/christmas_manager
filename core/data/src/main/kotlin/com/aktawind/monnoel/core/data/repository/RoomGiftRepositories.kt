@@ -15,7 +15,6 @@ import com.aktawind.monnoel.core.model.GiftCategory
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
-import com.aktawind.monnoel.core.model.WishItem
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -31,13 +30,6 @@ class RoomPersonRepository @Inject constructor(private val dao: PersonDao) : Per
     override suspend fun upsert(person: Person) = dao.upsert(person.asEntity())
 
     override suspend fun delete(id: String) = dao.delete(id)
-
-    override fun observeWishes(personId: String): Flow<List<WishItem>> =
-        dao.observeWishes(personId).map { list -> list.map { it.asModel() } }
-
-    override suspend fun upsertWish(item: WishItem) = dao.upsertWish(item.asEntity())
-
-    override suspend fun deleteWish(id: String) = dao.deleteWish(id)
 }
 
 class RoomGiftCategoryRepository @Inject constructor(private val dao: GiftCategoryDao) : GiftCategoryRepository {

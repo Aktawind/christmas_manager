@@ -14,26 +14,25 @@ import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
-import com.aktawind.monnoel.core.database.entity.WishItemEntity
 
 /**
  * Base unique de l'application (ADR 0002). Toute évolution du schéma doit être
  * accompagnée d'une migration testée — jamais de migration destructive.
  *
- * Historique : v1 (v0.1.0) années ; v2 (v0.2.0) personnes, idées, cadeaux, catégories, enveloppes.
+ * Historique : v1 (v0.1.0) années ; v2 (v0.2.0 tests) personnes, idées, cadeaux, catégories,
+ * enveloppes, souhaits ; v3 (v0.2.0) suppression de la liste de souhaits.
  */
 @Database(
     entities = [
         EditionEntity::class,
         PersonEntity::class,
-        WishItemEntity::class,
         GiftCategoryEntity::class,
         GiftIdeaEntity::class,
         IdeaPersonEntity::class,
         PlannedGiftEntity::class,
         PersonBudgetEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {

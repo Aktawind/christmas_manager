@@ -35,7 +35,6 @@ data class BackupData(
     val editions: List<EditionDto> = emptyList(),
     val giftCategories: List<GiftCategoryDto> = emptyList(),
     val persons: List<PersonDto> = emptyList(),
-    val wishItems: List<WishItemDto> = emptyList(),
     val giftIdeas: List<GiftIdeaDto> = emptyList(),
     val ideaPersons: List<IdeaPersonDto> = emptyList(),
     val plannedGifts: List<PlannedGiftDto> = emptyList(),
@@ -45,7 +44,6 @@ data class BackupData(
         "editions" to editions.size,
         "giftCategories" to giftCategories.size,
         "persons" to persons.size,
-        "wishItems" to wishItems.size,
         "giftIdeas" to giftIdeas.size,
         "plannedGifts" to plannedGifts.size,
         "personBudgets" to personBudgets.size,
@@ -76,9 +74,6 @@ data class PersonDto(
     val createdAt: Long,
     val updatedAt: Long,
 )
-
-@Serializable
-data class WishItemDto(val id: String, val personId: String, val text: String, val done: Boolean, val sortOrder: Int)
 
 @Serializable
 data class GiftIdeaDto(

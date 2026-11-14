@@ -19,5 +19,8 @@
 - **Enveloppe** : table `person_budget` (Noël × personne). Affichage doux, jamais en rouge.
 - **Catégories** : table `gift_category`, 11 catégories par défaut (identifiants fixes
   `cat-…`), modifiables dans les Réglages ; suppression → idées/cadeaux « sans catégorie ».
-- **Statut** : choisi dans un menu déroulant (décision utilisateur), avec le raccourci
-  « Acheté en magasin » → À emballer.
+- **Statut** : choisi dans un menu déroulant (décision utilisateur). Le raccourci
+  « Acheté en magasin » a été retiré (redondant avec « À emballer »).
+- **Pas de liste de souhaits** : retirée pendant les tests de la v0.2.0 (doublon avec les
+  idées). Base v3 : migration 2 → 3 qui supprime la table `wish_item`. Le format de
+  sauvegarde reste en version 2 ; un éventuel champ `wishItems` est ignoré à l'import.

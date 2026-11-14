@@ -42,4 +42,39 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun `migration 2 vers 3 supprime les souhaits et garde les cadeaux`() {
+        helper.createDatabase(dbName, 2).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO person (id, first_name, last_name, photo_path, interests, notes, " +
+                    "created_at, updated_at) VALUES ('p1', 'Léa', '', NULL, '', '', 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO wish_item (id, person_id, text, done, sort_order) VALUES ('w1', 'p1', 'Livre', 0, 0)",
+            )
+            db.execSQL(
+                "INSERT INTO planned_gift (id, edition_id, person_id, recipient_name, idea_id, title, description, " +
+                    "photo_path, price_cents, purchase_date, shop, order_url, tracking_number, notes, category_id, " +
+                    "status, created_at, updated_at) VALUES ('g1', 'e1', 'p1', 'Léa', NULL, 'Livre', '', NULL, 1500, " +
+                    "NULL, '', '', '', '', NULL, 'TO_BUY', 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 3, true, Migrations.MIGRATION_2_3).close()
+
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals("Livre", db.plannedGiftDao().getAll().single().title)
+            assertEquals("Léa", db.personDao().getAll().single().firstName)
+        }
+        db.close()
+    }
 }

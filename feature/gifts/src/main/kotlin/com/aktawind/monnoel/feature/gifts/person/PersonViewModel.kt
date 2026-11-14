@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.aktawind.monnoel.core.common.AppResult
-import com.aktawind.monnoel.core.common.IdGenerator
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
 import com.aktawind.monnoel.core.domain.gifts.PersonGiftBudget
@@ -20,7 +19,6 @@ import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
-import com.aktawind.monnoel.core.model.WishItem
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
 import com.aktawind.monnoel.feature.gifts.R
@@ -39,7 +37,6 @@ import kotlinx.coroutines.launch
 data class PersonUiState(
     val loading: Boolean = true,
     val person: Person? = null,
-    val wishes: List<WishItem> = emptyList(),
     val edition: ChristmasEdition? = null,
     val currentGifts: List<PlannedGift> = emptyList(),
     /** Cadeaux des autres années, regroupés par année (la plus récente d'abord). */
@@ -60,7 +57,6 @@ class PersonViewModel @Inject constructor(
     observeEditions: ObserveEditionsUseCase,
     private val setBudget: SetPersonBudgetUseCase,
     private val changeStatus: ChangeGiftStatusUseCase,
-    private val ids: IdGenerator,
 ) : ViewModel() {
     private val personId = savedStateHandle.toRoute<PersonDestination>().personId
     private val message = MutableStateFlow<UiMessage?>(null)
@@ -76,17 +72,15 @@ class PersonViewModel @Inject constructor(
 
     private val baseState = combine(
         persons.observePerson(personId),
-        persons.observeWishes(personId),
         gifts.observeGiftsForPerson(personId),
         ideas.observeIdeas(),
         editionsState,
-    ) { person, wishes, allGifts, allIdeas, editions ->
+    ) { person, allGifts, allIdeas, editions ->
         val current = editions.current
         val years = editions.editions.associate { it.id to it.year }
         PersonUiState(
             loading = false,
             person = person,
-            wishes = wishes,
             edition = current,
             currentGifts = allGifts.filter { it.editionId == current?.id },
             history = allGifts.filter { it.editionId != current?.id }
@@ -100,16 +94,6 @@ class PersonViewModel @Inject constructor(
     val uiState: StateFlow<PersonUiState> = combine(baseState, budgetFlow, message) { base, budget, msg ->
         base.copy(budget = budget, message = msg)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PersonUiState())
-
-    fun addWish(text: String) = viewModelScope.launch {
-        if (text.isBlank()) return@launch
-        val order = (uiState.value.wishes.maxOfOrNull { it.sortOrder } ?: -1) + 1
-        persons.upsertWish(WishItem(ids.newId(), personId, text.trim(), false, order))
-    }
-
-    fun toggleWish(item: WishItem) = viewModelScope.launch { persons.upsertWish(item.copy(done = !item.done)) }
-
-    fun deleteWish(item: WishItem) = viewModelScope.launch { persons.deleteWish(item.id) }
 
     fun saveEnvelope(input: String) = viewModelScope.launch {
         val edition = uiState.value.edition ?: return@launch

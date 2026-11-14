@@ -22,30 +22,42 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
+import com.aktawind.monnoel.core.domain.gifts.centsToInput
+import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
 import com.aktawind.monnoel.core.model.Person
 
 /**
  * Noter une idée en quelques secondes : un titre suffit ; on peut aussi indiquer pour qui
  * elle est (une ou plusieurs personnes). Le reste se complète plus tard.
  */
+/** Ce qui a été saisi dans « Noter une idée ». */
+data class QuickIdeaInput(val title: String, val url: String, val priceCents: Long?, val personIds: Set<String>)
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun QuickIdeaDialog(
     persons: List<Person>,
-    onSave: (title: String, url: String, personIds: Set<String>) -> Unit,
+    onSave: (QuickIdeaInput) -> Unit,
     onDismiss: () -> Unit,
     initialTitle: String = "",
     initialUrl: String = "",
+    initialPriceCents: Long? = null,
+    photoPath: String? = null,
 ) {
     var title by rememberSaveable { mutableStateOf(initialTitle) }
     var url by rememberSaveable { mutableStateOf(initialUrl) }
+    var price by rememberSaveable { mutableStateOf(centsToInput(initialPriceCents)) }
     var selected by rememberSaveable { mutableStateOf(emptyList<String>()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.quick_idea_title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (photoPath != null) {
+                    PhotoImage(photoPath, stringResource(R.string.photo_current), size = 120.dp, placeholder = "💡")
+                }
                 TextInput(title, { title = it }, stringResource(R.string.quick_idea_name), Modifier.fillMaxWidth())
+                MoneyInput(price, { price = it }, stringResource(R.string.quick_idea_price), Modifier.fillMaxWidth())
                 TextInput(
                     url,
                     { url = it },
@@ -76,7 +88,11 @@ fun QuickIdeaDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(title, url, selected.toSet()) }, enabled = title.isNotBlank()) {
+            val priceValid = price.isBlank() || parseEuroToCents(price) != null
+            TextButton(
+                onClick = { onSave(QuickIdeaInput(title, url, parseEuroToCents(price), selected.toSet())) },
+                enabled = title.isNotBlank() && priceValid,
+            ) {
                 Text(stringResource(R.string.quick_idea_save))
             }
         },

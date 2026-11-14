@@ -6,7 +6,6 @@ import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PersonBudget
 import com.aktawind.monnoel.core.model.PlannedGift
-import com.aktawind.monnoel.core.model.WishItem
 import java.time.Instant
 import java.time.LocalDate
 
@@ -31,10 +30,6 @@ fun Person.asEntity() = PersonEntity(
     createdAt.toEpochMilli(),
     updatedAt.toEpochMilli(),
 )
-
-fun WishItemEntity.asModel() = WishItem(id, personId, text, done, sortOrder)
-
-fun WishItem.asEntity() = WishItemEntity(id, personId, text, done, sortOrder)
 
 fun GiftCategoryEntity.asModel() = GiftCategory(id, name, sortOrder)
 

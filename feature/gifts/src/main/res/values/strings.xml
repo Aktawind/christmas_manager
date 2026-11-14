@@ -8,9 +8,15 @@
     <string name="fab_new_gift">Nouveau cadeau</string>
     <string name="fab_new_person">Nouvelle personne</string>
     <string name="fab_new_idea">Nouvelle idée</string>
-    <string name="group_person">Par personne</string>
-    <string name="group_status">Par statut</string>
-    <string name="group_category">Par catégorie</string>
+    <string name="group_label">Grouper : %1$s</string>
+    <plurals name="group_count">
+        <item quantity="one">%1$d cadeau</item>
+        <item quantity="many">%1$d cadeaux</item>
+        <item quantity="other">%1$d cadeaux</item>
+    </plurals>
+    <string name="group_person">par personne</string>
+    <string name="group_status">par statut</string>
+    <string name="group_category">par catégorie</string>
     <string name="filter_all">Tous</string>
     <string name="filter_paid">Achetés</string>
     <string name="filter_to_wrap">À emballer</string>
@@ -46,7 +52,6 @@
     <string name="status_to_wrap">À emballer</string>
     <string name="status_wrapped">Emballé</string>
     <string name="status_given">Offert</string>
-    <string name="status_bought_in_store">Acheté en magasin (à emballer)</string>
     <string name="status_change">Changer le statut</string>
     <string name="action_back">Retour</string>
     <string name="action_ok">OK</string>
@@ -91,9 +96,6 @@
     <string name="person_gifts_title">Cadeaux Noël %1$d</string>
     <string name="person_no_gift">Pas encore de cadeau prévu.</string>
     <string name="person_add_gift">+ Ajouter un cadeau</string>
-    <string name="person_wishes_title">Liste de souhaits</string>
-    <string name="person_wish_new">Nouveau souhait</string>
-    <string name="person_wish_delete">Supprimer « %1$s »</string>
     <string name="person_ideas_title">Idées pour cette personne</string>
     <string name="person_no_idea">Aucune idée associée.</string>
     <string name="person_add_idea">+ Noter une idée</string>

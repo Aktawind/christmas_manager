@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.common.SystemTimeProvider
 import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.common.UuidGenerator
 import com.aktawind.monnoel.core.data.repository.DataStoreUserPreferences
+import com.aktawind.monnoel.core.data.repository.HttpLinkPreviewRepository
 import com.aktawind.monnoel.core.data.repository.RoomEditionRepository
 import com.aktawind.monnoel.core.data.repository.RoomGiftCategoryRepository
 import com.aktawind.monnoel.core.data.repository.RoomGiftIdeaRepository
@@ -20,6 +21,7 @@ import com.aktawind.monnoel.core.data.repository.RoomPlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
 import com.aktawind.monnoel.core.domain.repository.GiftCategoryRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
+import com.aktawind.monnoel.core.domain.repository.LinkPreviewRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
@@ -56,6 +58,9 @@ abstract class DataBindsModule {
 
     @Binds
     abstract fun bindGifts(impl: RoomPlannedGiftRepository): PlannedGiftRepository
+
+    @Binds
+    abstract fun bindLinkPreviews(impl: HttpLinkPreviewRepository): LinkPreviewRepository
 
     @Binds
     abstract fun bindTime(impl: SystemTimeProvider): TimeProvider

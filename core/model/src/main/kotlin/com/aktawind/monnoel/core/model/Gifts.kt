@@ -20,9 +20,6 @@ data class Person(
         get() = listOf(firstName, lastName).mapNotNull { it.trim().firstOrNull()?.uppercaseChar() }.joinToString("")
 }
 
-/** Une ligne de la liste de souhaits d'une personne. */
-data class WishItem(val id: String, val personId: String, val text: String, val done: Boolean, val sortOrder: Int)
-
 data class GiftCategory(val id: String, val name: String, val sortOrder: Int)
 
 /** Une idée de cadeau, conservée d'une année à l'autre. */

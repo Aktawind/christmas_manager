@@ -18,26 +18,6 @@ data class PersonEntity(
     @ColumnInfo(name = "updated_at") val updatedAt: Long,
 )
 
-@Entity(
-    tableName = "wish_item",
-    foreignKeys = [
-        ForeignKey(
-            entity = PersonEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["person_id"],
-            onDelete = ForeignKey.CASCADE,
-        ),
-    ],
-    indices = [Index("person_id")],
-)
-data class WishItemEntity(
-    @PrimaryKey val id: String,
-    @ColumnInfo(name = "person_id") val personId: String,
-    val text: String,
-    val done: Boolean,
-    @ColumnInfo(name = "sort_order") val sortOrder: Int,
-)
-
 @Entity(tableName = "gift_category")
 data class GiftCategoryEntity(
     @PrimaryKey val id: String,

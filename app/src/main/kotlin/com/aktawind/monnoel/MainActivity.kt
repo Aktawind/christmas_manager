@@ -8,8 +8,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.MonNoelTheme
@@ -38,16 +51,22 @@ class MainActivity : ComponentActivity() {
             }
             MonNoelTheme(darkTheme = dark) {
                 MonNoelApp(hasEditions = ready.hasEditions)
+                val sharedLoading by viewModel.sharedLoading.collectAsStateWithLifecycle()
+                if (sharedLoading) SharedLoadingDialog(onSkip = viewModel::skipSharedLoading)
                 val shared by viewModel.sharedIdea.collectAsStateWithLifecycle()
                 shared?.let { idea ->
                     val persons by viewModel.persons.collectAsStateWithLifecycle()
-                    QuickIdeaDialog(
-                        persons = persons,
-                        initialTitle = idea.title,
-                        initialUrl = idea.url,
-                        onSave = viewModel::saveSharedIdea,
-                        onDismiss = viewModel::dismissSharedIdea,
-                    )
+                    key(idea) {
+                        QuickIdeaDialog(
+                            persons = persons,
+                            initialTitle = idea.title,
+                            initialUrl = idea.url,
+                            initialPriceCents = idea.priceCents,
+                            photoPath = idea.photoPath,
+                            onSave = viewModel::saveSharedIdea,
+                            onDismiss = viewModel::dismissSharedIdea,
+                        )
+                    }
                 }
                 val saved by viewModel.ideaSaved.collectAsStateWithLifecycle()
                 LaunchedEffect(saved) {
@@ -70,4 +89,21 @@ class MainActivity : ComponentActivity() {
             viewModel.onShared(intent.getStringExtra(Intent.EXTRA_TEXT), intent.getStringExtra(Intent.EXTRA_SUBJECT))
         }
     }
+}
+
+@Composable
+private fun SharedLoadingDialog(onSkip: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onSkip,
+        title = { Text(stringResource(com.aktawind.monnoel.core.ui.R.string.quick_idea_title)) },
+        text = {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(32.dp))
+                Text(stringResource(com.aktawind.monnoel.core.ui.R.string.quick_idea_loading))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onSkip) { Text(stringResource(com.aktawind.monnoel.core.ui.R.string.quick_idea_skip)) }
+        },
+    )
 }

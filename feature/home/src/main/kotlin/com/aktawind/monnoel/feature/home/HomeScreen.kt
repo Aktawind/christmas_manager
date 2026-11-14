@@ -76,8 +76,8 @@ fun HomeRoute(onOpenGifts: () -> Unit, viewModel: HomeViewModel = hiltViewModel(
         val persons by viewModel.persons.collectAsStateWithLifecycle()
         QuickIdeaDialog(
             persons = persons,
-            onSave = { title, url, personIds ->
-                viewModel.quickIdea(title, url, personIds)
+            onSave = { input ->
+                viewModel.quickIdea(input)
                 quickIdea = false
             },
             onDismiss = { quickIdea = false },

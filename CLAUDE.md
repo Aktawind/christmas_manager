@@ -65,6 +65,8 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
 - **Aucune pression** : pas de dates d'échéance ni de priorités sur les tâches, pas
   de retard affiché en rouge, pas de notifications insistantes. Les tâches sont une
   simple liste « à faire / fait » (voir ADR 0006).
+- **Hors connexion d'abord** : Internet sert uniquement à lire une page partagée vers
+  l'application (ADR 0008). Jamais de compte ni de service en ligne obligatoire.
 - Les seules dates sont celles qui existent naturellement (date d'un repas, ouverture
   des calendriers le 1er décembre, Noël).
 

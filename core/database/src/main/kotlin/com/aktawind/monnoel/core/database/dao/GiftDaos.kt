@@ -12,7 +12,6 @@ import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
-import com.aktawind.monnoel.core.database.entity.WishItemEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -40,21 +39,6 @@ interface PersonDao {
 
     @Query("DELETE FROM person")
     suspend fun deleteAll()
-
-    @Query("SELECT * FROM wish_item WHERE person_id = :personId ORDER BY done, sort_order")
-    fun observeWishes(personId: String): Flow<List<WishItemEntity>>
-
-    @Query("SELECT * FROM wish_item")
-    suspend fun getAllWishes(): List<WishItemEntity>
-
-    @Upsert
-    suspend fun upsertWish(entity: WishItemEntity)
-
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertWishes(entities: List<WishItemEntity>)
-
-    @Query("DELETE FROM wish_item WHERE id = :id")
-    suspend fun deleteWish(id: String)
 }
 
 @Dao

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Uniquement pour lire une page partagée vers Mon Noël (titre, photo, prix). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".MonNoelApplication"
         android:allowBackup="false"
