@@ -134,7 +134,9 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             )
             advent.insertTemplateBoxes(
                 data.adventTemplateBoxes.map {
-                    AdventTemplateBoxEntity(it.id, it.templateId, it.number, it.type, it.title, it.priceCents, it.supplier, it.url, it.notes)
+                    AdventTemplateBoxEntity(
+                        it.id, it.templateId, it.number, it.type, it.title, it.priceCents, it.supplier, it.url, it.notes,
+                    )
                 },
             )
         }
