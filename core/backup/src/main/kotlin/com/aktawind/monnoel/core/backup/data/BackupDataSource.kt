@@ -147,8 +147,7 @@ private fun EditionDto.toEntity() = EditionEntity(id, year, status, plannedBudge
 
 private fun PersonEntity.toDto() = PersonDto(id, firstName, lastName, photoPath, interests, notes, createdAt, updatedAt)
 
-private fun PersonDto.toEntity() =
-    PersonEntity(id, firstName, lastName, photoPath, interests, notes, createdAt, updatedAt)
+private fun PersonDto.toEntity() = PersonEntity(id, firstName, lastName, photoPath, interests, notes, createdAt, updatedAt)
 
 private fun GiftIdeaEntity.toDto() = GiftIdeaDto(
     id, title, description, photoPath, estimatedPriceCents, url, shop, notes, categoryId, createdAt, updatedAt,

@@ -10,8 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class RoomEditionRepository @Inject constructor(private val dao: EditionDao) : EditionRepository {
-    override fun observeEditions(): Flow<List<ChristmasEdition>> =
-        dao.observeAll().map { list -> list.map { it.asModel() } }
+    override fun observeEditions(): Flow<List<ChristmasEdition>> = dao.observeAll().map { list -> list.map { it.asModel() } }
 
     override suspend fun getById(id: String) = dao.getById(id)?.asModel()
 

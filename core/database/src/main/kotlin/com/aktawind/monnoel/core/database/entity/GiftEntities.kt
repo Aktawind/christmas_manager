@@ -19,11 +19,7 @@ data class PersonEntity(
 )
 
 @Entity(tableName = "gift_category")
-data class GiftCategoryEntity(
-    @PrimaryKey val id: String,
-    val name: String,
-    @ColumnInfo(name = "sort_order") val sortOrder: Int,
-)
+data class GiftCategoryEntity(@PrimaryKey val id: String, val name: String, @ColumnInfo(name = "sort_order") val sortOrder: Int)
 
 @Entity(
     tableName = "gift_idea",
@@ -70,10 +66,7 @@ data class GiftIdeaEntity(
     ],
     indices = [Index("person_id")],
 )
-data class IdeaPersonEntity(
-    @ColumnInfo(name = "idea_id") val ideaId: String,
-    @ColumnInfo(name = "person_id") val personId: String,
-)
+data class IdeaPersonEntity(@ColumnInfo(name = "idea_id") val ideaId: String, @ColumnInfo(name = "person_id") val personId: String)
 
 @Entity(
     tableName = "planned_gift",

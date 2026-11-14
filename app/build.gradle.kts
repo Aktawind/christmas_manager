@@ -29,8 +29,7 @@ val keystoreProps = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
-fun signingValue(env: String, prop: String): String? =
-    providers.environmentVariable(env).orNull ?: keystoreProps.getProperty(prop)
+fun signingValue(env: String, prop: String): String? = providers.environmentVariable(env).orNull ?: keystoreProps.getProperty(prop)
 
 val keystorePath = signingValue("SIGNING_KEYSTORE_PATH", "storeFile")
 

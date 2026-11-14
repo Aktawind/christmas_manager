@@ -10,8 +10,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class DataStoreUserPreferences @Inject constructor(private val store: DataStore<Preferences>) :
-    UserPreferencesRepository {
+class DataStoreUserPreferences @Inject constructor(private val store: DataStore<Preferences>) : UserPreferencesRepository {
     override val theme: Flow<ThemePreference> = store.data.map { prefs ->
         prefs[THEME]?.let { runCatching { ThemePreference.valueOf(it) }.getOrNull() } ?: ThemePreference.SYSTEM
     }

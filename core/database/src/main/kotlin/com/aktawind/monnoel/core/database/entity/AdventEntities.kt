@@ -178,13 +178,10 @@ fun AdventSupplyEntity.asModel() = AdventSupply(id, calendarId, name, quantity, 
 
 fun AdventSupply.asEntity() = AdventSupplyEntity(id, calendarId, name, quantity, priceCents, bought, sortOrder)
 
-fun AdventTemplateEntity.asModel() =
-    AdventTemplate(id, name, theme, description, boxCount, Instant.ofEpochMilli(createdAt))
+fun AdventTemplateEntity.asModel() = AdventTemplate(id, name, theme, description, boxCount, Instant.ofEpochMilli(createdAt))
 
 fun AdventTemplate.asEntity() = AdventTemplateEntity(id, name, theme, description, boxCount, createdAt.toEpochMilli())
 
-fun AdventTemplateBoxEntity.asModel() =
-    AdventTemplateBox(id, templateId, number, surprise(type), title, priceCents, supplier, url, notes)
+fun AdventTemplateBoxEntity.asModel() = AdventTemplateBox(id, templateId, number, surprise(type), title, priceCents, supplier, url, notes)
 
-fun AdventTemplateBox.asEntity() =
-    AdventTemplateBoxEntity(id, templateId, number, type?.name, title, priceCents, supplier, url, notes)
+fun AdventTemplateBox.asEntity() = AdventTemplateBoxEntity(id, templateId, number, type?.name, title, priceCents, supplier, url, notes)

@@ -35,8 +35,7 @@ class RoomAdventRepository @Inject constructor(private val dao: AdventDao) : Adv
 
     override suspend fun getCalendar(id: String) = dao.getCalendar(id)?.asModel(dao.getPersonIds(id).toSet())
 
-    override suspend fun saveCalendar(calendar: AdventCalendar) =
-        dao.saveCalendar(calendar.asEntity(), calendar.personIds)
+    override suspend fun saveCalendar(calendar: AdventCalendar) = dao.saveCalendar(calendar.asEntity(), calendar.personIds)
 
     override suspend fun deleteCalendar(id: String) = dao.deleteCalendar(id)
 
@@ -66,13 +65,11 @@ class RoomAdventRepository @Inject constructor(private val dao: AdventDao) : Adv
         l.map { it.asModel() }
     }
 
-    override fun observeSuppliesForEdition(editionId: String) =
-        dao.observeSuppliesForEdition(editionId).map { l -> l.map { it.asModel() } }
+    override fun observeSuppliesForEdition(editionId: String) = dao.observeSuppliesForEdition(editionId).map { l -> l.map { it.asModel() } }
 
     override suspend fun getSupplies(calendarId: String) = dao.getSupplies(calendarId).map { it.asModel() }
 
-    override suspend fun saveSupply(supply: AdventSupply, linkedBoxIds: Set<String>) =
-        dao.saveSupply(supply.asEntity(), linkedBoxIds)
+    override suspend fun saveSupply(supply: AdventSupply, linkedBoxIds: Set<String>) = dao.saveSupply(supply.asEntity(), linkedBoxIds)
 
     override suspend fun deleteSupply(id: String) = dao.deleteSupply(id)
 
