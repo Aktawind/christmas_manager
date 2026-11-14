@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.TimeProvider
+import com.aktawind.monnoel.core.domain.advent.AdventRepository
+import com.aktawind.monnoel.core.domain.advent.boxOfTheDay
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
 import com.aktawind.monnoel.core.domain.countdown.christmasCountdown
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
@@ -12,6 +14,8 @@ import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.model.AdventBox
+import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
@@ -42,9 +46,19 @@ sealed interface HomeUiState {
         /** Jour de l'année, pour choisir le message du jour. */
         val dayOfYear: Int,
         val gifts: GiftsSummary = GiftsSummary(),
+        val calendars: List<CalendarProgress> = emptyList(),
         val message: UiMessage? = null,
     ) : HomeUiState
 }
+
+/** Avancement d'un calendrier de l'Avent, et la case du jour en décembre. */
+data class CalendarProgress(
+    val name: String,
+    val ready: Int,
+    val boxCount: Int,
+    val todayNumber: Int?,
+    val todayBox: AdventBox?,
+)
 
 /** Résumé des cadeaux de l'année pour l'accueil. */
 data class GiftsSummary(
@@ -65,6 +79,7 @@ class HomeViewModel @Inject constructor(
     private val saveIdea: SaveIdeaUseCase,
     private val time: TimeProvider,
     personRepository: PersonRepository,
+    private val advent: AdventRepository,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
         personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -76,9 +91,31 @@ class HomeViewModel @Inject constructor(
         gifts.observeGifts(edition.id).map { edition to it }
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), message) {
+    private val editionCalendars = observeEditions().flatMapLatest { state ->
+        val edition = state.current ?: return@flatMapLatest flowOf(emptyList())
+        combine(advent.observeCalendars(edition.id), advent.observeBoxesForEdition(edition.id)) { calendars, boxes ->
+            val today = time.today()
+            calendars.map { c ->
+                val own = boxes.filter { it.calendarId == c.id }
+                val number = boxOfTheDay(today, edition.year, c.boxCount)
+                CalendarProgress(
+                    c.name,
+                    own.count { it.status == BoxStatus.READY },
+                    c.boxCount,
+                    number,
+                    own.firstOrNull {
+                        it.number ==
+                            number
+                    },
+                )
+            }
+        }
+    }
+
+    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionCalendars, message) {
             (edition, list),
             ideaList,
+            calendars,
             msg,
         ->
         if (edition == null) return@combine HomeUiState.NoEdition
@@ -97,6 +134,7 @@ class HomeViewModel @Inject constructor(
                 plannedCents = list.sumOf { it.priceCents ?: 0 },
                 ideas = ideaList.size,
             ),
+            calendars = calendars,
             message = msg,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)

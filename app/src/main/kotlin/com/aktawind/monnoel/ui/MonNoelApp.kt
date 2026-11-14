@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
@@ -31,6 +32,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aktawind.monnoel.R
 import com.aktawind.monnoel.core.designsystem.icon.MonNoelIcons
+import com.aktawind.monnoel.feature.advent.navigation.AdventDestination
+import com.aktawind.monnoel.feature.advent.navigation.BoxEditDestination
+import com.aktawind.monnoel.feature.advent.navigation.CalendarDestination
+import com.aktawind.monnoel.feature.advent.navigation.CalendarEditDestination
+import com.aktawind.monnoel.feature.advent.navigation.adventGraph
 import com.aktawind.monnoel.feature.gifts.navigation.GiftEditDestination
 import com.aktawind.monnoel.feature.gifts.navigation.GiftsDestination
 import com.aktawind.monnoel.feature.gifts.navigation.IdeaEditDestination
@@ -65,6 +71,12 @@ private enum class TopLevelDestination(
         ),
         MonNoelIcons.Gift,
         R.string.nav_gifts,
+    ),
+    ADVENT(
+        AdventDestination,
+        listOf(AdventDestination::class, CalendarDestination::class, CalendarEditDestination::class, BoxEditDestination::class),
+        Icons.Filled.DateRange,
+        R.string.nav_advent,
     ),
     YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
     SETTINGS(
@@ -122,8 +134,9 @@ fun MonNoelApp(hasEditions: Boolean) {
     ) {
         Surface(Modifier.windowInsetsPadding(contentInsets), color = MaterialTheme.colorScheme.background) {
             NavHost(navController = navController, startDestination = HomeDestination) {
-                homeScreen(onOpenGifts = { navigate(TopLevelDestination.GIFTS) })
+                homeScreen(onOpenGifts = { navigate(TopLevelDestination.GIFTS) }, onOpenAdvent = { navigate(TopLevelDestination.ADVENT) })
                 giftsGraph(navController)
+                adventGraph(navController)
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
                 settingsScreen(navController)
             }

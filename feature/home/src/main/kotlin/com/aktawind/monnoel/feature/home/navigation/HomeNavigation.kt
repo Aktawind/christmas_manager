@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object HomeDestination
 
-fun NavGraphBuilder.homeScreen(onOpenGifts: () -> Unit) {
-    composable<HomeDestination> { HomeRoute(onOpenGifts = onOpenGifts) }
+fun NavGraphBuilder.homeScreen(onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit) {
+    composable<HomeDestination> { HomeRoute(onOpenGifts = onOpenGifts, onOpenAdvent = onOpenAdvent) }
 }

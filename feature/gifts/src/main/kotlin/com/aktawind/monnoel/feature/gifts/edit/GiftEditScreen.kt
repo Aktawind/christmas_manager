@@ -36,12 +36,12 @@ import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.ui.DropdownField
+import com.aktawind.monnoel.core.ui.EditorScaffold
 import com.aktawind.monnoel.core.ui.MoneyInput
 import com.aktawind.monnoel.core.ui.PhotoField
 import com.aktawind.monnoel.core.ui.PhotoImage
 import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.feature.gifts.R
-import com.aktawind.monnoel.feature.gifts.components.EditorScaffold
 import com.aktawind.monnoel.feature.gifts.components.emoji
 import com.aktawind.monnoel.feature.gifts.components.label
 import java.time.Instant

@@ -8,10 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aktawind.monnoel.core.ui.EditorScaffold
 import com.aktawind.monnoel.core.ui.PhotoField
 import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.feature.gifts.R
-import com.aktawind.monnoel.feature.gifts.components.EditorScaffold
 
 @Composable
 fun PersonEditRoute(

@@ -6,7 +6,6 @@ import androidx.annotation.StringRes
 internal data class UpcomingModule(val emoji: String, @StringRes val title: Int, val version: String)
 
 internal val upcomingModules = listOf(
-    UpcomingModule("🗓️", R.string.module_advent, "0.3"),
     UpcomingModule("📝", R.string.module_tasks, "0.4"),
     UpcomingModule("🧁", R.string.module_recipes, "0.5"),
     UpcomingModule("🍽️", R.string.module_meals, "0.6"),

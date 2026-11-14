@@ -1,4 +1,4 @@
-package com.aktawind.monnoel.feature.gifts.components
+package com.aktawind.monnoel.core.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,10 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.aktawind.monnoel.core.ui.R as UiR
-import com.aktawind.monnoel.core.ui.UiMessage
-import com.aktawind.monnoel.core.ui.resolve
-import com.aktawind.monnoel.feature.gifts.R
 
 /** Écran de saisie : barre avec retour, enregistrer et supprimer (avec confirmation). */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,12 +77,12 @@ fun EditorScaffold(
                 actions = {
                     if (onDelete != null) {
                         IconButton(onClick = { confirmDelete = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(UiR.string.action_delete))
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
                         }
                     }
                     if (onSave != null) {
                         TextButton(onClick = onSave, enabled = saveEnabled && !busy) {
-                            Text(stringResource(UiR.string.action_save))
+                            Text(stringResource(R.string.action_save))
                         }
                     }
                 },
@@ -112,16 +108,16 @@ fun EditorScaffold(
     if (confirmDelete && onDelete != null && deleteConfirmation != null) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text(stringResource(UiR.string.action_delete)) },
+            title = { Text(stringResource(R.string.action_delete)) },
             text = { Text(deleteConfirmation) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDelete = false
                     onDelete()
-                }) { Text(stringResource(UiR.string.action_delete), color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(UiR.string.action_cancel)) }
+                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }

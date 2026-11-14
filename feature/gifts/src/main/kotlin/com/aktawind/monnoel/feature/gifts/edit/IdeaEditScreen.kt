@@ -20,11 +20,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.ui.DropdownField
+import com.aktawind.monnoel.core.ui.EditorScaffold
 import com.aktawind.monnoel.core.ui.MoneyInput
 import com.aktawind.monnoel.core.ui.PhotoField
 import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.feature.gifts.R
-import com.aktawind.monnoel.feature.gifts.components.EditorScaffold
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

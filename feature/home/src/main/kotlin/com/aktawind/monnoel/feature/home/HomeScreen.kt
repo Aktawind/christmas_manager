@@ -53,10 +53,11 @@ import com.aktawind.monnoel.core.designsystem.theme.MonNoelTheme
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.ui.QuickIdeaDialog
+import com.aktawind.monnoel.core.ui.emoji
 import com.aktawind.monnoel.core.ui.resolve
 
 @Composable
-fun HomeRoute(onOpenGifts: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeRoute(onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var quickIdea by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
@@ -69,7 +70,7 @@ fun HomeRoute(onOpenGifts: () -> Unit, viewModel: HomeViewModel = hiltViewModel(
         }
     }
     Box(Modifier.fillMaxSize()) {
-        HomeScreen(state, onOpenGifts = onOpenGifts, onQuickIdea = { quickIdea = true })
+        HomeScreen(state, onOpenGifts = onOpenGifts, onOpenAdvent = onOpenAdvent, onQuickIdea = { quickIdea = true })
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
     if (quickIdea) {
@@ -86,17 +87,17 @@ fun HomeRoute(onOpenGifts: () -> Unit, viewModel: HomeViewModel = hiltViewModel(
 }
 
 @Composable
-internal fun HomeScreen(state: HomeUiState, onOpenGifts: () -> Unit = {}, onQuickIdea: () -> Unit = {}) {
+internal fun HomeScreen(state: HomeUiState, onOpenGifts: () -> Unit = {}, onOpenAdvent: () -> Unit = {}, onQuickIdea: () -> Unit = {}) {
     when (state) {
         HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onQuickIdea)
+        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onQuickIdea)
     }
 }
 
 @Composable
-private fun HomeContent(state: HomeUiState.Ready, onOpenGifts: () -> Unit, onQuickIdea: () -> Unit) {
+private fun HomeContent(state: HomeUiState.Ready, onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit, onQuickIdea: () -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 170.dp),
         modifier = Modifier.fillMaxSize(),
@@ -107,6 +108,7 @@ private fun HomeContent(state: HomeUiState.Ready, onOpenGifts: () -> Unit, onQui
         item(span = { GridItemSpan(maxLineSpan) }) { CountdownCard(state) }
         item(span = { GridItemSpan(maxLineSpan) }) { DailyMessage(state.dayOfYear) }
         item(span = { GridItemSpan(maxLineSpan) }) { GiftsSummaryCard(state.gifts, onOpenGifts, onQuickIdea) }
+        item(span = { GridItemSpan(maxLineSpan) }) { AdventSummaryCard(state.calendars, onOpenAdvent) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -224,6 +226,40 @@ private fun DailyMessage(dayOfYear: Int) {
             modifier = Modifier.fillMaxWidth(),
         )
         StarDivider()
+    }
+}
+
+@Composable
+private fun AdventSummaryCard(calendars: List<CalendarProgress>, onOpen: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "🗓️  " + stringResource(R.string.home_advent_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (calendars.isEmpty()) {
+                Text(stringResource(R.string.home_advent_empty), color = secondary)
+            }
+            calendars.forEach { c ->
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(stringResource(R.string.home_advent_line, c.name, c.ready, c.boxCount), style = MaterialTheme.typography.bodyLarge)
+                    if (c.todayNumber != null) {
+                        val content = c.todayBox?.let { box ->
+                            listOfNotNull(box.type?.emoji, box.title.takeIf { it.isNotBlank() }).joinToString(" ")
+                        }
+                            .orEmpty()
+                            .ifBlank { stringResource(R.string.home_advent_today_empty) }
+                        Text(stringResource(R.string.home_advent_today, c.todayNumber, content), color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }
     }
 }
 

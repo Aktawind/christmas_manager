@@ -45,4 +45,16 @@
     <string name="action_save">Enregistrer</string>
     <string name="action_delete">Supprimer</string>
     <string name="action_edit">Modifier</string>
+    <string name="surprise_bought">Objet acheté</string>
+    <string name="surprise_handmade">Objet fait main</string>
+    <string name="surprise_treat">Gourmandise</string>
+    <string name="surprise_activity">Activité</string>
+    <string name="surprise_message">Message personnalisé</string>
+    <string name="surprise_experience">Bon pour une expérience</string>
+    <string name="surprise_photo">Photo ou souvenir</string>
+    <string name="surprise_game">Petit jeu ou énigme</string>
+    <string name="box_status_to_find">À trouver</string>
+    <string name="box_status_to_prepare">À préparer</string>
+    <string name="box_status_ready">Prête</string>
+    <string name="action_back">Retour</string>
 </resources>

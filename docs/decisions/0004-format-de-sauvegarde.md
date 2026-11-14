@@ -36,3 +36,4 @@
 | ------------- | ---------------- | ---------- |
 | 1 | v0.1.0 | Années |
 | 2 | v0.2.0 | Personnes, souhaits, catégories, idées (+ liens personnes), cadeaux, enveloppes, photos dans `media/photos/`. Conversion 1 → 2 : ajout des catégories par défaut. |
+| 3 | v0.3.0 | Calendriers de l'Avent (+ personnes), cases, fournitures, modèles et leurs cases. Conversion 2 → 3 : rien à ajouter. |

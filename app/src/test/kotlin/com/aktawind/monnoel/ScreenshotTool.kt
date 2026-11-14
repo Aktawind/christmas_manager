@@ -10,9 +10,13 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.aktawind.monnoel.core.common.AppResult
+import com.aktawind.monnoel.core.domain.advent.BoxDraft
+import com.aktawind.monnoel.core.domain.advent.CalendarDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
+import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.SurpriseType
 import com.aktawind.monnoel.di.TestDataEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.io.File
@@ -123,6 +127,33 @@ class ScreenshotTool {
             edition.id,
             GiftDraft(mamie.id, "Plaid tout doux", priceCents = 3_900, status = GiftStatus.TO_WRAP),
         )
+        seedAdvent(data, edition.id, lea.id, tom.id)
+    }
+
+    private suspend fun seedAdvent(data: TestDataEntryPoint, editionId: String, leaId: String, tomId: String) {
+        val cal = (
+            data.saveCalendar()(
+                null,
+                editionId,
+                CalendarDraft("Calendrier de Tom", setOf(tomId), theme = "Dinosaures", budgetCents = 5_000),
+            ) as AppResult.Success
+            ).value
+        data.saveCalendar()(null, editionId, CalendarDraft("Lutin farceur", setOf(leaId, tomId), theme = "Farces", boxCount = 25))
+        val boxes = data.adventRepository().getBoxes(cal.id)
+        val contents = listOf(
+            Triple(SurpriseType.TREAT, "Chocolat", BoxStatus.READY),
+            Triple(SurpriseType.BOUGHT, "Petit dino", BoxStatus.READY),
+            Triple(SurpriseType.ACTIVITY, "Biscuits ensemble", BoxStatus.TO_PREPARE),
+            Triple(SurpriseType.MESSAGE, "Mot doux", BoxStatus.READY),
+            Triple(SurpriseType.GAME, "Énigme", BoxStatus.TO_PREPARE),
+            Triple(SurpriseType.EXPERIENCE, "Bon pour une luge", BoxStatus.TO_FIND),
+        )
+        contents.forEachIndexed { i, (type, title, status) ->
+            val price = if (type == SurpriseType.BOUGHT) 450L else null
+            data.saveBox()(boxes[i].id, BoxDraft(type = type, title = title, status = status, priceCents = price))
+        }
+        data.saveSupply()(cal.id, null, "Sachets kraft", 24, 690, true, emptySet())
+        data.saveSupply()(cal.id, null, "Paquet de chocolats", 1, 1_200, false, boxes.take(12).map { it.id }.toSet())
     }
 
     @Test
@@ -153,6 +184,14 @@ class ScreenshotTool {
         click("Réglages")
         waitText("Personnaliser")
         shot("16-settings")
+        click("Avent")
+        waitText("Calendrier de Tom")
+        shot("18-advent-list")
+        click("Calendrier de Tom")
+        waitText("Biscuits")
+        shot("19-calendar")
+        click("Réglages")
+        waitText("Personnaliser")
         click("Catégories de cadeaux")
         waitText("Mes catégories")
         shot("17-categories")
