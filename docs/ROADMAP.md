@@ -83,6 +83,8 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 | A-009 | Dupliquer un calendrier d'une année à l'autre                                   | 🧪 |
 | A-010 | Modèles personnels : enregistrer / créer depuis un modèle, réutiliser des cases | 🧪 |
 | A-011 | Accueil : avancement des calendriers et « case du jour » en décembre           | 🧪 |
+| A-012 | Sélection multiple : type, contenu, prix, avancement ou achat groupé pour plusieurs cases | 🧪 |
+| A-013 | Fournitures avec photo, remplissage automatique des cases reliées              | 🧪 |
 
 ## v0.4.0 — Ma liste de lutin 📝
 

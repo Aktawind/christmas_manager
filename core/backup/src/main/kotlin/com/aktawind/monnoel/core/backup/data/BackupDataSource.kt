@@ -54,7 +54,10 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                 AdventCalendarPersonDto(it.calendarId, it.personId)
             },
             adventSupplies = db.adventDao().getAllSupplies().map {
-                AdventSupplyDto(it.id, it.calendarId, it.name, it.quantity, it.priceCents, it.bought, it.sortOrder)
+                AdventSupplyDto(
+                    it.id, it.calendarId, it.name, it.quantity, it.priceCents, it.bought, it.sortOrder, it.photoPath, it.type,
+                    it.boxTitle, it.supplier,
+                )
             },
             adventBoxes = db.adventDao().getAllBoxes().map {
                 AdventBoxDto(
@@ -109,13 +112,8 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             advent.insertSupplies(
                 data.adventSupplies.map {
                     AdventSupplyEntity(
-                        it.id,
-                        it.calendarId,
-                        it.name,
-                        it.quantity,
-                        it.priceCents,
-                        it.bought,
-                        it.sortOrder,
+                        it.id, it.calendarId, it.name, it.quantity, it.priceCents, it.bought, it.sortOrder, it.photoPath, it.type,
+                        it.boxTitle, it.supplier,
                     )
                 },
             )

@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 3
+const val BACKUP_FORMAT_VERSION = 4
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -155,6 +155,10 @@ data class AdventSupplyDto(
     val priceCents: Long? = null,
     val bought: Boolean = false,
     val sortOrder: Int = 0,
+    val photoPath: String? = null,
+    val type: String? = null,
+    val boxTitle: String = "",
+    val supplier: String = "",
 )
 
 @Serializable

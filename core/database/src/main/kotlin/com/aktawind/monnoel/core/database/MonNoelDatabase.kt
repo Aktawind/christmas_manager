@@ -28,7 +28,8 @@ import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
  *
  * Historique : v1 (v0.1.0) années ; v2 (v0.2.0 tests) personnes, idées, cadeaux, catégories,
  * enveloppes, souhaits ; v3 (v0.2.0) suppression de la liste de souhaits ;
- * v4 (v0.3.0) calendriers de l'Avent, cases, fournitures, modèles.
+ * v4 (v0.3.0) calendriers de l'Avent, cases, fournitures, modèles ;
+ * v5 (v0.3.0) fournitures : photo, type, contenu des cases, fournisseur.
  */
 @Database(
     entities = [
@@ -46,7 +47,7 @@ import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
         AdventTemplateEntity::class,
         AdventTemplateBoxEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {

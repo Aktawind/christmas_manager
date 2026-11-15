@@ -47,8 +47,8 @@
     <string name="supplies_quantity">Quantité</string>
     <string name="supplies_price">Prix total</string>
     <string name="supplies_bought">Déjà achetée</string>
-    <string name="supplies_share_title">Répartir le prix sur des cases (facultatif)</string>
-    <string name="supplies_share_hint">Le prix est partagé à parts égales entre les cases choisies.</string>
+    <string name="supplies_share_title">Cases concernées (facultatif)</string>
+    <string name="supplies_share_hint">Le prix est partagé à parts égales entre les cases choisies, qui sont remplies automatiquement.</string>
     <string name="calendar_new_title">Nouveau calendrier</string>
     <string name="calendar_edit_title">Modifier le calendrier</string>
     <string name="field_calendar_name">Nom du calendrier</string>
@@ -75,4 +75,21 @@
     <string name="group_purchase_none">Aucun</string>
     <string name="field_url">Lien d’achat</string>
     <string name="open_link">Ouvrir le lien ↗</string>
+    <string name="calendar_select">Sélectionner plusieurs cases</string>
+    <string name="calendar_select_hint">Touche les cases à modifier ensemble, puis « Modifier… ».</string>
+    <string name="selection_count">%1$d case(s) sélectionnée(s)</string>
+    <string name="selection_all">Toutes</string>
+    <string name="selection_empty">Les vides</string>
+    <string name="selection_none">Aucune</string>
+    <string name="selection_edit">Modifier…</string>
+    <string name="selection_close">Quitter la sélection</string>
+    <string name="bulk_title">Modifier %1$d case(s)</string>
+    <string name="bulk_keep">Ne pas changer</string>
+    <string name="bulk_content">Contenu (vide : ne pas changer)</string>
+    <string name="bulk_price">Prix par case (vide : ne pas changer)</string>
+    <string name="bulk_apply">Appliquer</string>
+    <string name="bulk_done">%1$d case(s) modifiée(s) ✨</string>
+    <string name="bulk_supply_hint">Relier à un achat groupé remplit les cases avec son type, son contenu et sa photo, et partage son prix.</string>
+    <string name="supplies_fill_hint">Les cases choisies seront remplies automatiquement : type, contenu, photo et fournisseur ; elles passent « À préparer » une fois l’achat fait.</string>
+    <string name="supplies_box_title">Contenu de chaque case (vide : « %1$s »)</string>
 </resources>

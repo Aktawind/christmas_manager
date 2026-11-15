@@ -26,6 +26,8 @@ internal object BackupMigrations {
         },
         // v2 (v0.2.0) -> v3 (v0.3.0) : calendriers de l'Avent, absents des anciennes sauvegardes.
         3 to { json -> json },
+        // v3 -> v4 (v0.3.0) : fournitures enrichies (photo, type, contenu, fournisseur), valeurs par défaut.
+        4 to { json -> json },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

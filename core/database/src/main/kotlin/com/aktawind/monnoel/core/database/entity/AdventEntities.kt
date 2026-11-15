@@ -84,6 +84,10 @@ data class AdventSupplyEntity(
     @ColumnInfo(name = "price_cents") val priceCents: Long?,
     val bought: Boolean,
     @ColumnInfo(name = "sort_order") val sortOrder: Int,
+    @ColumnInfo(name = "photo_path") val photoPath: String? = null,
+    val type: String? = null,
+    @ColumnInfo(name = "box_title", defaultValue = "") val boxTitle: String = "",
+    @ColumnInfo(defaultValue = "") val supplier: String = "",
 )
 
 @Entity(
@@ -174,9 +178,11 @@ fun AdventBox.asEntity() = AdventBoxEntity(
     id, calendarId, number, type?.name, title, photoPath, priceCents, supplier, url, status.name, notes, supplyId,
 )
 
-fun AdventSupplyEntity.asModel() = AdventSupply(id, calendarId, name, quantity, priceCents, bought, sortOrder)
+fun AdventSupplyEntity.asModel() =
+    AdventSupply(id, calendarId, name, quantity, priceCents, bought, sortOrder, photoPath, surprise(type), boxTitle, supplier)
 
-fun AdventSupply.asEntity() = AdventSupplyEntity(id, calendarId, name, quantity, priceCents, bought, sortOrder)
+fun AdventSupply.asEntity() =
+    AdventSupplyEntity(id, calendarId, name, quantity, priceCents, bought, sortOrder, photoPath, type?.name, boxTitle, supplier)
 
 fun AdventTemplateEntity.asModel() = AdventTemplate(id, name, theme, description, boxCount, Instant.ofEpochMilli(createdAt))
 

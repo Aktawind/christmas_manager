@@ -197,25 +197,22 @@ class AdventUseCasesTest {
             guard,
         )(boxes[0].id, BoxDraft(title = "Livre", priceCents = 800, status = BoxStatus.READY))
         val supply = (
-            SaveSupplyUseCase(advent, guard, ids)(
+            SaveSupplyUseCase(advent, photos, guard, ids)(
                 cal.id,
                 null,
-                "Sachet de chocolats",
-                1,
-                1_000,
-                true,
-                boxes.map {
-                    it.id
-                }.toSet(),
+                SupplyDraft("Sachet de chocolats", priceCents = 1_000, bought = true),
+                boxes.drop(1).map { it.id }.toSet(),
             )
                 as AppResult.Success
             ).value
         val linked = advent.getBoxes(cal.id).filter { it.supplyId == supply.id }
-        assertEquals(mapOf(boxes[0].id to 334L, boxes[1].id to 333L, boxes[2].id to 333L), supplyShares(supply, linked))
+        assertEquals(mapOf(boxes[1].id to 500L, boxes[2].id to 500L), supplyShares(supply, linked))
 
         val summary = summarizeCalendar(3, 2_000, advent.getBoxes(cal.id), advent.getSupplies(cal.id))
         assertEquals(1, summary.ready)
-        assertEquals(2, summary.toFind)
+        // Achat fait : les cases reliées passent « À préparer » toutes seules.
+        assertEquals(2, summary.toPrepare)
+        assertEquals(0, summary.toFind)
         assertEquals(1_800, summary.plannedCents)
         assertEquals(1_800, summary.spentCents)
         assertTrue(!summary.isOverBudget)
@@ -232,7 +229,7 @@ class AdventUseCasesTest {
             photos,
             guard,
         )(boxes[0].id, BoxDraft(title = "Puzzle", status = BoxStatus.READY, photoPath = "photos/p.jpg"))
-        SaveSupplyUseCase(advent, guard, ids)(cal.id, null, "Étiquettes", 24, 300, true, setOf(boxes[1].id))
+        SaveSupplyUseCase(advent, photos, guard, ids)(cal.id, null, SupplyDraft("Étiquettes", 24, 300, true), setOf(boxes[1].id))
 
         val copy = (DuplicateCalendarUseCase(advent, photos, guard, time, ids)(cal.id, "e") as AppResult.Success).value
         val copied = advent.getBoxes(copy.id)
@@ -280,5 +277,47 @@ class AdventUseCasesTest {
         assertEquals(25, boxOfTheDay(LocalDate.of(2026, 12, 25), 2026, 25))
         assertNull(boxOfTheDay(LocalDate.of(2026, 11, 30), 2026, 24))
         assertNull(boxOfTheDay(LocalDate.of(2026, 12, 3), 2025, 24))
+    }
+
+    @Test
+    fun `relier un achat groupe remplit les cases`() = runTest {
+        edition("e", 2026)
+        val cal = (save(null, "e", CalendarDraft(name = "Chocolats", boxCount = 4)) as AppResult.Success).value
+        val ids4 = advent.getBoxes(cal.id).map { it.id }
+        val draft =
+            SupplyDraft("Boîte de 24 chocolats", priceCents = 1_200, type = SurpriseType.TREAT, boxTitle = "Chocolat", supplier = "Lidl")
+        val supply = (SaveSupplyUseCase(advent, photos, guard, ids)(cal.id, null, draft, ids4.take(3).toSet()) as AppResult.Success).value
+        val boxes = advent.getBoxes(cal.id)
+        boxes.take(3).forEach {
+            assertEquals(SurpriseType.TREAT, it.type)
+            assertEquals("Chocolat", it.title)
+            assertEquals("Lidl", it.supplier)
+            assertEquals(BoxStatus.TO_FIND, it.status)
+        }
+        assertTrue(boxes[3].isEmpty)
+        // L'achat est fait : les cases passent « À préparer ».
+        SaveSupplyUseCase(advent, photos, guard, ids)(cal.id, supply.id, draft.copy(bought = true), ids4.take(3).toSet())
+        assertEquals(BoxStatus.TO_PREPARE, advent.getBoxes(cal.id)[0].status)
+    }
+
+    @Test
+    fun `modifier plusieurs cases d'un coup`() = runTest {
+        edition("e", 2026)
+        val cal = (save(null, "e", CalendarDraft(name = "L", boxCount = 5)) as AppResult.Success).value
+        val ids5 = advent.getBoxes(cal.id).map { it.id }
+        val change = BulkBoxChange(type = SurpriseType.TREAT, status = BoxStatus.READY, title = "Chocolat")
+        val count = (BulkUpdateBoxesUseCase(advent, guard)(cal.id, ids5.take(4).toSet(), change) as AppResult.Success).value
+        assertEquals(4, count)
+        val boxes = advent.getBoxes(cal.id)
+        assertEquals(4, boxes.count { it.title == "Chocolat" && it.status == BoxStatus.READY && it.type == SurpriseType.TREAT })
+        assertTrue(boxes[4].isEmpty)
+
+        val supply = (
+            SaveSupplyUseCase(advent, photos, guard, ids)(cal.id, null, SupplyDraft("Sachets", boxTitle = "Bonbon"), emptySet())
+                as AppResult.Success
+            ).value
+        BulkUpdateBoxesUseCase(advent, guard)(cal.id, setOf(ids5[4]), BulkBoxChange(supplyId = supply.id))
+        assertEquals("Bonbon", advent.getBoxes(cal.id)[4].title)
+        assertEquals(supply.id, advent.getBoxes(cal.id)[4].supplyId)
     }
 }

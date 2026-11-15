@@ -164,45 +164,120 @@ class SwapBoxesUseCase @Inject constructor(private val advent: AdventRepository,
     }
 }
 
+/** Données saisies pour une fourniture ou un achat groupé. */
+data class SupplyDraft(
+    val name: String,
+    val quantity: Int = 1,
+    val priceCents: Long? = null,
+    val bought: Boolean = false,
+    val photoPath: String? = null,
+    val type: SurpriseType? = null,
+    /** Contenu écrit dans chaque case reliée ; vide = le nom de la fourniture. */
+    val boxTitle: String = "",
+    val supplier: String = "",
+)
+
+/**
+ * Remplit automatiquement les cases reliées à un achat groupé : type de surprise, contenu,
+ * fournisseur ; si l'achat est fait, les cases « À trouver » passent « À préparer ».
+ * Le prix n'est pas recopié : chaque case affiche sa part de l'achat.
+ */
+internal fun AdventBox.filledFrom(supply: AdventSupply): AdventBox = copy(
+    type = supply.type ?: type,
+    title = supply.contentForBoxes,
+    supplier = supply.supplier.ifBlank { supplier },
+    status = if (supply.bought && status == BoxStatus.TO_FIND) BoxStatus.TO_PREPARE else status,
+    supplyId = supply.id,
+)
+
 class SaveSupplyUseCase @Inject constructor(
     private val advent: AdventRepository,
+    private val photos: PhotoRepository,
     private val guard: EditionGuard,
     private val ids: IdGenerator,
 ) {
     suspend operator fun invoke(
         calendarId: String,
         supplyId: String?,
-        name: String,
-        quantity: Int,
-        priceCents: Long?,
-        bought: Boolean,
+        draft: SupplyDraft,
         linkedBoxIds: Set<String>,
     ): AppResult<AdventSupply> {
-        if (name.isBlank() || quantity < 1) return AppResult.Failure(AppError.InvalidInput)
+        if (draft.name.isBlank() || draft.quantity < 1) return AppResult.Failure(AppError.InvalidInput)
         val calendar = advent.getCalendar(calendarId) ?: return AppResult.Failure(AppError.NotFound)
         guard.check(calendar.editionId)?.let { return AppResult.Failure(it) }
         val existing = advent.getSupplies(calendarId)
         val current = existing.firstOrNull { it.id == supplyId }
+        current?.photoPath?.takeIf { it != draft.photoPath }?.let { photos.deletePhoto(it) }
         val supply = AdventSupply(
             id = current?.id ?: ids.newId(),
             calendarId = calendarId,
-            name = name.trim(),
-            quantity = quantity,
-            priceCents = priceCents,
-            bought = bought,
+            name = draft.name.trim(),
+            quantity = draft.quantity,
+            priceCents = draft.priceCents,
+            bought = draft.bought,
             sortOrder = current?.sortOrder ?: ((existing.maxOfOrNull { it.sortOrder } ?: -1) + 1),
+            photoPath = draft.photoPath,
+            type = draft.type,
+            boxTitle = draft.boxTitle.trim(),
+            supplier = draft.supplier.trim(),
         )
         advent.saveSupply(supply, linkedBoxIds)
+        val filled = advent.getBoxes(calendarId).filter { it.id in linkedBoxIds }.map { it.filledFrom(supply) }
+        if (filled.isNotEmpty()) advent.saveBoxes(filled)
         return AppResult.Success(supply)
     }
 }
 
-class DeleteSupplyUseCase @Inject constructor(private val advent: AdventRepository, private val guard: EditionGuard) {
+class DeleteSupplyUseCase @Inject constructor(
+    private val advent: AdventRepository,
+    private val photos: PhotoRepository,
+    private val guard: EditionGuard,
+) {
     suspend operator fun invoke(calendarId: String, supplyId: String): AppResult<Unit> {
         val calendar = advent.getCalendar(calendarId) ?: return AppResult.Failure(AppError.NotFound)
         guard.check(calendar.editionId)?.let { return AppResult.Failure(it) }
+        val supply = advent.getSupplies(calendarId).firstOrNull { it.id == supplyId }
         advent.deleteSupply(supplyId)
+        supply?.photoPath?.let { photos.deletePhoto(it) }
         return AppResult.Success(Unit)
+    }
+}
+
+/** Ce qu'on change d'un coup sur plusieurs cases (null = ne pas changer). */
+data class BulkBoxChange(
+    val type: SurpriseType? = null,
+    val status: BoxStatus? = null,
+    val title: String? = null,
+    val priceCents: Long? = null,
+    /** Relie les cases à cet achat groupé (et les remplit automatiquement). */
+    val supplyId: String? = null,
+)
+
+/** Modifie plusieurs cases en une fois (ex. 24 cases « Chocolat », prêtes). */
+class BulkUpdateBoxesUseCase @Inject constructor(
+    private val advent: AdventRepository,
+    private val guard: EditionGuard,
+) {
+    suspend operator fun invoke(calendarId: String, boxIds: Set<String>, change: BulkBoxChange): AppResult<Int> {
+        if (boxIds.isEmpty()) return AppResult.Success(0)
+        val calendar = advent.getCalendar(calendarId) ?: return AppResult.Failure(AppError.NotFound)
+        guard.check(calendar.editionId)?.let { return AppResult.Failure(it) }
+        val boxes = advent.getBoxes(calendarId)
+        val supply = change.supplyId?.let { id -> advent.getSupplies(calendarId).firstOrNull { it.id == id } }
+        if (supply != null) {
+            val linked = boxes.filter { it.supplyId == supply.id }.map { it.id }.toSet() + boxIds
+            advent.saveSupply(supply, linked)
+        }
+        val updated = boxes.filter { it.id in boxIds }.map { box ->
+            var b = supply?.let { box.filledFrom(it) } ?: box
+            change.type?.let { b = b.copy(type = it) }
+            change.title?.takeIf { it.isNotBlank() }?.let { b = b.copy(title = it.trim()) }
+            change.priceCents?.let { b = b.copy(priceCents = it) }
+            change.status?.let { b = b.copy(status = it) }
+            b
+        }
+        advent.saveBoxes(updated)
+        return AppResult.Success(updated.size)
     }
 }
 
@@ -243,7 +318,8 @@ class DuplicateCalendarUseCase @Inject constructor(
         advent.getSupplies(sourceId).forEach { supply ->
             val newId = supplyIds.getValue(supply.id)
             val linked = boxes.filter { it.second == supply.id }.map { it.first.id }.toSet()
-            advent.saveSupply(supply.copy(id = newId, calendarId = copy.id, bought = false), linked)
+            val photo = supply.photoPath?.let { photos.copyPhoto(it) }
+            advent.saveSupply(supply.copy(id = newId, calendarId = copy.id, bought = false, photoPath = photo), linked)
         }
         return AppResult.Success(copy)
     }

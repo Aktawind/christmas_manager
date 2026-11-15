@@ -12,6 +12,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.advent.BoxDraft
 import com.aktawind.monnoel.core.domain.advent.CalendarDraft
+import com.aktawind.monnoel.core.domain.advent.SupplyDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.model.BoxStatus
@@ -152,8 +153,9 @@ class ScreenshotTool {
             val price = if (type == SurpriseType.BOUGHT) 450L else null
             data.saveBox()(boxes[i].id, BoxDraft(type = type, title = title, status = status, priceCents = price))
         }
-        data.saveSupply()(cal.id, null, "Sachets kraft", 24, 690, true, emptySet())
-        data.saveSupply()(cal.id, null, "Paquet de chocolats", 1, 1_200, false, boxes.take(12).map { it.id }.toSet())
+        data.saveSupply()(cal.id, null, SupplyDraft("Sachets kraft", 24, 690, true), emptySet())
+        val chocolates = SupplyDraft("Paquet de chocolats", 1, 1_200, true, type = SurpriseType.TREAT, boxTitle = "Chocolat")
+        data.saveSupply()(cal.id, null, chocolates, boxes.drop(6).take(12).map { it.id }.toSet())
     }
 
     @Test
@@ -190,6 +192,9 @@ class ScreenshotTool {
         click("Calendrier de Tom")
         waitText("Biscuits")
         shot("19-calendar")
+        click("Sélectionner plusieurs cases")
+        click("Les vides")
+        shot("20-selection")
         click("Réglages")
         waitText("Personnaliser")
         click("Catégories de cadeaux")

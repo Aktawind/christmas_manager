@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,9 +23,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -76,13 +79,18 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
+import com.aktawind.monnoel.core.domain.advent.BulkBoxChange
+import com.aktawind.monnoel.core.domain.advent.SupplyDraft
 import com.aktawind.monnoel.core.domain.gifts.centsToInput
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventSupply
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.SurpriseType
+import com.aktawind.monnoel.core.ui.DropdownField
 import com.aktawind.monnoel.core.ui.MoneyInput
+import com.aktawind.monnoel.core.ui.PhotoField
 import com.aktawind.monnoel.core.ui.PhotoImage
 import com.aktawind.monnoel.core.ui.R as UiR
 import com.aktawind.monnoel.core.ui.TextInput
@@ -108,6 +116,9 @@ fun CalendarRoute(
     var editingSupply by remember { mutableStateOf<AdventSupply?>(null) }
     var newSupply by rememberSaveable { mutableStateOf(false) }
     var onlyToPrepare by rememberSaveable { mutableStateOf(false) }
+    var selecting by rememberSaveable { mutableStateOf(false) }
+    var selected by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var bulkOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -162,6 +173,21 @@ fun CalendarRoute(
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
+        bottomBar = {
+            if (selecting) {
+                SelectionBar(
+                    count = selected.size,
+                    onAll = { selected = state.boxes.map { it.id } },
+                    onEmpty = { selected = state.boxes.filter { it.isEmpty }.map { it.id } },
+                    onNone = { selected = emptyList() },
+                    onEdit = { bulkOpen = true },
+                    onClose = {
+                        selecting = false
+                        selected = emptyList()
+                    },
+                )
+            }
+        },
     ) { padding ->
         BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
             val columns = when {
@@ -174,11 +200,24 @@ fun CalendarRoute(
                 columns = columns,
                 boxes = visible,
                 shares = state.shares,
-                canDrag = !state.readOnly && !onlyToPrepare,
-                onOpenBox = onOpenBox,
+                supplyPhotos = state.supplies.associate { it.id to it.photoPath },
+                canDrag = !state.readOnly && !onlyToPrepare && !selecting,
+                selected = if (selecting) selected.toSet() else null,
+                onOpenBox = { id ->
+                    if (selecting) selected = if (id in selected) selected - id else selected + id else onOpenBox(id)
+                },
                 onSwap = viewModel::swap,
                 header = {
-                    CalendarHeader(state, onlyToPrepare, onToggleFilter = { onlyToPrepare = !onlyToPrepare })
+                    CalendarHeader(
+                        state = state,
+                        onlyToPrepare = onlyToPrepare,
+                        selecting = selecting,
+                        onToggleFilter = { onlyToPrepare = !onlyToPrepare },
+                        onToggleSelecting = {
+                            selecting = !selecting
+                            selected = emptyList()
+                        },
+                    )
                 },
                 footer = {
                     SuppliesSection(
@@ -198,11 +237,12 @@ fun CalendarRoute(
         SupplyDialog(
             supply = editingSupply,
             boxes = state.boxes,
-            onSave = { name, qty, price, bought, boxIds ->
-                viewModel.saveSupply(editingSupply?.id, name, qty, price, bought, boxIds)
+            onSave = { draft, boxIds ->
+                viewModel.saveSupply(editingSupply?.id, draft, boxIds)
                 newSupply = false
                 editingSupply = null
             },
+            onImportPhoto = viewModel::importSupplyPhoto,
             onDelete = editingSupply?.let { s ->
                 {
                     viewModel.removeSupply(s.id)
@@ -210,9 +250,23 @@ fun CalendarRoute(
                 }
             },
             onDismiss = {
+                viewModel.discardSupplyPhotos()
                 newSupply = false
                 editingSupply = null
             },
+        )
+    }
+    if (bulkOpen) {
+        BulkEditDialog(
+            count = selected.size,
+            supplies = state.supplies,
+            onApply = { change ->
+                viewModel.bulkUpdate(selected.toSet(), change)
+                bulkOpen = false
+                selecting = false
+                selected = emptyList()
+            },
+            onDismiss = { bulkOpen = false },
         )
     }
     if (askTemplate) {
@@ -252,7 +306,13 @@ fun CalendarRoute(
 }
 
 @Composable
-private fun CalendarHeader(state: CalendarUiState, onlyToPrepare: Boolean, onToggleFilter: () -> Unit) {
+private fun CalendarHeader(
+    state: CalendarUiState,
+    onlyToPrepare: Boolean,
+    selecting: Boolean,
+    onToggleFilter: () -> Unit,
+    onToggleSelecting: () -> Unit,
+) {
     val calendar = state.calendar ?: return
     val summary = state.summary
     val secondary = LocalMonNoelColors.current.secondaryText
@@ -298,8 +358,15 @@ private fun CalendarHeader(state: CalendarUiState, onlyToPrepare: Boolean, onTog
             FilterChip(selected = onlyToPrepare, onClick = onToggleFilter, label = {
                 Text(stringResource(R.string.calendar_filter_to_prepare))
             })
+            if (!state.readOnly) {
+                FilterChip(selected = selecting, onClick = onToggleSelecting, label = { Text(stringResource(R.string.calendar_select)) })
+            }
             if (!state.readOnly && !onlyToPrepare) {
-                Text(stringResource(R.string.calendar_drag_hint), style = MaterialTheme.typography.bodySmall, color = secondary)
+                Text(
+                    stringResource(if (selecting) R.string.calendar_select_hint else R.string.calendar_drag_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = secondary,
+                )
             }
         }
     }
@@ -311,7 +378,10 @@ private fun BoxGrid(
     columns: Int,
     boxes: List<AdventBox>,
     shares: Map<String, Long>,
+    supplyPhotos: Map<String, String?>,
     canDrag: Boolean,
+    /** Cases sélectionnées (mode sélection), ou null hors sélection. */
+    selected: Set<String>?,
     onOpenBox: (String) -> Unit,
     onSwap: (String, String) -> Unit,
     header: @Composable () -> Unit,
@@ -343,6 +413,8 @@ private fun BoxGrid(
                 box = box,
                 share = shares[box.id],
                 highlighted = hovered == box.id,
+                photoPath = box.photoPath ?: box.supplyId?.let { supplyPhotos[it] },
+                selected = selected?.contains(box.id),
                 modifier = Modifier
                     .onGloballyPositioned { if (dragging != box.id) bounds[box.id] = it.boundsInRoot() }
                     .zIndex(if (isDragged) 1f else 0f)
@@ -393,7 +465,15 @@ private fun BoxGrid(
 }
 
 @Composable
-private fun BoxCell(box: AdventBox, share: Long?, highlighted: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun BoxCell(
+    box: AdventBox,
+    share: Long?,
+    highlighted: Boolean,
+    photoPath: String?,
+    selected: Boolean?,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
     val gold = LocalMonNoelColors.current.gold
     val (container, border) = when (box.status) {
         BoxStatus.READY -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
@@ -405,13 +485,20 @@ private fun BoxCell(box: AdventBox, share: Long?, highlighted: Boolean, modifier
         onClick = onClick,
         color = container,
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(if (highlighted) 3.dp else 1.dp, if (highlighted) gold else border),
+        border = BorderStroke(
+            if (highlighted || selected == true) 3.dp else 1.dp,
+            when {
+                selected == true -> MaterialTheme.colorScheme.primary
+                highlighted -> gold
+                else -> border
+            },
+        ),
         modifier = modifier.aspectRatio(1.3f).semantics { contentDescription = description },
     ) {
         Box(Modifier.fillMaxSize()) {
-            if (box.photoPath != null) {
+            if (photoPath != null) {
                 PhotoImage(
-                    box.photoPath,
+                    photoPath,
                     null,
                     size = 400.dp,
                     shape = RectangleShape,
@@ -429,6 +516,9 @@ private fun BoxCell(box: AdventBox, share: Long?, highlighted: Boolean, modifier
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f),
                     )
+                    if (selected != null) {
+                        Checkbox(checked = selected, onCheckedChange = null, modifier = Modifier.size(24.dp))
+                    }
                     Text(
                         when (box.status) {
                             BoxStatus.READY -> "✓"
@@ -484,6 +574,7 @@ private fun SuppliesSection(
             val linked = boxes.filter { it.supplyId == supply.id }.map { it.number }.sorted()
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = supply.bought, onCheckedChange = if (readOnly) null else { _ -> onToggle(supply) })
+                if (supply.photoPath != null) PhotoImage(supply.photoPath, null, size = 40.dp, modifier = Modifier.padding(end = 10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
                         if (supply.quantity >
@@ -512,12 +603,106 @@ private fun SuppliesSection(
     }
 }
 
+/** Barre du mode sélection : nombre de cases, raccourcis de sélection, « Modifier… ». */
+@Composable
+private fun SelectionBar(count: Int, onAll: () -> Unit, onEmpty: () -> Unit, onNone: () -> Unit, onEdit: () -> Unit, onClose: () -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.selection_count, count),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onAll) { Text(stringResource(R.string.selection_all)) }
+            TextButton(onClick = onEmpty) { Text(stringResource(R.string.selection_empty)) }
+            TextButton(onClick = onNone) { Text(stringResource(R.string.selection_none)) }
+            Button(onClick = onEdit, enabled = count > 0) { Text(stringResource(R.string.selection_edit)) }
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.selection_close)) }
+        }
+    }
+}
+
+/** Modifier plusieurs cases d'un coup. Chaque champ laissé sur « ne pas changer » est ignoré. */
+@Composable
+private fun BulkEditDialog(count: Int, supplies: List<AdventSupply>, onApply: (BulkBoxChange) -> Unit, onDismiss: () -> Unit) {
+    var type by rememberSaveable { mutableStateOf<SurpriseType?>(null) }
+    var status by rememberSaveable { mutableStateOf<BoxStatus?>(null) }
+    var title by rememberSaveable { mutableStateOf("") }
+    var price by rememberSaveable { mutableStateOf("") }
+    var supplyId by rememberSaveable { mutableStateOf<String?>(null) }
+    val keep = stringResource(R.string.bulk_keep)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.bulk_title, count)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (supplies.isNotEmpty()) {
+                    DropdownField(
+                        label = stringResource(R.string.field_group_purchase),
+                        selected = supplies.firstOrNull { it.id == supplyId },
+                        options = listOf(null) + supplies,
+                        optionLabel = { it?.name ?: keep },
+                        onSelect = { supplyId = it?.id },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        stringResource(R.string.bulk_supply_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalMonNoelColors.current.secondaryText,
+                    )
+                }
+                DropdownField(
+                    label = stringResource(R.string.field_surprise_type),
+                    selected = type,
+                    options = listOf<SurpriseType?>(null) + SurpriseType.entries,
+                    optionLabel = { t -> t?.let { "${it.emoji}  ${stringResource(it.label)}" } ?: keep },
+                    onSelect = { type = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                TextInput(title, { title = it }, stringResource(R.string.bulk_content), Modifier.fillMaxWidth())
+                MoneyInput(price, { price = it }, stringResource(R.string.bulk_price), Modifier.fillMaxWidth())
+                DropdownField(
+                    label = stringResource(R.string.field_box_status),
+                    selected = status,
+                    options = listOf<BoxStatus?>(null) + BoxStatus.entries,
+                    optionLabel = { st -> st?.let { stringResource(it.label) } ?: keep },
+                    onSelect = { status = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            val priceValid = price.isBlank() || parseEuroToCents(price) != null
+            TextButton(
+                onClick = {
+                    onApply(
+                        BulkBoxChange(
+                            type = type,
+                            status = status,
+                            title = title.takeIf { it.isNotBlank() },
+                            priceCents = parseEuroToCents(price),
+                            supplyId = supplyId,
+                        ),
+                    )
+                },
+                enabled = priceValid,
+            ) { Text(stringResource(R.string.bulk_apply)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(UiR.string.action_cancel)) } },
+    )
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SupplyDialog(
     supply: AdventSupply?,
     boxes: List<AdventBox>,
-    onSave: (String, Int, Long?, Boolean, Set<String>) -> Unit,
+    onSave: (SupplyDraft, Set<String>) -> Unit,
+    onImportPhoto: (String, (String) -> Unit) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
@@ -525,9 +710,14 @@ private fun SupplyDialog(
     var quantity by rememberSaveable { mutableStateOf((supply?.quantity ?: 1).toString()) }
     var price by rememberSaveable { mutableStateOf(centsToInput(supply?.priceCents)) }
     var bought by rememberSaveable { mutableStateOf(supply?.bought ?: false) }
+    var photoPath by rememberSaveable { mutableStateOf(supply?.photoPath) }
+    var type by rememberSaveable { mutableStateOf(supply?.type) }
+    var boxTitle by rememberSaveable { mutableStateOf(supply?.boxTitle.orEmpty()) }
+    var supplier by rememberSaveable { mutableStateOf(supply?.supplier.orEmpty()) }
     var shared by rememberSaveable { mutableStateOf(boxes.filter { it.supplyId != null && it.supplyId == supply?.id }.map { it.id }) }
     val qty = quantity.toIntOrNull()
     val valid = name.isNotBlank() && qty != null && qty >= 1 && (price.isBlank() || parseEuroToCents(price) != null)
+    val secondary = LocalMonNoelColors.current.secondaryText
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (supply == null) R.string.supplies_new else R.string.supplies_edit_title)) },
@@ -535,21 +725,36 @@ private fun SupplyDialog(
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextInput(name, { name = it }, stringResource(R.string.supplies_name), Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextInput(quantity, {
-                        quantity = it.filter(Char::isDigit).take(3)
-                    }, stringResource(R.string.supplies_quantity), Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                    TextInput(
+                        quantity,
+                        { quantity = it.filter(Char::isDigit).take(3) },
+                        stringResource(R.string.supplies_quantity),
+                        Modifier.weight(1f),
+                        keyboardType = KeyboardType.Number,
+                    )
                     MoneyInput(price, { price = it }, stringResource(R.string.supplies_price), Modifier.weight(1f))
                 }
+                TextInput(supplier, { supplier = it }, stringResource(R.string.field_supplier), Modifier.fillMaxWidth())
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.supplies_bought), modifier = Modifier.weight(1f))
                     Switch(checked = bought, onCheckedChange = { bought = it })
                 }
-                Text(stringResource(R.string.supplies_share_title), style = MaterialTheme.typography.titleSmall)
-                Text(
-                    stringResource(R.string.supplies_share_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LocalMonNoelColors.current.secondaryText,
+                PhotoField(
+                    path = photoPath,
+                    onPicked = { uri -> onImportPhoto(uri) { photoPath = it } },
+                    onRemove = { photoPath = null },
+                    placeholder = "📦",
                 )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Text(stringResource(R.string.supplies_share_title), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.supplies_share_hint), style = MaterialTheme.typography.bodySmall, color = secondary)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = { shared = boxes.map { it.id } }) { Text(stringResource(R.string.selection_all)) }
+                    TextButton(onClick = { shared = boxes.filter { it.isEmpty || it.supplyId == supply?.id }.map { it.id } }) {
+                        Text(stringResource(R.string.selection_empty))
+                    }
+                    TextButton(onClick = { shared = emptyList() }) { Text(stringResource(R.string.selection_none)) }
+                }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     boxes.forEach { box ->
                         FilterChip(
@@ -559,6 +764,22 @@ private fun SupplyDialog(
                         )
                     }
                 }
+                if (shared.isNotEmpty()) {
+                    Text(stringResource(R.string.supplies_fill_hint), style = MaterialTheme.typography.bodySmall, color = secondary)
+                    DropdownField(
+                        label = stringResource(R.string.field_surprise_type),
+                        selected = type,
+                        options = listOf<SurpriseType?>(null) + SurpriseType.entries,
+                        optionLabel = { t ->
+                            t?.let { "${it.emoji}  ${stringResource(it.label)}" } ?: stringResource(R.string.surprise_none)
+                        },
+                        onSelect = { type = it },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    TextInput(boxTitle, {
+                        boxTitle = it
+                    }, stringResource(R.string.supplies_box_title, name.ifBlank { "…" }), Modifier.fillMaxWidth())
+                }
                 if (onDelete != null) {
                     TextButton(onClick = onDelete) {
                         Text(stringResource(UiR.string.action_delete), color = MaterialTheme.colorScheme.error)
@@ -567,9 +788,15 @@ private fun SupplyDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(name, qty ?: 1, parseEuroToCents(price), bought, shared.toSet()) }, enabled = valid) {
-                Text(stringResource(UiR.string.action_save))
-            }
+            TextButton(
+                onClick = {
+                    onSave(
+                        SupplyDraft(name, qty ?: 1, parseEuroToCents(price), bought, photoPath, type, boxTitle, supplier),
+                        shared.toSet(),
+                    )
+                },
+                enabled = valid,
+            ) { Text(stringResource(UiR.string.action_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(UiR.string.action_cancel)) } },
     )

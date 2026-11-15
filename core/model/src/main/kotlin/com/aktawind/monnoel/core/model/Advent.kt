@@ -65,7 +65,15 @@ data class AdventSupply(
     val priceCents: Long?,
     val bought: Boolean,
     val sortOrder: Int,
-)
+    val photoPath: String? = null,
+    /** Type de surprise appliqué aux cases reliées. */
+    val type: SurpriseType? = null,
+    /** Contenu écrit dans chaque case reliée (ex. « Chocolat »). Vide : le nom de la fourniture. */
+    val boxTitle: String = "",
+    val supplier: String = "",
+) {
+    val contentForBoxes: String get() = boxTitle.ifBlank { name }
+}
 
 /** Modèle personnel de calendrier (réutilisable, indépendant des années). */
 data class AdventTemplate(

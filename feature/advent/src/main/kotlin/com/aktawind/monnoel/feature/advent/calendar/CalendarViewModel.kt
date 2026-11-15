@@ -5,18 +5,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.aktawind.monnoel.core.common.AppResult
+import com.aktawind.monnoel.core.common.ApplicationScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
+import com.aktawind.monnoel.core.domain.advent.BulkBoxChange
+import com.aktawind.monnoel.core.domain.advent.BulkUpdateBoxesUseCase
 import com.aktawind.monnoel.core.domain.advent.CalendarSummary
 import com.aktawind.monnoel.core.domain.advent.DeleteCalendarUseCase
 import com.aktawind.monnoel.core.domain.advent.DeleteSupplyUseCase
 import com.aktawind.monnoel.core.domain.advent.SaveAsTemplateUseCase
 import com.aktawind.monnoel.core.domain.advent.SaveSupplyUseCase
 import com.aktawind.monnoel.core.domain.advent.SetBoxStatusUseCase
+import com.aktawind.monnoel.core.domain.advent.SupplyDraft
 import com.aktawind.monnoel.core.domain.advent.SwapBoxesUseCase
 import com.aktawind.monnoel.core.domain.advent.summarizeCalendar
 import com.aktawind.monnoel.core.domain.advent.supplyShares
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
+import com.aktawind.monnoel.core.domain.repository.PhotoRepository
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventCalendar
 import com.aktawind.monnoel.core.model.AdventSupply
@@ -27,6 +32,7 @@ import com.aktawind.monnoel.feature.advent.R
 import com.aktawind.monnoel.feature.advent.navigation.CalendarDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -64,7 +70,12 @@ class CalendarViewModel @Inject constructor(
     private val deleteSupply: DeleteSupplyUseCase,
     private val saveAsTemplate: SaveAsTemplateUseCase,
     private val deleteCalendar: DeleteCalendarUseCase,
+    private val bulkUpdateBoxes: BulkUpdateBoxesUseCase,
+    private val photos: PhotoRepository,
+    @ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
+    private val addedPhotos = mutableSetOf<String>()
+
     private val calendarId = savedStateHandle.toRoute<CalendarDestination>().calendarId
     private val message = MutableStateFlow<UiMessage?>(null)
     private val deleted = MutableStateFlow(false)
@@ -101,12 +112,43 @@ class CalendarViewModel @Inject constructor(
 
     fun setBoxStatus(boxId: String, status: BoxStatus) = report { setStatus(boxId, status) }
 
-    fun saveSupply(supplyId: String?, name: String, quantity: Int, priceCents: Long?, bought: Boolean, boxIds: Set<String>) =
-        report { saveSupply(calendarId, supplyId, name, quantity, priceCents, bought, boxIds) }
+    fun saveSupply(supplyId: String?, draft: SupplyDraft, boxIds: Set<String>) {
+        draft.photoPath?.let { addedPhotos -= it }
+        report { saveSupply(calendarId, supplyId, draft, boxIds) }
+    }
 
     fun toggleBought(supply: AdventSupply) = report {
         val linked = uiState.value.boxes.filter { it.supplyId == supply.id }.map { it.id }.toSet()
-        saveSupply(calendarId, supply.id, supply.name, supply.quantity, supply.priceCents, !supply.bought, linked)
+        saveSupply(calendarId, supply.id, supply.toDraft().copy(bought = !supply.bought), linked)
+    }
+
+    /** Modifie plusieurs cases d'un coup ; renvoie le nombre de cases changées via un message. */
+    fun bulkUpdate(boxIds: Set<String>, change: BulkBoxChange) {
+        viewModelScope.launch {
+            message.value = when (val result = bulkUpdateBoxes(calendarId, boxIds, change)) {
+                is AppResult.Success -> UiMessage(R.string.bulk_done, listOf(result.value))
+                is AppResult.Failure -> result.error.toUiMessage()
+            }
+        }
+    }
+
+    /** Photo choisie dans la fenêtre d'une fourniture (supprimée si la fenêtre est annulée). */
+    fun importSupplyPhoto(uri: String, onImported: (String) -> Unit) {
+        viewModelScope.launch {
+            when (val result = photos.importPhoto(uri)) {
+                is AppResult.Success -> {
+                    addedPhotos += result.value
+                    onImported(result.value)
+                }
+                is AppResult.Failure -> message.value = UiMessage(com.aktawind.monnoel.core.ui.R.string.photo_error)
+            }
+        }
+    }
+
+    fun discardSupplyPhotos() {
+        val leftovers = addedPhotos.toList()
+        addedPhotos.clear()
+        if (leftovers.isNotEmpty()) appScope.launch { leftovers.forEach { photos.deletePhoto(it) } }
     }
 
     fun removeSupply(supplyId: String) = report { deleteSupply(calendarId, supplyId) }
@@ -124,6 +166,10 @@ class CalendarViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        discardSupplyPhotos()
+    }
+
     fun messageShown() {
         message.value = null
     }
@@ -137,3 +183,5 @@ class CalendarViewModel @Inject constructor(
         }
     }
 }
+
+internal fun AdventSupply.toDraft() = SupplyDraft(name, quantity, priceCents, bought, photoPath, type, boxTitle, supplier)

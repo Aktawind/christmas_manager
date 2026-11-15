@@ -57,5 +57,17 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    /** Fournitures enrichies : photo, type de surprise, contenu des cases, fournisseur. */
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "ALTER TABLE `advent_supply` ADD COLUMN `photo_path` TEXT",
+                "ALTER TABLE `advent_supply` ADD COLUMN `type` TEXT",
+                "ALTER TABLE `advent_supply` ADD COLUMN `box_title` TEXT NOT NULL DEFAULT ''",
+                "ALTER TABLE `advent_supply` ADD COLUMN `supplier` TEXT NOT NULL DEFAULT ''",
+            ).forEach(db::execSQL)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 }

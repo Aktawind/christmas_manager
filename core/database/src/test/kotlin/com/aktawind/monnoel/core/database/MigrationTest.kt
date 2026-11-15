@@ -102,6 +102,36 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 4, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 5, true, *Migrations.ALL).close()
+    }
+
+    @Test
+    fun `migration 4 vers 5 garde les fournitures`() {
+        helper.createDatabase(dbName, 4).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO advent_calendar (id, edition_id, name, description, cover_photo_path, theme, budget_cents, notes, " +
+                    "box_count, created_at, updated_at) VALUES ('c1', 'e1', 'Lucas', '', NULL, '', NULL, '', 24, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO advent_supply (id, calendar_id, name, quantity, price_cents, bought, sort_order) " +
+                    "VALUES ('s1', 'c1', 'Chocolats', 1, 1200, 0, 0)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 5, true, Migrations.MIGRATION_4_5).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            val supply = db.adventDao().getAllSupplies().single()
+            assertEquals("Chocolats", supply.name)
+            assertEquals("", supply.boxTitle)
+        }
+        db.close()
     }
 }
