@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 5
+const val BACKUP_FORMAT_VERSION = 6
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -47,6 +47,9 @@ data class BackupData(
     val adventTemplateBoxes: List<AdventTemplateBoxDto> = emptyList(),
     val tasks: List<TaskDto> = emptyList(),
     val dismissedSuggestions: List<DismissedSuggestionDto> = emptyList(),
+    val recipeCategories: List<RecipeCategoryDto> = emptyList(),
+    val recipes: List<RecipeDto> = emptyList(),
+    val productions: List<ProductionDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -59,6 +62,8 @@ data class BackupData(
         "adventBoxes" to adventBoxes.size,
         "adventTemplates" to adventTemplates.size,
         "tasks" to tasks.size,
+        "recipes" to recipes.size,
+        "productions" to productions.size,
     )
 }
 
@@ -221,6 +226,36 @@ data class TaskDto(
 
 @Serializable
 data class DismissedSuggestionDto(val editionId: String, val suggestionKey: String)
+
+@Serializable
+data class RecipeCategoryDto(val id: String, val name: String, val sortOrder: Int)
+
+@Serializable
+data class RecipeDto(
+    val id: String,
+    val name: String,
+    val photoPath: String? = null,
+    val categoryId: String? = null,
+    val url: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+@Serializable
+data class ProductionDto(
+    val id: String,
+    val editionId: String,
+    val recipeId: String? = null,
+    val recipeName: String,
+    val recipePhotoPath: String? = null,
+    val quantity: Int = 1,
+    val destination: String = "",
+    val status: String,
+    val photoPath: String? = null,
+    val notes: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
+)
 
 internal val backupJson = Json {
     prettyPrint = true

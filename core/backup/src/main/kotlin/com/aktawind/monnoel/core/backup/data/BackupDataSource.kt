@@ -16,6 +16,9 @@ import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
 import com.aktawind.monnoel.core.backup.format.PersonDto
 import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
+import com.aktawind.monnoel.core.backup.format.ProductionDto
+import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
+import com.aktawind.monnoel.core.backup.format.RecipeDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.entity.AdventBoxEntity
@@ -32,6 +35,9 @@ import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
+import com.aktawind.monnoel.core.database.entity.ProductionEntity
+import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
+import com.aktawind.monnoel.core.database.entity.RecipeEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
 import javax.inject.Inject
 
@@ -75,6 +81,16 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     it.suggestionKey, it.createdAt, it.updatedAt,
                 )
             },
+            recipeCategories = db.cookingDao().getAllCategories().map { RecipeCategoryDto(it.id, it.name, it.sortOrder) },
+            recipes = db.cookingDao().getAllRecipes().map {
+                RecipeDto(it.id, it.name, it.photoPath, it.categoryId, it.url, it.createdAt, it.updatedAt)
+            },
+            productions = db.cookingDao().getAllProductions().map {
+                ProductionDto(
+                    it.id, it.editionId, it.recipeId, it.recipeName, it.recipePhotoPath, it.quantity, it.destination, it.status,
+                    it.photoPath, it.notes, it.createdAt, it.updatedAt,
+                )
+            },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -89,6 +105,9 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
     suspend fun replaceAll(data: BackupData) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
+            db.cookingDao().deleteAllProductions()
+            db.cookingDao().deleteAllRecipes()
+            db.cookingDao().deleteAllCategories()
             db.taskDao().deleteAll()
             db.taskDao().deleteAllDismissed()
             db.adventDao().deleteAllCalendars()
@@ -107,6 +126,18 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             db.plannedGiftDao().insertAll(data.plannedGifts.map { it.toEntity() })
             db.plannedGiftDao().insertBudgets(
                 data.personBudgets.map { PersonBudgetEntity(it.editionId, it.personId, it.amountCents) },
+            )
+            db.cookingDao().insertCategories(data.recipeCategories.map { RecipeCategoryEntity(it.id, it.name, it.sortOrder) })
+            db.cookingDao().insertRecipes(
+                data.recipes.map { RecipeEntity(it.id, it.name, it.photoPath, it.categoryId, it.url, it.createdAt, it.updatedAt) },
+            )
+            db.cookingDao().insertProductions(
+                data.productions.map {
+                    ProductionEntity(
+                        it.id, it.editionId, it.recipeId, it.recipeName, it.recipePhotoPath, it.quantity, it.destination, it.status,
+                        it.photoPath, it.notes, it.createdAt, it.updatedAt,
+                    )
+                },
             )
             db.taskDao().insertAll(
                 data.tasks.map {

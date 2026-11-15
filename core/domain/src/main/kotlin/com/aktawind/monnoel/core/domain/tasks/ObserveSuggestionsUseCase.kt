@@ -2,6 +2,7 @@ package com.aktawind.monnoel.core.domain.tasks
 
 import com.aktawind.monnoel.core.common.ApplicationScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
+import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
@@ -31,6 +32,7 @@ class ObserveLutinUseCase @Inject constructor(
     private val observeEditions: ObserveEditionsUseCase,
     private val gifts: PlannedGiftRepository,
     private val advent: AdventRepository,
+    private val cooking: CookingRepository,
     private val tasks: TaskRepository,
     private val preferences: UserPreferencesRepository,
 ) {
@@ -41,7 +43,8 @@ class ObserveLutinUseCase @Inject constructor(
             advent.observeCalendars(edition.id),
             advent.observeBoxesForEdition(edition.id),
             advent.observeSuppliesForEdition(edition.id),
-        ) { g, c, b, s -> SuggestionSource(g, c, b, s) }
+            cooking.observeProductions(edition.id),
+        ) { g, c, b, s, p -> SuggestionSource(g, c, b, s, p) }
         combine(
             source,
             tasks.observeTasks(edition.id),

@@ -7,6 +7,8 @@ import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.core.model.LutinTask
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.model.Production
+import com.aktawind.monnoel.core.model.Recipe
 import java.text.Normalizer
 
 /** Un résultat de recherche : de quoi l'afficher et l'ouvrir. */
@@ -27,6 +29,8 @@ data class SearchData(
     val boxes: List<AdventBox>,
     val tasks: List<LutinTask>,
     val years: Map<String, Int>,
+    val recipes: List<Recipe> = emptyList(),
+    val productions: List<Production> = emptyList(),
 )
 
 /** Minuscules, sans accents : « Noël » et « noel » se valent. */
@@ -105,6 +109,19 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
                 first.title,
                 listOfNotNull(calendarNames[first.calendarId], where, year(calendarEditions[first.calendarId])).joinToString(" · "),
                 group.firstNotNullOfOrNull { it.photoPath },
+            )
+        }
+    results[LinkType.RECIPE] = data.recipes.filter { matches(it.name) }
+        .map { SearchResult(LinkType.RECIPE, it.id, it.name, "", it.photoPath) }
+    results[LinkType.PRODUCTION] = data.productions.filter { matches(it.recipeName, it.destination, it.notes) }
+        .sortedByDescending { data.years[it.editionId] ?: 0 }
+        .map {
+            SearchResult(
+                LinkType.PRODUCTION,
+                it.id,
+                if (it.quantity > 1) "${it.recipeName} × ${it.quantity}" else it.recipeName,
+                listOfNotNull(it.destination.ifBlank { null }, year(it.editionId)).joinToString(" · "),
+                it.photoPath ?: it.recipePhotoPath,
             )
         }
     results[LinkType.TASK] = data.tasks.filter { matches(it.title, it.description, it.notes) }

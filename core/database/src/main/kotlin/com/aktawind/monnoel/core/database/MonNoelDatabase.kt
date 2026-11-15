@@ -3,6 +3,7 @@ package com.aktawind.monnoel.core.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.aktawind.monnoel.core.database.dao.AdventDao
+import com.aktawind.monnoel.core.database.dao.CookingDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
@@ -23,6 +24,9 @@ import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
+import com.aktawind.monnoel.core.database.entity.ProductionEntity
+import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
+import com.aktawind.monnoel.core.database.entity.RecipeEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
 
 /**
@@ -33,7 +37,8 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
  * enveloppes, souhaits ; v3 (v0.2.0) suppression de la liste de souhaits ;
  * v4 (v0.3.0) calendriers de l'Avent, cases, fournitures, modèles ;
  * v5 (v0.3.0) fournitures : photo, type, contenu des cases, fournisseur ;
- * v6 (v0.4.0) ma liste de lutin (tâches) et suggestions supprimées.
+ * v6 (v0.4.0) ma liste de lutin (tâches) et suggestions supprimées ;
+ * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions.
  */
 @Database(
     entities = [
@@ -52,8 +57,11 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
         AdventTemplateBoxEntity::class,
         TaskEntity::class,
         DismissedSuggestionEntity::class,
+        RecipeCategoryEntity::class,
+        RecipeEntity::class,
+        ProductionEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {
@@ -70,6 +78,8 @@ abstract class MonNoelDatabase : RoomDatabase() {
     abstract fun adventDao(): AdventDao
 
     abstract fun taskDao(): TaskDao
+
+    abstract fun cookingDao(): CookingDao
 
     companion object {
         const val NAME = "mon-noel.db"

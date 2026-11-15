@@ -80,5 +80,20 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    /** v0.5.0 : recettes (nom et photo), catégories de recettes, productions. */
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "CREATE TABLE IF NOT EXISTS `recipe_category` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `sort_order` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                "CREATE TABLE IF NOT EXISTS `recipe` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `photo_path` TEXT, `category_id` TEXT, `url` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`category_id`) REFERENCES `recipe_category`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+                "CREATE INDEX IF NOT EXISTS `index_recipe_category_id` ON `recipe` (`category_id`)",
+                "CREATE TABLE IF NOT EXISTS `production` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, `recipe_id` TEXT, `recipe_name` TEXT NOT NULL, `recipe_photo_path` TEXT, `quantity` INTEGER NOT NULL, `destination` TEXT NOT NULL, `status` TEXT NOT NULL, `photo_path` TEXT, `notes` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`recipe_id`) REFERENCES `recipe`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+                "CREATE INDEX IF NOT EXISTS `index_production_edition_id` ON `production` (`edition_id`)",
+                "CREATE INDEX IF NOT EXISTS `index_production_recipe_id` ON `production` (`recipe_id`)",
+            ).forEach(db::execSQL)
+            DefaultData.insertRecipeCategories(db)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
 }

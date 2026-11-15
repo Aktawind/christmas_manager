@@ -103,6 +103,7 @@ class BackupArchiveTest {
         assertEquals(2026, decoded.data.editions.single().year)
         assertEquals(11, decoded.data.giftCategories.size)
         assertEquals(0, decoded.data.persons.size)
+        assertEquals(10, decoded.data.recipeCategories.size)
     }
 
     private fun zipOf(vararg entries: Pair<String, String>): ByteArray {

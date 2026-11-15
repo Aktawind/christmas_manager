@@ -30,6 +30,13 @@ internal object BackupMigrations {
         4 to { json -> json },
         // v4 -> v5 (v0.4.0) : ma liste de lutin, absente des anciennes sauvegardes.
         5 to { json -> json },
+        // v5 -> v6 (v0.5.0) : cuisine ; les catégories de recettes par défaut sont ajoutées.
+        6 to { json ->
+            val categories = DefaultData.recipeCategories.mapIndexed { index, (id, name) ->
+                JsonObject(mapOf("id" to JsonPrimitive(id), "name" to JsonPrimitive(name), "sortOrder" to JsonPrimitive(index)))
+            }
+            JsonObject(json + ("recipeCategories" to JsonArray(categories)))
+        },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

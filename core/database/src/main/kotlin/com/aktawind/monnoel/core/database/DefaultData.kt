@@ -18,6 +18,29 @@ object DefaultData {
         "cat-other" to "Autre",
     )
 
+    /** Catégories de recettes proposées au départ (cahier des charges). */
+    val recipeCategories: List<Pair<String, String>> = listOf(
+        "rcat-buches" to "Bûches",
+        "rcat-sables" to "Sablés",
+        "rcat-mendiants" to "Mendiants",
+        "rcat-chocolats" to "Chocolats",
+        "rcat-truffes" to "Truffes",
+        "rcat-petits-gateaux" to "Petits gâteaux",
+        "rcat-confiseries" to "Confiseries",
+        "rcat-desserts" to "Desserts",
+        "rcat-boissons" to "Boissons",
+        "rcat-aperitifs" to "Apéritifs salés",
+    )
+
+    fun insertRecipeCategories(db: SupportSQLiteDatabase) {
+        recipeCategories.forEachIndexed { index, (id, name) ->
+            db.execSQL(
+                "INSERT OR IGNORE INTO recipe_category (id, name, sort_order) VALUES (?, ?, ?)",
+                arrayOf<Any>(id, name, index),
+            )
+        }
+    }
+
     fun insertGiftCategories(db: SupportSQLiteDatabase) {
         giftCategories.forEachIndexed { index, (id, name) ->
             db.execSQL(

@@ -7,6 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.aktawind.monnoel.core.database.DefaultData
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.dao.AdventDao
+import com.aktawind.monnoel.core.database.dao.CookingDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
@@ -24,6 +25,7 @@ import javax.inject.Singleton
 val SeedCallback = object : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
         DefaultData.insertGiftCategories(db)
+        DefaultData.insertRecipeCategories(db)
     }
 }
 
@@ -49,6 +51,9 @@ object DatabaseModule {
 
     @Provides
     fun provideGiftIdeaDao(db: MonNoelDatabase): GiftIdeaDao = db.giftIdeaDao()
+
+    @Provides
+    fun provideCookingDao(db: MonNoelDatabase): CookingDao = db.cookingDao()
 
     @Provides
     fun provideTaskDao(db: MonNoelDatabase): TaskDao = db.taskDao()

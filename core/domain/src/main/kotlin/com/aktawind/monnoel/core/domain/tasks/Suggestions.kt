@@ -8,6 +8,8 @@ import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.core.model.LutinTask
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.model.Production
+import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.SuggestionKind
 import com.aktawind.monnoel.core.model.TaskModule
 
@@ -32,6 +34,7 @@ data class SuggestionSource(
     val calendars: List<AdventCalendar>,
     val boxes: List<AdventBox>,
     val supplies: List<AdventSupply>,
+    val productions: List<Production> = emptyList(),
 )
 
 /** État de chaque suggestion possible : clé -> faite (true) ou encore à faire (false). */
@@ -50,6 +53,7 @@ fun suggestionStates(source: SuggestionSource): Map<String, Boolean> {
         states["${SuggestionKind.ADVENT_FIND.name}:${calendar.id}"] = toFind == 0
         states["${SuggestionKind.ADVENT_PREPARE.name}:${calendar.id}"] = toFind == 0 && toPrepare == 0
     }
+    source.productions.forEach { states["${SuggestionKind.PRODUCTION_MAKE.name}:${it.id}"] = it.status == ProductionStatus.DONE }
     return states
 }
 
@@ -145,6 +149,20 @@ fun currentSuggestions(
                 ),
             )
         }
+    }
+    source.productions.filter { it.status != ProductionStatus.DONE }.forEach { production ->
+        add(
+            Suggestion(
+                "${SuggestionKind.PRODUCTION_MAKE.name}:${production.id}",
+                SuggestionKind.PRODUCTION_MAKE,
+                TaskModule.COOKING,
+                production.recipeName,
+                production.destination,
+                production.quantity,
+                LinkType.PRODUCTION,
+                production.id,
+            ),
+        )
     }
     return result
 }
