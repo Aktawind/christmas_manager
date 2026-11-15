@@ -16,7 +16,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts, photos, ajout rapide, budget et enveloppes, catégories | ✅ |
 | v0.3.0  | Les calendriers de l'Avent  | Calendriers, cases en grille, glisser-déposer, fournitures, modèles, duplication | ✅ |
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ✅ |
-| v0.5.0  | Le fournil                  | Bibliothèque de recettes (nom + photo), préparations de l'année       | 🧪 |
+| v0.5.0  | Le fournil                  | Bibliothèque de recettes (nom + photo), préparations de l'année       | ✅ |
 | v0.6.0  | La table de fête            | Repas, menus par catégories, liens recettes                           | ⬜ |
 | v0.7.0  | Les comptes du Père Noël    | Budget complet : catégories, dépassements, graphiques, comparaison    | ⬜ |
 | v0.8.0  | Les traditions              | Catalogue de traditions, suivi annuel, listes d'inspiration           | ⬜ |
@@ -104,13 +104,13 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| R-001 | Bibliothèque de recettes **sans détail** : nom, photo, catégorie, lien facultatif (pas d'ingrédients ni d'étapes, ADR 0011) | 🧪 |
-| R-002 | Catégories initiales (bûches, sablés, mendiants…) + sous-écran « Catégories de recettes » dans les Réglages | 🧪 |
-| R-003 | Préparations de l'année : recette ou nom libre, quantité, pour qui, avancement À faire → En cours → Faite, photo du résultat, notes | 🧪 |
-| R-004 | Suggestion du lutin « Préparer … » pour chaque préparation pas encore faite (coche automatique) | 🧪 |
-| R-005 | Recherche étendue aux recettes et préparations                                 | 🧪 |
-| R-006 | Partage depuis le navigateur : « Ranger comme » Idée cadeau ou **Recette** (nom, photo, lien) | 🧪 |
-| R-007 | Accueil : carte « Le fournil » (x sur y préparés) ; onglet **Cuisine** (les repas de la v0.6 y viendront) | 🧪 |
+| R-001 | Bibliothèque de recettes **sans détail** : nom, photo, catégorie, lien facultatif (pas d'ingrédients ni d'étapes, ADR 0011) | ✅ |
+| R-002 | Catégories initiales (bûches, sablés, mendiants…) + sous-écran « Catégories de recettes » dans les Réglages | ✅ |
+| R-003 | Préparations de l'année : recette ou nom libre, quantité, pour qui, avancement À faire → En cours → Faite, photo du résultat, notes | ✅ |
+| R-004 | Suggestion du lutin « Préparer … » pour chaque préparation pas encore faite (coche automatique) | ✅ |
+| R-005 | Recherche étendue aux recettes et préparations                                 | ✅ |
+| R-006 | Partage depuis le navigateur : « Ranger comme » Idée cadeau ou **Recette** (nom, photo, lien) | ✅ |
+| R-007 | Accueil : carte « Le fournil » (x sur y préparés) ; onglet **Cuisine** (les repas de la v0.6 y viendront) | ✅ |
 | ~~—~~ | ~~Ingrédients, étapes, liste de courses, lien avec les cadeaux~~ — non voulus (ADR 0011) | — |
 
 ## v0.6.0 — La table de fête 🍽️
