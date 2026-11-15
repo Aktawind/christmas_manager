@@ -57,7 +57,12 @@ import com.aktawind.monnoel.core.ui.toUiMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsRoute(onOpenCategories: () -> Unit, onOpenSuggestions: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsRoute(
+    onOpenCategories: () -> Unit,
+    onOpenRecipeCategories: () -> Unit,
+    onOpenSuggestions: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
@@ -94,7 +99,7 @@ fun SettingsRoute(onOpenCategories: () -> Unit, onOpenSuggestions: () -> Unit, v
         ) {
             Column(Modifier.widthIn(max = 720.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-                PersonalizeSection(state.theme, viewModel::setTheme, onOpenCategories, onOpenSuggestions)
+                PersonalizeSection(state.theme, viewModel::setTheme, onOpenCategories, onOpenRecipeCategories, onOpenSuggestions)
                 BackupSection(
                     busy = state.busy,
                     onExport = { exportLauncher.launch(viewModel.suggestedExportName()) },
@@ -144,6 +149,7 @@ private fun PersonalizeSection(
     selected: ThemePreference,
     onSelect: (ThemePreference) -> Unit,
     onOpenCategories: () -> Unit,
+    onOpenRecipeCategories: () -> Unit,
     onOpenSuggestions: () -> Unit,
 ) {
     val labels = mapOf(
@@ -164,6 +170,11 @@ private fun PersonalizeSection(
             title = stringResource(R.string.settings_categories),
             subtitle = stringResource(R.string.settings_categories_explain),
             onClick = onOpenCategories,
+        )
+        SettingsLink(
+            title = stringResource(R.string.settings_recipe_categories),
+            subtitle = stringResource(R.string.settings_recipe_categories_explain),
+            onClick = onOpenRecipeCategories,
         )
         SettingsLink(
             title = stringResource(R.string.settings_suggestions),

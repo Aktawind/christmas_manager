@@ -40,6 +40,9 @@
     <string name="settings_category_delete">Supprimer %1$s</string>
     <string name="settings_category_delete_title">Supprimer « %1$s » ?</string>
     <string name="settings_category_delete_message">Les idées et cadeaux de cette catégorie seront simplement « sans catégorie ».</string>
+    <string name="settings_recipe_categories">Catégories de recettes</string>
+    <string name="settings_recipe_categories_explain">Ajouter, renommer ou supprimer les catégories de la bibliothèque de recettes.</string>
+    <string name="settings_recipe_category_delete_message">Les recettes de cette catégorie seront simplement « sans catégorie ».</string>
     <string name="settings_suggestions">Suggestions du lutin</string>
     <string name="settings_suggestions_subtitle">Choisir ce que le lutin peut te proposer dans « Ma liste ».</string>
     <string name="settings_suggestions_card">Ce que le lutin peut proposer</string>

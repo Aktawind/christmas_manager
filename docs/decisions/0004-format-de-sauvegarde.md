@@ -39,3 +39,4 @@
 | 3 | v0.3.0 | Calendriers de l'Avent (+ personnes), cases, fournitures, modèles et leurs cases. Conversion 2 → 3 : rien à ajouter. |
 | 4 | v0.3.0 | Fournitures : photo, type, contenu des cases, fournisseur (valeurs par défaut pour les anciennes sauvegardes). |
 | 5 | v0.4.0 | Ma liste de lutin (tâches) et suggestions supprimées. |
+| 6 | v0.5.0 | Recettes (nom, photo, catégorie, lien), catégories de recettes, préparations de l'année. Conversion 5 → 6 : ajout des catégories de recettes par défaut. |

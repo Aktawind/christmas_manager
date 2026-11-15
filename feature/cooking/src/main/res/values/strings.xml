@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
+    <string name="cooking_title">Cuisine</string>
+    <string name="cooking_title_year">Cuisine · Noël %1$d</string>
+    <string name="tab_productions">Pour ce Noël</string>
+    <string name="tab_recipes">Mes recettes</string>
+    <string name="fab_new_recipe">Recette</string>
+    <string name="fab_new_production">À préparer</string>
+    <string name="recipes_filter_all">Toutes</string>
+    <string name="productions_empty_title">Le fournil est encore froid</string>
+    <string name="productions_empty_message">Ajoutez ce que vous voulez préparer cette année : sablés, bûche, truffes…</string>
+    <string name="productions_progress">%1$d sur %2$d préparés</string>
+    <string name="production_change_status">Changer l\'avancement</string>
+    <string name="recipes_empty_title">Votre bibliothèque de recettes</string>
+    <string name="recipes_empty_message">Un nom et une photo suffisent. Vous pouvez aussi partager une recette depuis le navigateur.</string>
+    <string name="recipe_new_title">Nouvelle recette</string>
+    <string name="recipe_edit_title">Recette</string>
+    <string name="recipe_delete_confirm">Supprimer cette recette ? Ce que vous avez déjà préparé avec reste dans vos années.</string>
+    <string name="field_recipe_name">Nom de la recette</string>
+    <string name="field_category">Catégorie</string>
+    <string name="no_category">Sans catégorie</string>
+    <string name="field_recipe_url">Lien vers la recette (facultatif)</string>
+    <string name="open_recipe_link">Ouvrir la recette</string>
+    <string name="recipe_hint">Les ingrédients et les étapes restent dans votre application de recettes : ici, juste de quoi la reconnaître.</string>
+    <string name="recipe_make_for">Préparer pour Noël %1$d</string>
+    <string name="production_new_title">À préparer</string>
+    <string name="production_edit_title">Préparation</string>
+    <string name="production_delete_confirm">Supprimer cette préparation ?</string>
+    <string name="production_read_only">Cette année est archivée : la préparation est en lecture seule.</string>
+    <string name="field_recipe">Recette</string>
+    <string name="no_recipe">Aucune (nom libre)</string>
+    <string name="field_production_name">Ce que je prépare</string>
+    <string name="field_quantity">Quantité</string>
+    <string name="quantity_less">Une de moins</string>
+    <string name="quantity_more">Une de plus</string>
+    <string name="field_destination">Pour qui / pour quoi</string>
+    <string name="field_status">Avancement</string>
+    <string name="field_result_photo">Photo du résultat</string>
+    <string name="production_recipe_photo_hint">En attendant, la photo de la recette est utilisée.</string>
+    <string name="field_notes">Notes</string>
+    <string-array name="destination_shortcuts">
+        <item>Pour la maison</item>
+        <item>À offrir</item>
+        <item>Repas de Noël</item>
+        <item>Voisins</item>
+        <item>Collègues</item>
+        <item>École</item>
+    </string-array>
+</resources>

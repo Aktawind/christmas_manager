@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.ApplicationScope
+import com.aktawind.monnoel.core.domain.cooking.SaveRecipeUseCase
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.domain.gifts.PrepareSharedIdeaUseCase
@@ -28,6 +29,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+enum class SharedSaved { IDEA, RECIPE }
+
 sealed interface MainUiState {
     data object Loading : MainUiState
 
@@ -42,6 +45,7 @@ class MainViewModel @Inject constructor(
     personRepository: PersonRepository,
     private val prepareSharedIdea: PrepareSharedIdeaUseCase,
     private val photos: PhotoRepository,
+    private val saveRecipe: SaveRecipeUseCase,
     @ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
@@ -60,8 +64,9 @@ class MainViewModel @Inject constructor(
     val sharedLoading: StateFlow<Boolean> = _sharedLoading.asStateFlow()
     private var preparing: Job? = null
 
-    private val _ideaSaved = MutableStateFlow(false)
-    val ideaSaved: StateFlow<Boolean> = _ideaSaved.asStateFlow()
+    /** Ce qui vient d'être rangé depuis un partage, pour le confirmer (idée ou recette). */
+    private val _sharedSaved = MutableStateFlow<SharedSaved?>(null)
+    val sharedSaved: StateFlow<SharedSaved?> = _sharedSaved.asStateFlow()
 
     fun onShared(text: String?, subject: String?) {
         val shared = parseSharedText(text, subject) ?: return
@@ -98,7 +103,16 @@ class MainViewModel @Inject constructor(
                 photoPath = shared.photoPath,
                 personIds = input.personIds,
             )
-            if (saveIdea(null, draft) is AppResult.Success) _ideaSaved.value = true
+            if (saveIdea(null, draft) is AppResult.Success) _sharedSaved.value = SharedSaved.IDEA
+        }
+    }
+
+    /** Le partage devient une recette de la bibliothèque : nom, photo de la page et lien. */
+    fun saveSharedRecipe(title: String, url: String) {
+        val shared = _sharedIdea.value ?: return
+        _sharedIdea.value = null
+        viewModelScope.launch {
+            if (saveRecipe(null, title, shared.photoPath, null, url) is AppResult.Success) _sharedSaved.value = SharedSaved.RECIPE
         }
     }
 
@@ -112,7 +126,7 @@ class MainViewModel @Inject constructor(
         appScope.launch { photos.deletePhoto(photo) }
     }
 
-    fun ideaSavedShown() {
-        _ideaSaved.value = false
+    fun sharedSavedShown() {
+        _sharedSaved.value = null
     }
 }

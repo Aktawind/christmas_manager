@@ -69,6 +69,7 @@ fun HomeRoute(
     onOpenGifts: () -> Unit,
     onOpenAdvent: () -> Unit,
     onOpenTasks: () -> Unit,
+    onOpenCooking: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -83,10 +84,14 @@ fun HomeRoute(
         }
     }
     Box(Modifier.fillMaxSize()) {
-        HomeScreen(state, onOpenGifts = onOpenGifts, onOpenAdvent = onOpenAdvent, onOpenTasks = onOpenTasks, onQuickIdea = {
-            quickIdea =
-                true
-        })
+        HomeScreen(
+            state,
+            onOpenGifts = onOpenGifts,
+            onOpenAdvent = onOpenAdvent,
+            onOpenTasks = onOpenTasks,
+            onOpenCooking = onOpenCooking,
+            onQuickIdea = { quickIdea = true },
+        )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
     if (quickIdea) {
@@ -108,13 +113,14 @@ internal fun HomeScreen(
     onOpenGifts: () -> Unit = {},
     onOpenAdvent: () -> Unit = {},
     onOpenTasks: () -> Unit = {},
+    onOpenCooking: () -> Unit = {},
     onQuickIdea: () -> Unit = {},
 ) {
     when (state) {
         HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onOpenTasks, onQuickIdea)
+        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onOpenTasks, onOpenCooking, onQuickIdea)
     }
 }
 
@@ -124,6 +130,7 @@ private fun HomeContent(
     onOpenGifts: () -> Unit,
     onOpenAdvent: () -> Unit,
     onOpenTasks: () -> Unit,
+    onOpenCooking: () -> Unit,
     onQuickIdea: () -> Unit,
 ) {
     LazyVerticalGrid(
@@ -139,6 +146,7 @@ private fun HomeContent(
         item(span = { GridItemSpan(maxLineSpan) }) { TasksSummaryCard(state, onOpenTasks) }
         item(span = { GridItemSpan(maxLineSpan) }) { GiftsSummaryCard(state.gifts, onOpenGifts, onQuickIdea) }
         item(span = { GridItemSpan(maxLineSpan) }) { AdventSummaryCard(state.calendars, onOpenAdvent) }
+        item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenCooking) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -364,6 +372,43 @@ private fun TasksSummaryCard(state: HomeUiState.Ready, onOpen: () -> Unit) {
             }
             if (state.suggestionCount > 0) {
                 Text(stringResource(R.string.home_tasks_suggestions, state.suggestionCount), color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CookingSummaryCard(summary: CookingSummary, onOpen: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "🧁  " + stringResource(R.string.home_cooking_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            when {
+                summary.total == 0 -> Text(stringResource(R.string.home_cooking_empty), color = secondary)
+                summary.done == summary.total -> Text(
+                    stringResource(R.string.home_cooking_all_done, summary.total),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                else -> {
+                    Text(
+                        stringResource(R.string.home_cooking_progress, summary.done, summary.total),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        summary.next.take(3).joinToString(" · "),
+                        color = secondary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }

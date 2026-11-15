@@ -45,14 +45,17 @@ fun QuickIdeaDialog(
     photoPath: String? = null,
     /** Petite explication quand la page n'a pas tout donné (photo, prix…). */
     note: String? = null,
+    /** Si renseigné, on peut aussi ranger le partage comme recette (nom, photo, lien). */
+    onSaveRecipe: ((title: String, url: String) -> Unit)? = null,
 ) {
     var title by rememberSaveable { mutableStateOf(initialTitle) }
     var url by rememberSaveable { mutableStateOf(initialUrl) }
     var price by rememberSaveable { mutableStateOf(centsToInput(initialPriceCents)) }
     var selected by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var asRecipe by rememberSaveable { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.quick_idea_title)) },
+        title = { Text(stringResource(if (asRecipe) R.string.quick_recipe_title else R.string.quick_idea_title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (photoPath != null) {
@@ -65,8 +68,23 @@ fun QuickIdeaDialog(
                         color = LocalMonNoelColors.current.secondaryText,
                     )
                 }
-                TextInput(title, { title = it }, stringResource(R.string.quick_idea_name), Modifier.fillMaxWidth())
-                MoneyInput(price, { price = it }, stringResource(R.string.quick_idea_price), Modifier.fillMaxWidth())
+                if (onSaveRecipe != null) {
+                    DropdownField(
+                        label = stringResource(R.string.quick_share_kind),
+                        selected = asRecipe,
+                        options = listOf(false, true),
+                        optionLabel = { stringResource(if (it) R.string.quick_share_recipe else R.string.quick_share_idea) },
+                        onSelect = { asRecipe = it },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                TextInput(
+                    title,
+                    { title = it },
+                    stringResource(if (asRecipe) R.string.quick_recipe_name else R.string.quick_idea_name),
+                    Modifier.fillMaxWidth(),
+                )
+                if (!asRecipe) MoneyInput(price, { price = it }, stringResource(R.string.quick_idea_price), Modifier.fillMaxWidth())
                 TextInput(
                     url,
                     { url = it },
@@ -74,7 +92,7 @@ fun QuickIdeaDialog(
                     Modifier.fillMaxWidth(),
                     keyboardType = KeyboardType.Uri,
                 )
-                if (persons.isNotEmpty()) {
+                if (persons.isNotEmpty() && !asRecipe) {
                     Text(stringResource(R.string.quick_idea_for_whom), style = MaterialTheme.typography.titleSmall)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         persons.forEach { person ->
@@ -90,7 +108,7 @@ fun QuickIdeaDialog(
                     }
                 }
                 Text(
-                    stringResource(R.string.quick_idea_hint),
+                    stringResource(if (asRecipe) R.string.quick_recipe_hint else R.string.quick_idea_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = LocalMonNoelColors.current.secondaryText,
                 )
@@ -99,8 +117,14 @@ fun QuickIdeaDialog(
         confirmButton = {
             val priceValid = price.isBlank() || parseEuroToCents(price) != null
             TextButton(
-                onClick = { onSave(QuickIdeaInput(title, url, parseEuroToCents(price), selected.toSet())) },
-                enabled = title.isNotBlank() && priceValid,
+                onClick = {
+                    if (asRecipe && onSaveRecipe != null) {
+                        onSaveRecipe(title, url)
+                    } else {
+                        onSave(QuickIdeaInput(title, url, parseEuroToCents(price), selected.toSet()))
+                    }
+                },
+                enabled = title.isNotBlank() && (asRecipe || priceValid),
             ) {
                 Text(stringResource(R.string.quick_idea_save))
             }

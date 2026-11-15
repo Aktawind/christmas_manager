@@ -11,4 +11,6 @@
     <string name="search_calendars">Calendriers</string>
     <string name="search_boxes">Cases</string>
     <string name="search_tasks">Ma liste</string>
+    <string name="search_recipes">Recettes</string>
+    <string name="search_productions">Préparations</string>
 </resources>

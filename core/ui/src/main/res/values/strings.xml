@@ -40,6 +40,12 @@
     <string name="preview_image_failed">ℹ️ La photo de la page n’a pas pu être téléchargée.</string>
     <string name="quick_idea_for_whom">Pour qui ? (facultatif)</string>
     <string name="quick_idea_hint">Tu pourras compléter le reste plus tard dans Cadeaux → Idées.</string>
+    <string name="quick_share_kind">Ranger comme</string>
+    <string name="quick_share_idea">Idée cadeau</string>
+    <string name="quick_share_recipe">Recette</string>
+    <string name="quick_recipe_title">Garder une recette</string>
+    <string name="quick_recipe_name">Nom de la recette</string>
+    <string name="quick_recipe_hint">Juste le nom, la photo et le lien : la recette elle-même reste sur le site.</string>
     <string name="quick_idea_save">Noter</string>
     <string name="quick_idea_saved">Idée notée ✨</string>
     <string name="action_save">Enregistrer</string>
@@ -87,4 +93,10 @@
     <string name="task_status_in_progress">En cours</string>
     <string name="task_status_done">Terminée</string>
     <string name="task_status_cancelled">Annulée</string>
+    <string name="suggestion_make">Préparer « %1$s »</string>
+    <string name="suggestion_make_many">Préparer « %1$s » × %2$d</string>
+    <string name="suggestion_kind_make">Préparer les pâtisseries prévues</string>
+    <string name="production_status_todo">À faire</string>
+    <string name="production_status_in_progress">En cours</string>
+    <string name="production_status_done">Faite</string>
 </resources>

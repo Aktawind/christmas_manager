@@ -6,6 +6,7 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.advent.boxOfTheDay
+import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
 import com.aktawind.monnoel.core.domain.countdown.PathStep
 import com.aktawind.monnoel.core.domain.countdown.christmasCountdown
@@ -22,6 +23,7 @@ import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.TaskStatus
 import com.aktawind.monnoel.core.ui.QuickIdeaInput
 import com.aktawind.monnoel.core.ui.UiMessage
@@ -51,6 +53,7 @@ sealed interface HomeUiState {
         val dayOfYear: Int,
         val gifts: GiftsSummary = GiftsSummary(),
         val calendars: List<CalendarProgress> = emptyList(),
+        val cooking: CookingSummary = CookingSummary(),
         val path: List<PathStep> = emptyList(),
         val openTasks: List<String> = emptyList(),
         val doneTasks: Int = 0,
@@ -67,6 +70,9 @@ data class CalendarProgress(
     val todayNumber: Int?,
     val todayBox: AdventBox?,
 )
+
+/** Avancement des pâtisseries et gourmandises de l'année. */
+data class CookingSummary(val total: Int = 0, val done: Int = 0, val inProgress: Int = 0, val next: List<String> = emptyList())
 
 /** Résumé des cadeaux de l'année pour l'accueil. */
 data class GiftsSummary(
@@ -90,6 +96,7 @@ class HomeViewModel @Inject constructor(
     personRepository: PersonRepository,
     private val advent: AdventRepository,
     private val observeLutin: ObserveLutinUseCase,
+    cooking: CookingRepository,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
         personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -122,10 +129,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionCalendars, observeLutin(), message) {
+    private val editionCooking = observeEditions().flatMapLatest { state ->
+        val edition = state.current ?: return@flatMapLatest flowOf(CookingSummary())
+        cooking.observeProductions(edition.id).map { list ->
+            CookingSummary(
+                total = list.size,
+                done = list.count { it.status == ProductionStatus.DONE },
+                inProgress = list.count { it.status == ProductionStatus.IN_PROGRESS },
+                next = list.filter { it.status != ProductionStatus.DONE }.sortedByDescending { it.status.ordinal }.map { it.recipeName },
+            )
+        }
+    }
+
+    private val editionAdventAndCooking = combine(editionCalendars, editionCooking) { calendars, summary -> calendars to summary }
+
+    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionAdventAndCooking, observeLutin(), message) {
             (edition, list),
             ideaList,
-            calendars,
+            (calendars, cookingSummary),
             lutin,
             msg,
         ->
@@ -147,6 +168,7 @@ class HomeViewModel @Inject constructor(
                 ideas = ideaList.size,
             ),
             calendars = calendars,
+            cooking = cookingSummary,
             path = christmasPath(today, edition.year),
             openTasks = lutin.tasks.filter { it.isOpen }.map { it.title },
             doneTasks = lutin.tasks.count { it.status == TaskStatus.DONE },

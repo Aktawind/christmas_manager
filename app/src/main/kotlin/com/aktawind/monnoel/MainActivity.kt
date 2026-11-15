@@ -67,14 +67,16 @@ class MainActivity : ComponentActivity() {
                             note = previewNote(idea.previewIssue, idea.previewCode),
                             onSave = viewModel::saveSharedIdea,
                             onDismiss = viewModel::dismissSharedIdea,
+                            onSaveRecipe = viewModel::saveSharedRecipe,
                         )
                     }
                 }
-                val saved by viewModel.ideaSaved.collectAsStateWithLifecycle()
+                val saved by viewModel.sharedSaved.collectAsStateWithLifecycle()
                 LaunchedEffect(saved) {
-                    if (saved) {
-                        Toast.makeText(this@MainActivity, R.string.share_saved, Toast.LENGTH_SHORT).show()
-                        viewModel.ideaSavedShown()
+                    saved?.let {
+                        val text = if (it == SharedSaved.RECIPE) R.string.share_recipe_saved else R.string.share_saved
+                        Toast.makeText(this@MainActivity, text, Toast.LENGTH_SHORT).show()
+                        viewModel.sharedSavedShown()
                     }
                 }
             }

@@ -57,6 +57,8 @@ private val LinkType.emoji: String
         LinkType.CALENDAR -> "🗓️"
         LinkType.BOX -> "📦"
         LinkType.TASK -> "📝"
+        LinkType.RECIPE -> "📖"
+        LinkType.PRODUCTION -> "🧁"
     }
 
 @get:StringRes
@@ -68,6 +70,8 @@ private val LinkType.groupLabel: Int
         LinkType.CALENDAR -> R.string.search_calendars
         LinkType.BOX -> R.string.search_boxes
         LinkType.TASK -> R.string.search_tasks
+        LinkType.RECIPE -> R.string.search_recipes
+        LinkType.PRODUCTION -> R.string.search_productions
     }
 
 @Composable

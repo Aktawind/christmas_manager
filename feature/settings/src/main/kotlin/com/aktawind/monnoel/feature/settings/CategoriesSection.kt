@@ -35,55 +35,82 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.aktawind.monnoel.core.common.IdGenerator
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
+import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.repository.GiftCategoryRepository
 import com.aktawind.monnoel.core.model.GiftCategory
+import com.aktawind.monnoel.core.model.RecipeCategory
 import com.aktawind.monnoel.core.ui.TextInput
+import com.aktawind.monnoel.feature.settings.navigation.CategoriesDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Une catégorie, de cadeaux ou de recettes : l'écran de réglage est le même. */
+data class EditableCategory(val id: String, val name: String, val sortOrder: Int)
+
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    private val categories: GiftCategoryRepository,
+    savedStateHandle: SavedStateHandle,
+    private val giftCategories: GiftCategoryRepository,
+    private val cooking: CookingRepository,
     private val ids: IdGenerator,
 ) : ViewModel() {
-    val uiState: StateFlow<List<GiftCategory>> =
-        categories.observeCategories().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    private val recipes = savedStateHandle.toRoute<CategoriesDestination>().recipes
+
+    val uiState: StateFlow<List<EditableCategory>> =
+        (
+            if (recipes) {
+                cooking.observeCategories().map { list -> list.map { EditableCategory(it.id, it.name, it.sortOrder) } }
+            } else {
+                giftCategories.observeCategories().map { list -> list.map { EditableCategory(it.id, it.name, it.sortOrder) } }
+            }
+            ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private suspend fun save(category: EditableCategory) {
+        if (recipes) {
+            cooking.saveCategory(RecipeCategory(category.id, category.name, category.sortOrder))
+        } else {
+            giftCategories.upsert(GiftCategory(category.id, category.name, category.sortOrder))
+        }
+    }
 
     fun add(name: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
             val order = (uiState.value.maxOfOrNull { it.sortOrder } ?: -1) + 1
-            categories.upsert(GiftCategory(ids.newId(), name.trim(), order))
+            save(EditableCategory(ids.newId(), name.trim(), order))
         }
     }
 
-    fun rename(category: GiftCategory, name: String) {
+    fun rename(category: EditableCategory, name: String) {
         if (name.isBlank()) return
-        viewModelScope.launch { categories.upsert(category.copy(name = name.trim())) }
+        viewModelScope.launch { save(category.copy(name = name.trim())) }
     }
 
-    fun delete(category: GiftCategory) {
-        viewModelScope.launch { categories.delete(category.id) }
+    fun delete(category: EditableCategory) {
+        viewModelScope.launch { if (recipes) cooking.deleteCategory(category.id) else giftCategories.delete(category.id) }
     }
 }
 
-/** Sous-écran des réglages : catégories de cadeaux (ajouter, renommer, supprimer). */
+/** Sous-écran des réglages : catégories de cadeaux ou de recettes (ajouter, renommer, supprimer). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesRoute(onBack: () -> Unit) {
+fun CategoriesRoute(recipes: Boolean, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_categories)) },
+                title = { Text(stringResource(if (recipes) R.string.settings_recipe_categories else R.string.settings_categories)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -104,21 +131,21 @@ fun CategoriesRoute(onBack: () -> Unit) {
                 .padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(Modifier.widthIn(max = 720.dp).fillMaxWidth()) { CategoriesSection() }
+            Column(Modifier.widthIn(max = 720.dp).fillMaxWidth()) { CategoriesSection(recipes) }
         }
     }
 }
 
 @Composable
-internal fun CategoriesSection(viewModel: CategoriesViewModel = hiltViewModel()) {
+internal fun CategoriesSection(recipes: Boolean, viewModel: CategoriesViewModel = hiltViewModel()) {
     val categories by viewModel.uiState.collectAsStateWithLifecycle()
     var newName by rememberSaveable { mutableStateOf("") }
-    var renaming by remember { mutableStateOf<GiftCategory?>(null) }
-    var deleting by remember { mutableStateOf<GiftCategory?>(null) }
+    var renaming by remember { mutableStateOf<EditableCategory?>(null) }
+    var deleting by remember { mutableStateOf<EditableCategory?>(null) }
 
     SettingsCard(stringResource(R.string.settings_categories_mine)) {
         Text(
-            stringResource(R.string.settings_categories_explain),
+            stringResource(if (recipes) R.string.settings_recipe_categories_explain else R.string.settings_categories_explain),
             style = MaterialTheme.typography.bodyMedium,
             color = LocalMonNoelColors.current.secondaryText,
         )
@@ -177,7 +204,13 @@ internal fun CategoriesSection(viewModel: CategoriesViewModel = hiltViewModel())
         AlertDialog(
             onDismissRequest = { deleting = null },
             title = { Text(stringResource(R.string.settings_category_delete_title, category.name)) },
-            text = { Text(stringResource(R.string.settings_category_delete_message)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (recipes) R.string.settings_recipe_category_delete_message else R.string.settings_category_delete_message,
+                    ),
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete(category)

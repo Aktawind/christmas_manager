@@ -33,6 +33,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aktawind.monnoel.R
+import com.aktawind.monnoel.core.designsystem.icon.Cupcake
 import com.aktawind.monnoel.core.designsystem.icon.MonNoelIcons
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.feature.advent.navigation.AdventDestination
@@ -40,6 +41,10 @@ import com.aktawind.monnoel.feature.advent.navigation.BoxEditDestination
 import com.aktawind.monnoel.feature.advent.navigation.CalendarDestination
 import com.aktawind.monnoel.feature.advent.navigation.CalendarEditDestination
 import com.aktawind.monnoel.feature.advent.navigation.adventGraph
+import com.aktawind.monnoel.feature.cooking.navigation.CookingDestination
+import com.aktawind.monnoel.feature.cooking.navigation.ProductionEditDestination
+import com.aktawind.monnoel.feature.cooking.navigation.RecipeEditDestination
+import com.aktawind.monnoel.feature.cooking.navigation.cookingGraph
 import com.aktawind.monnoel.feature.gifts.navigation.GiftEditDestination
 import com.aktawind.monnoel.feature.gifts.navigation.GiftsDestination
 import com.aktawind.monnoel.feature.gifts.navigation.IdeaEditDestination
@@ -52,6 +57,7 @@ import com.aktawind.monnoel.feature.search.navigation.SearchDestination
 import com.aktawind.monnoel.feature.search.navigation.searchScreen
 import com.aktawind.monnoel.feature.settings.navigation.CategoriesDestination
 import com.aktawind.monnoel.feature.settings.navigation.SettingsDestination
+import com.aktawind.monnoel.feature.settings.navigation.SuggestionsSettingsDestination
 import com.aktawind.monnoel.feature.settings.navigation.settingsScreen
 import com.aktawind.monnoel.feature.tasks.navigation.TaskEditDestination
 import com.aktawind.monnoel.feature.tasks.navigation.TasksDestination
@@ -87,6 +93,12 @@ private enum class TopLevelDestination(
         Icons.Filled.DateRange,
         R.string.nav_advent,
     ),
+    COOKING(
+        CookingDestination,
+        listOf(CookingDestination::class, RecipeEditDestination::class, ProductionEditDestination::class),
+        MonNoelIcons.Cupcake,
+        R.string.nav_cooking,
+    ),
     TASKS(
         TasksDestination,
         listOf(TasksDestination::class, TaskEditDestination::class),
@@ -96,7 +108,7 @@ private enum class TopLevelDestination(
     YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
     SETTINGS(
         SettingsDestination,
-        listOf(SettingsDestination::class, CategoriesDestination::class),
+        listOf(SettingsDestination::class, CategoriesDestination::class, SuggestionsSettingsDestination::class),
         Icons.Filled.Settings,
         R.string.nav_settings,
     ),
@@ -142,6 +154,8 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.CALENDAR -> CalendarDestination(id)
             LinkType.BOX -> BoxEditDestination(id)
             LinkType.TASK -> TaskEditDestination(id)
+            LinkType.RECIPE -> RecipeEditDestination(recipeId = id)
+            LinkType.PRODUCTION -> ProductionEditDestination(productionId = id)
         }
         navController.navigate(destination)
     }
@@ -166,11 +180,13 @@ fun MonNoelApp(hasEditions: Boolean) {
                     onOpenGifts = { navigate(TopLevelDestination.GIFTS) },
                     onOpenAdvent = { navigate(TopLevelDestination.ADVENT) },
                     onOpenTasks = { navigate(TopLevelDestination.TASKS) },
+                    onOpenCooking = { navigate(TopLevelDestination.COOKING) },
                 )
                 searchScreen(onOpen = openLink)
                 tasksGraph(navController, onOpenLink = openLink)
                 giftsGraph(navController)
                 adventGraph(navController)
+                cookingGraph(navController)
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
                 settingsScreen(navController)
             }

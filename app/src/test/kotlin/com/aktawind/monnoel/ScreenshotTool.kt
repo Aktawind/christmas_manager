@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
@@ -15,11 +16,13 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.advent.BoxDraft
 import com.aktawind.monnoel.core.domain.advent.CalendarDraft
 import com.aktawind.monnoel.core.domain.advent.SupplyDraft
+import com.aktawind.monnoel.core.domain.cooking.ProductionDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.SurpriseType
 import com.aktawind.monnoel.core.model.TaskModule
 import com.aktawind.monnoel.core.model.TaskStatus
@@ -134,9 +137,24 @@ class ScreenshotTool {
             GiftDraft(mamie.id, "Plaid tout doux", priceCents = 3_900, status = GiftStatus.TO_WRAP),
         )
         seedAdvent(data, edition.id, lea.id, tom.id)
+        seedCooking(data, edition.id)
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
+    }
+
+    private suspend fun seedCooking(data: TestDataEntryPoint, editionId: String) {
+        suspend fun recipe(name: String, category: String) = (data.saveRecipe()(null, name, null, category, "") as AppResult.Success).value
+        val sables = recipe("Sablés à la cannelle", "rcat-sables")
+        val buche = recipe("Bûche chocolat-marron", "rcat-buches")
+        val truffes = recipe("Truffes au chocolat", "rcat-truffes")
+        recipe("Mendiants aux fruits secs", "rcat-mendiants")
+        recipe("Vin chaud aux épices", "rcat-boissons")
+        val save = data.saveProduction()
+        save(null, editionId, ProductionDraft(sables.id, sables.name, 3, "Voisins", ProductionStatus.DONE))
+        save(null, editionId, ProductionDraft(truffes.id, truffes.name, 2, "À offrir", ProductionStatus.IN_PROGRESS))
+        save(null, editionId, ProductionDraft(buche.id, buche.name, 1, "Repas de Noël"))
+        save(null, editionId, ProductionDraft(null, "Biscuits pour l'école", 1, "École"))
     }
 
     private suspend fun seedAdvent(data: TestDataEntryPoint, editionId: String, leaId: String, tomId: String) {
@@ -223,8 +241,28 @@ class ScreenshotTool {
         click("Accueil")
         waitText("Le chemin vers Noël")
         shot("23-home")
+        click("Cuisine")
+        waitText("Bûche chocolat-marron")
+        shot("30-cooking")
+        click("Mes recettes")
+        waitText("Vin chaud")
+        shot("31-recipes")
+        click("Truffes au chocolat")
+        waitText("Préparer pour Noël")
+        shot("32-recipe")
+        compose.onNodeWithContentDescription("Retour").performClick()
+        click("Pour ce Noël")
+        waitText("Biscuits pour l'école")
+        click("Biscuits pour l'école")
+        waitText("Pour qui")
+        shot("33-production")
+        compose.onNodeWithContentDescription("Retour").performClick()
         click("Réglages")
         waitText("Personnaliser")
+        click("Catégories de recettes")
+        waitText("Mes catégories")
+        shot("34-recipe-categories")
+        compose.onNodeWithContentDescription("Retour").performClick()
         click("Catégories de cadeaux")
         waitText("Mes catégories")
         shot("17-categories")

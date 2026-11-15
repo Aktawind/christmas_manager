@@ -3,6 +3,7 @@ package com.aktawind.monnoel.feature.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
+import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
@@ -32,6 +33,7 @@ class SearchViewModel @Inject constructor(
     advent: AdventRepository,
     tasks: TaskRepository,
     editions: EditionRepository,
+    cooking: CookingRepository,
 ) : ViewModel() {
     private val query = MutableStateFlow("")
 
@@ -40,7 +42,8 @@ class SearchViewModel @Inject constructor(
         combine(advent.observeAllCalendars(), advent.observeAllBoxes()) { c, b -> c to b },
         tasks.observeAllTasks(),
         editions.observeEditions(),
-    ) { (p, i, g), (c, b), t, e -> SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }) }
+        combine(cooking.observeRecipes(), cooking.observeAllProductions()) { r, pr -> r to pr },
+    ) { (p, i, g), (c, b), t, e, (r, pr) -> SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, r, pr) }
 
     val uiState: StateFlow<SearchUiState> = combine(query.debounce(150), data) { q, d ->
         SearchUiState(query = q, results = searchAll(q, d))
