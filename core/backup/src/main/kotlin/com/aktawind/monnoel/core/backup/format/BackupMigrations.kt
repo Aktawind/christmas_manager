@@ -37,6 +37,8 @@ internal object BackupMigrations {
             }
             JsonObject(json + ("recipeCategories" to JsonArray(categories)))
         },
+        // v6 -> v7 (v0.6.0) : repas, absents des anciennes sauvegardes.
+        7 to { json -> json },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

@@ -7,6 +7,7 @@ import com.aktawind.monnoel.core.database.dao.CookingDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
+import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
 import com.aktawind.monnoel.core.database.dao.TaskDao
@@ -21,6 +22,9 @@ import com.aktawind.monnoel.core.database.entity.EditionEntity
 import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
 import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
+import com.aktawind.monnoel.core.database.entity.MealDishEntity
+import com.aktawind.monnoel.core.database.entity.MealEntity
+import com.aktawind.monnoel.core.database.entity.MealPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
@@ -38,7 +42,8 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
  * v4 (v0.3.0) calendriers de l'Avent, cases, fournitures, modèles ;
  * v5 (v0.3.0) fournitures : photo, type, contenu des cases, fournisseur ;
  * v6 (v0.4.0) ma liste de lutin (tâches) et suggestions supprimées ;
- * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions.
+ * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions ;
+ * v8 (v0.6.0) repas, convives, plats du menu.
  */
 @Database(
     entities = [
@@ -60,8 +65,11 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
         RecipeCategoryEntity::class,
         RecipeEntity::class,
         ProductionEntity::class,
+        MealEntity::class,
+        MealPersonEntity::class,
+        MealDishEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {
@@ -80,6 +88,8 @@ abstract class MonNoelDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
 
     abstract fun cookingDao(): CookingDao
+
+    abstract fun mealDao(): MealDao
 
     companion object {
         const val NAME = "mon-noel.db"

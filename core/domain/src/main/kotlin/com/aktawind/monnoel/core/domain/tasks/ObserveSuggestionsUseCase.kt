@@ -4,6 +4,7 @@ import com.aktawind.monnoel.core.common.ApplicationScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
+import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
 import com.aktawind.monnoel.core.model.ChristmasEdition
@@ -33,18 +34,24 @@ class ObserveLutinUseCase @Inject constructor(
     private val gifts: PlannedGiftRepository,
     private val advent: AdventRepository,
     private val cooking: CookingRepository,
+    private val meals: MealRepository,
     private val tasks: TaskRepository,
     private val preferences: UserPreferencesRepository,
 ) {
     operator fun invoke(): Flow<LutinState> = observeEditions().map { it.current }.distinctUntilChanged().flatMapLatest { edition ->
         if (edition == null) return@flatMapLatest flowOf(LutinState(null, emptyList(), emptyList(), emptyMap()))
+        val kitchen = combine(
+            cooking.observeProductions(edition.id),
+            meals.observeMeals(edition.id),
+            meals.observeDishes(edition.id),
+        ) { p, m, d -> Triple(p, m, d) }
         val source = combine(
             gifts.observeGifts(edition.id),
             advent.observeCalendars(edition.id),
             advent.observeBoxesForEdition(edition.id),
             advent.observeSuppliesForEdition(edition.id),
-            cooking.observeProductions(edition.id),
-        ) { g, c, b, s, p -> SuggestionSource(g, c, b, s, p) }
+            kitchen,
+        ) { g, c, b, s, (p, m, d) -> SuggestionSource(g, c, b, s, p, m, d) }
         combine(
             source,
             tasks.observeTasks(edition.id),

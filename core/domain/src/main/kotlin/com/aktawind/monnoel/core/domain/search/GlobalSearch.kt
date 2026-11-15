@@ -5,6 +5,8 @@ import com.aktawind.monnoel.core.model.AdventCalendar
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.core.model.LutinTask
+import com.aktawind.monnoel.core.model.Meal
+import com.aktawind.monnoel.core.model.MealDish
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
 import com.aktawind.monnoel.core.model.Production
@@ -31,6 +33,8 @@ data class SearchData(
     val years: Map<String, Int>,
     val recipes: List<Recipe> = emptyList(),
     val productions: List<Production> = emptyList(),
+    val meals: List<Meal> = emptyList(),
+    val dishes: List<MealDish> = emptyList(),
 )
 
 /** Minuscules, sans accents : « Noël » et « noel » se valent. */
@@ -124,6 +128,21 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
                 it.photoPath ?: it.recipePhotoPath,
             )
         }
+    // Un repas est trouvé par son nom, son lieu, ses invités… ou par l'un de ses plats.
+    val dishesByMeal = data.dishes.groupBy { it.mealId }
+    results[LinkType.MEAL] = data.meals.mapNotNull { meal ->
+        val ownMatch = matches(meal.name, meal.place, meal.guests.joinToString(" "), meal.notes)
+        val dishes = dishesByMeal[meal.id].orEmpty().filter { matches(it.name, it.broughtBy) }
+        if (!ownMatch && dishes.isEmpty()) return@mapNotNull null
+        val detail = dishes.joinToString(", ") { it.name }.ifBlank { null }
+        meal to SearchResult(
+            LinkType.MEAL,
+            meal.id,
+            meal.name,
+            listOfNotNull(detail, year(meal.editionId)).joinToString(" · "),
+            dishes.firstNotNullOfOrNull { it.photoPath },
+        )
+    }.sortedByDescending { data.years[it.first.editionId] ?: 0 }.map { it.second }
     results[LinkType.TASK] = data.tasks.filter { matches(it.title, it.description, it.notes) }
         .map { SearchResult(LinkType.TASK, it.id, it.title, year(it.editionId).orEmpty(), null) }
     return results.mapValues { it.value.take(limitPerType) }.filterValues { it.isNotEmpty() }

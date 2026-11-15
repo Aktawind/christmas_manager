@@ -8,6 +8,7 @@ import com.aktawind.monnoel.core.database.DefaultData
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.dao.AdventDao
 import com.aktawind.monnoel.core.database.dao.CookingDao
+import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
@@ -54,6 +55,9 @@ object DatabaseModule {
 
     @Provides
     fun provideCookingDao(db: MonNoelDatabase): CookingDao = db.cookingDao()
+
+    @Provides
+    fun provideMealDao(db: MonNoelDatabase): MealDao = db.mealDao()
 
     @Provides
     fun provideTaskDao(db: MonNoelDatabase): TaskDao = db.taskDao()

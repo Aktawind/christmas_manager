@@ -16,6 +16,9 @@ import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
 import com.aktawind.monnoel.core.backup.format.PersonDto
 import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
+import com.aktawind.monnoel.core.backup.format.MealDishDto
+import com.aktawind.monnoel.core.backup.format.MealDto
+import com.aktawind.monnoel.core.backup.format.MealPersonDto
 import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
@@ -35,6 +38,9 @@ import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
+import com.aktawind.monnoel.core.database.entity.MealDishEntity
+import com.aktawind.monnoel.core.database.entity.MealEntity
+import com.aktawind.monnoel.core.database.entity.MealPersonEntity
 import com.aktawind.monnoel.core.database.entity.ProductionEntity
 import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
 import com.aktawind.monnoel.core.database.entity.RecipeEntity
@@ -91,6 +97,19 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     it.photoPath, it.notes, it.createdAt, it.updatedAt,
                 )
             },
+            meals = db.mealDao().getAllMeals().map {
+                MealDto(
+                    it.id, it.editionId, it.name, it.type, it.date, it.place, it.guests, it.estimatedCostCents, it.notes,
+                    it.createdAt, it.updatedAt,
+                )
+            },
+            mealPersons = db.mealDao().getAllMealPersons().map { MealPersonDto(it.mealId, it.personId) },
+            mealDishes = db.mealDao().getAllDishes().map {
+                MealDishDto(
+                    it.id, it.mealId, it.course, it.recipeId, it.name, it.photoPath, it.broughtBy, it.toOrder, it.ordered,
+                    it.sortOrder, it.createdAt,
+                )
+            },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -105,6 +124,8 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
     suspend fun replaceAll(data: BackupData) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
+            db.mealDao().deleteAllDishes()
+            db.mealDao().deleteAllMeals()
             db.cookingDao().deleteAllProductions()
             db.cookingDao().deleteAllRecipes()
             db.cookingDao().deleteAllCategories()
@@ -136,6 +157,23 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     ProductionEntity(
                         it.id, it.editionId, it.recipeId, it.recipeName, it.recipePhotoPath, it.quantity, it.destination, it.status,
                         it.photoPath, it.notes, it.createdAt, it.updatedAt,
+                    )
+                },
+            )
+            db.mealDao().insertMeals(
+                data.meals.map {
+                    MealEntity(
+                        it.id, it.editionId, it.name, it.type, it.date, it.place, it.guests, it.estimatedCostCents, it.notes,
+                        it.createdAt, it.updatedAt,
+                    )
+                },
+            )
+            db.mealDao().insertMealPersons(data.mealPersons.map { MealPersonEntity(it.mealId, it.personId) })
+            db.mealDao().insertDishes(
+                data.mealDishes.map {
+                    MealDishEntity(
+                        it.id, it.mealId, it.course, it.recipeId, it.name, it.photoPath, it.broughtBy, it.toOrder, it.ordered,
+                        it.sortOrder, it.createdAt,
                     )
                 },
             )

@@ -102,7 +102,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 7, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 8, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -173,6 +173,28 @@ class MigrationTest {
         runBlocking {
             assertEquals(2026, db.editionDao().getAll().single().year)
             assertEquals(DefaultData.recipeCategories.size, db.cookingDao().getAllCategories().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 7 vers 8 ajoute les repas et garde les recettes`() {
+        helper.createDatabase(dbName, 7).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL("INSERT INTO recipe (id, name, photo_path, category_id, url, created_at, updated_at) VALUES ('r1', 'Bûche', NULL, NULL, '', 1, 1)")
+        }
+        helper.runMigrationsAndValidate(dbName, 8, true, Migrations.MIGRATION_7_8).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals("Bûche", db.cookingDao().getAllRecipes().single().name)
+            assertEquals(0, db.mealDao().getAllMeals().size)
         }
         db.close()
     }

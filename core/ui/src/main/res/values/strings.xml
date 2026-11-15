@@ -99,4 +99,21 @@
     <string name="production_status_todo">À faire</string>
     <string name="production_status_in_progress">En cours</string>
     <string name="production_status_done">Faite</string>
+    <string name="suggestion_menu">Préparer le menu « %1$s »</string>
+    <string name="suggestion_order">Commander « %1$s »</string>
+    <string name="suggestion_order_for">Commander « %1$s » (%2$s)</string>
+    <string name="suggestion_kind_menu">Préparer le menu des repas</string>
+    <string name="suggestion_kind_order">Commander les plats à commander</string>
+    <string name="meal_type_eve">Réveillon du 24</string>
+    <string name="meal_type_day">Déjeuner du 25</string>
+    <string name="meal_type_brunch">Brunch</string>
+    <string name="meal_type_snack">Goûter</string>
+    <string name="meal_type_friends">Repas entre amis</string>
+    <string name="meal_type_other">Autre repas</string>
+    <string name="course_aperitif">Apéritif</string>
+    <string name="course_starter">Entrée</string>
+    <string name="course_main">Plat</string>
+    <string name="course_cheese">Fromage</string>
+    <string name="course_dessert">Dessert</string>
+    <string name="course_drinks">Boissons</string>
 </resources>

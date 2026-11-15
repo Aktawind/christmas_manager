@@ -95,5 +95,21 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+    /** v0.6.0 : repas, convives et plats du menu. */
+    val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "CREATE TABLE IF NOT EXISTS `meal` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `date` TEXT, `place` TEXT NOT NULL, `guests` TEXT NOT NULL, `estimated_cost_cents` INTEGER, `notes` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_meal_edition_id` ON `meal` (`edition_id`)",
+                "CREATE TABLE IF NOT EXISTS `meal_person` (`meal_id` TEXT NOT NULL, `person_id` TEXT NOT NULL, PRIMARY KEY(`meal_id`, `person_id`), FOREIGN KEY(`meal_id`) REFERENCES `meal`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`person_id`) REFERENCES `person`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_meal_person_person_id` ON `meal_person` (`person_id`)",
+                "CREATE TABLE IF NOT EXISTS `meal_dish` (`id` TEXT NOT NULL, `meal_id` TEXT NOT NULL, `course` TEXT NOT NULL, `recipe_id` TEXT, `name` TEXT NOT NULL, `photo_path` TEXT, `brought_by` TEXT NOT NULL, `to_order` INTEGER NOT NULL, `ordered` INTEGER NOT NULL, `sort_order` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`meal_id`) REFERENCES `meal`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`recipe_id`) REFERENCES `recipe`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+                "CREATE INDEX IF NOT EXISTS `index_meal_dish_meal_id` ON `meal_dish` (`meal_id`)",
+                "CREATE INDEX IF NOT EXISTS `index_meal_dish_recipe_id` ON `meal_dish` (`recipe_id`)",
+            ).forEach(db::execSQL)
+        }
+    }
+
+    val ALL: Array<Migration> =
+        arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
 }

@@ -7,6 +7,8 @@ import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.core.model.LutinTask
+import com.aktawind.monnoel.core.model.Meal
+import com.aktawind.monnoel.core.model.MealDish
 import com.aktawind.monnoel.core.model.PlannedGift
 import com.aktawind.monnoel.core.model.Production
 import com.aktawind.monnoel.core.model.ProductionStatus
@@ -35,6 +37,8 @@ data class SuggestionSource(
     val boxes: List<AdventBox>,
     val supplies: List<AdventSupply>,
     val productions: List<Production> = emptyList(),
+    val meals: List<Meal> = emptyList(),
+    val dishes: List<MealDish> = emptyList(),
 )
 
 /** État de chaque suggestion possible : clé -> faite (true) ou encore à faire (false). */
@@ -54,6 +58,8 @@ fun suggestionStates(source: SuggestionSource): Map<String, Boolean> {
         states["${SuggestionKind.ADVENT_PREPARE.name}:${calendar.id}"] = toFind == 0 && toPrepare == 0
     }
     source.productions.forEach { states["${SuggestionKind.PRODUCTION_MAKE.name}:${it.id}"] = it.status == ProductionStatus.DONE }
+    source.meals.forEach { meal -> states["${SuggestionKind.MEAL_MENU.name}:${meal.id}"] = source.dishes.any { it.mealId == meal.id } }
+    source.dishes.forEach { states["${SuggestionKind.DISH_ORDER.name}:${it.id}"] = !it.toOrder || it.ordered }
     return states
 }
 
@@ -161,6 +167,35 @@ fun currentSuggestions(
                 production.quantity,
                 LinkType.PRODUCTION,
                 production.id,
+            ),
+        )
+    }
+    source.meals.filter { meal -> source.dishes.none { it.mealId == meal.id } }.forEach { meal ->
+        add(
+            Suggestion(
+                "${SuggestionKind.MEAL_MENU.name}:${meal.id}",
+                SuggestionKind.MEAL_MENU,
+                TaskModule.MEALS,
+                meal.name,
+                "",
+                1,
+                LinkType.MEAL,
+                meal.id,
+            ),
+        )
+    }
+    val mealNames = source.meals.associate { it.id to it.name }
+    source.dishes.filter { it.toOrder && !it.ordered }.forEach { dish ->
+        add(
+            Suggestion(
+                "${SuggestionKind.DISH_ORDER.name}:${dish.id}",
+                SuggestionKind.DISH_ORDER,
+                TaskModule.MEALS,
+                dish.name,
+                mealNames[dish.mealId].orEmpty(),
+                1,
+                LinkType.MEAL,
+                dish.mealId,
             ),
         )
     }

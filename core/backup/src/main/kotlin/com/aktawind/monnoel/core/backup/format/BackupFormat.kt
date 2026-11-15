@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 6
+const val BACKUP_FORMAT_VERSION = 7
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -50,6 +50,9 @@ data class BackupData(
     val recipeCategories: List<RecipeCategoryDto> = emptyList(),
     val recipes: List<RecipeDto> = emptyList(),
     val productions: List<ProductionDto> = emptyList(),
+    val meals: List<MealDto> = emptyList(),
+    val mealPersons: List<MealPersonDto> = emptyList(),
+    val mealDishes: List<MealDishDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -64,6 +67,8 @@ data class BackupData(
         "tasks" to tasks.size,
         "recipes" to recipes.size,
         "productions" to productions.size,
+        "meals" to meals.size,
+        "mealDishes" to mealDishes.size,
     )
 }
 
@@ -255,6 +260,39 @@ data class ProductionDto(
     val notes: String = "",
     val createdAt: Long,
     val updatedAt: Long,
+)
+
+@Serializable
+data class MealDto(
+    val id: String,
+    val editionId: String,
+    val name: String,
+    val type: String,
+    val date: String? = null,
+    val place: String = "",
+    val guests: String = "",
+    val estimatedCostCents: Long? = null,
+    val notes: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+@Serializable
+data class MealPersonDto(val mealId: String, val personId: String)
+
+@Serializable
+data class MealDishDto(
+    val id: String,
+    val mealId: String,
+    val course: String,
+    val recipeId: String? = null,
+    val name: String,
+    val photoPath: String? = null,
+    val broughtBy: String = "",
+    val toOrder: Boolean = false,
+    val ordered: Boolean = false,
+    val sortOrder: Int = 0,
+    val createdAt: Long,
 )
 
 internal val backupJson = Json {
