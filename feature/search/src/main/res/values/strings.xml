@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
+    <string name="search_hint">Chercher une personne, une idée, un cadeau, une case…</string>
+    <string name="search_clear">Effacer</string>
+    <string name="search_empty_title">Retrouver n’importe quoi</string>
+    <string name="search_empty_message">Personnes, idées, cadeaux de toutes les années, calendriers, cases et choses à faire.</string>
+    <string name="search_no_result">Rien trouvé pour « %1$s ».</string>
+    <string name="search_persons">Personnes</string>
+    <string name="search_ideas">Idées</string>
+    <string name="search_gifts">Cadeaux</string>
+    <string name="search_calendars">Calendriers</string>
+    <string name="search_boxes">Cases</string>
+    <string name="search_tasks">Ma liste</string>
+</resources>

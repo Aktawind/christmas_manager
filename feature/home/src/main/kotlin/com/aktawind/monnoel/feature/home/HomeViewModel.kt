@@ -7,18 +7,22 @@ import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.advent.boxOfTheDay
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
+import com.aktawind.monnoel.core.domain.countdown.PathStep
 import com.aktawind.monnoel.core.domain.countdown.christmasCountdown
+import com.aktawind.monnoel.core.domain.countdown.christmasPath
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.domain.tasks.ObserveLutinUseCase
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.model.TaskStatus
 import com.aktawind.monnoel.core.ui.QuickIdeaInput
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
@@ -47,6 +51,10 @@ sealed interface HomeUiState {
         val dayOfYear: Int,
         val gifts: GiftsSummary = GiftsSummary(),
         val calendars: List<CalendarProgress> = emptyList(),
+        val path: List<PathStep> = emptyList(),
+        val openTasks: List<String> = emptyList(),
+        val doneTasks: Int = 0,
+        val suggestionCount: Int = 0,
         val message: UiMessage? = null,
     ) : HomeUiState
 }
@@ -67,6 +75,7 @@ data class GiftsSummary(
     val awaiting: Int = 0,
     val toWrap: Int = 0,
     val given: Int = 0,
+    val wrapped: Int = 0,
     val plannedCents: Long = 0,
     val ideas: Int = 0,
 )
@@ -80,6 +89,7 @@ class HomeViewModel @Inject constructor(
     private val time: TimeProvider,
     personRepository: PersonRepository,
     private val advent: AdventRepository,
+    private val observeLutin: ObserveLutinUseCase,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
         personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -112,10 +122,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionCalendars, message) {
+    val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionCalendars, observeLutin(), message) {
             (edition, list),
             ideaList,
             calendars,
+            lutin,
             msg,
         ->
         if (edition == null) return@combine HomeUiState.NoEdition
@@ -131,10 +142,15 @@ class HomeViewModel @Inject constructor(
                 awaiting = list.count { it.status.isAwaitingDelivery },
                 toWrap = list.count { it.status == GiftStatus.TO_WRAP || it.status == GiftStatus.RECEIVED },
                 given = list.count { it.status == GiftStatus.GIVEN },
+                wrapped = list.count { it.status == GiftStatus.WRAPPED },
                 plannedCents = list.sumOf { it.priceCents ?: 0 },
                 ideas = ideaList.size,
             ),
             calendars = calendars,
+            path = christmasPath(today, edition.year),
+            openTasks = lutin.tasks.filter { it.isOpen }.map { it.title },
+            doneTasks = lutin.tasks.count { it.status == TaskStatus.DONE },
+            suggestionCount = lutin.suggestions.size,
             message = msg,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)

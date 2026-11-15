@@ -32,3 +32,18 @@ fun christmasCountdown(today: LocalDate, editionYear: Int): CountdownState {
         }
     }
 }
+
+/** Étapes datées « naturellement » sur le chemin vers Noël (jamais des échéances). */
+enum class PathStepKind { ADVENT_START, CHRISTMAS_EVE, CHRISTMAS }
+
+data class PathStep(val kind: PathStepKind, val date: LocalDate, val passed: Boolean, val isNext: Boolean)
+
+fun christmasPath(today: LocalDate, editionYear: Int): List<PathStep> {
+    val dates = listOf(
+        PathStepKind.ADVENT_START to LocalDate.of(editionYear, Month.DECEMBER, 1),
+        PathStepKind.CHRISTMAS_EVE to LocalDate.of(editionYear, Month.DECEMBER, 24),
+        PathStepKind.CHRISTMAS to LocalDate.of(editionYear, Month.DECEMBER, 25),
+    )
+    val next = dates.firstOrNull { !it.second.isBefore(today) }?.first
+    return dates.map { (kind, date) -> PathStep(kind, date, passed = date.isBefore(today), isNext = kind == next) }
+}

@@ -38,4 +38,15 @@ class ChristmasCountdownTest {
         val state = christmasCountdown(LocalDate.of(2026, 12, 5), 2027)
         assertEquals(CountdownState.DaysLeft(days = 385, adventDay = null), state)
     }
+
+    @Test
+    fun `chemin vers Noel`() {
+        val before = christmasPath(LocalDate.of(2026, 11, 15), 2026)
+        assertEquals(listOf(true, false, false), before.map { it.isNext })
+        assertEquals(listOf(false, false, false), before.map { it.passed })
+        val eve = christmasPath(LocalDate.of(2026, 12, 24), 2026)
+        assertEquals(listOf(true, false, false), eve.map { it.passed })
+        assertEquals(PathStepKind.CHRISTMAS_EVE, eve.single { it.isNext }.kind)
+        assertEquals(0, christmasPath(LocalDate.of(2026, 12, 26), 2026).count { it.isNext })
+    }
 }

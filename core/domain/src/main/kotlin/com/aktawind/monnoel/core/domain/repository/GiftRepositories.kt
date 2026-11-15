@@ -44,6 +44,9 @@ interface GiftIdeaRepository {
 interface PlannedGiftRepository {
     fun observeGifts(editionId: String): Flow<List<PlannedGift>>
 
+    /** Tous les cadeaux de tous les Noëls (recherche). */
+    fun observeAllGifts(): Flow<List<PlannedGift>>
+
     /** Tous les cadeaux d'une personne, toutes années confondues. */
     fun observeGiftsForPerson(personId: String): Flow<List<PlannedGift>>
 

@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -51,13 +55,22 @@ import com.aktawind.monnoel.core.designsystem.theme.Ivory
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.designsystem.theme.MonNoelTheme
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
+import com.aktawind.monnoel.core.domain.countdown.PathStep
+import com.aktawind.monnoel.core.domain.countdown.PathStepKind
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.ui.QuickIdeaDialog
 import com.aktawind.monnoel.core.ui.emoji
 import com.aktawind.monnoel.core.ui.resolve
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
-fun HomeRoute(onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeRoute(
+    onOpenGifts: () -> Unit,
+    onOpenAdvent: () -> Unit,
+    onOpenTasks: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var quickIdea by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
@@ -70,7 +83,10 @@ fun HomeRoute(onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit, viewModel: Home
         }
     }
     Box(Modifier.fillMaxSize()) {
-        HomeScreen(state, onOpenGifts = onOpenGifts, onOpenAdvent = onOpenAdvent, onQuickIdea = { quickIdea = true })
+        HomeScreen(state, onOpenGifts = onOpenGifts, onOpenAdvent = onOpenAdvent, onOpenTasks = onOpenTasks, onQuickIdea = {
+            quickIdea =
+                true
+        })
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
     if (quickIdea) {
@@ -87,17 +103,29 @@ fun HomeRoute(onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit, viewModel: Home
 }
 
 @Composable
-internal fun HomeScreen(state: HomeUiState, onOpenGifts: () -> Unit = {}, onOpenAdvent: () -> Unit = {}, onQuickIdea: () -> Unit = {}) {
+internal fun HomeScreen(
+    state: HomeUiState,
+    onOpenGifts: () -> Unit = {},
+    onOpenAdvent: () -> Unit = {},
+    onOpenTasks: () -> Unit = {},
+    onQuickIdea: () -> Unit = {},
+) {
     when (state) {
         HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onQuickIdea)
+        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onOpenTasks, onQuickIdea)
     }
 }
 
 @Composable
-private fun HomeContent(state: HomeUiState.Ready, onOpenGifts: () -> Unit, onOpenAdvent: () -> Unit, onQuickIdea: () -> Unit) {
+private fun HomeContent(
+    state: HomeUiState.Ready,
+    onOpenGifts: () -> Unit,
+    onOpenAdvent: () -> Unit,
+    onOpenTasks: () -> Unit,
+    onQuickIdea: () -> Unit,
+) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 170.dp),
         modifier = Modifier.fillMaxSize(),
@@ -107,6 +135,8 @@ private fun HomeContent(state: HomeUiState.Ready, onOpenGifts: () -> Unit, onOpe
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) { CountdownCard(state) }
         item(span = { GridItemSpan(maxLineSpan) }) { DailyMessage(state.dayOfYear) }
+        item(span = { GridItemSpan(maxLineSpan) }) { ChristmasPathCard(state.path) }
+        item(span = { GridItemSpan(maxLineSpan) }) { TasksSummaryCard(state, onOpenTasks) }
         item(span = { GridItemSpan(maxLineSpan) }) { GiftsSummaryCard(state.gifts, onOpenGifts, onQuickIdea) }
         item(span = { GridItemSpan(maxLineSpan) }) { AdventSummaryCard(state.calendars, onOpenAdvent) }
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -226,6 +256,116 @@ private fun DailyMessage(dayOfYear: Int) {
             modifier = Modifier.fillMaxWidth(),
         )
         StarDivider()
+    }
+}
+
+/** « Le chemin vers Noël » : les étapes datées par nature, présentées comme un chemin, jamais comme des retards. */
+@Composable
+private fun ChristmasPathCard(path: List<PathStep>) {
+    if (path.isEmpty()) return
+    val gold = LocalMonNoelColors.current.gold
+    val secondary = LocalMonNoelColors.current.secondaryText
+    val dateFormat = remember { DateTimeFormatter.ofPattern("d MMMM", Locale.FRENCH) }
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.home_path_title),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.semantics { heading() },
+        )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            path.forEachIndexed { index, step ->
+                Column(
+                    Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f).height(2.dp).background(if (index == 0) Color.Transparent else gold.copy(alpha = 0.4f)))
+                        Surface(
+                            shape = CircleShape,
+                            color = when {
+                                step.passed -> gold
+                                step.isNext -> MaterialTheme.colorScheme.primary
+                                else -> MaterialTheme.colorScheme.surfaceVariant
+                            },
+                            modifier = Modifier.size(if (step.isNext) 18.dp else 14.dp),
+                        ) {}
+                        Box(
+                            Modifier.weight(1f).height(2.dp).background(
+                                if (index ==
+                                    path.lastIndex
+                                ) {
+                                    Color.Transparent
+                                } else {
+                                    gold.copy(alpha = 0.4f)
+                                },
+                            ),
+                        )
+                    }
+                    Text(
+                        stepEmoji(step.kind) + "  " + dateFormat.format(step.date),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (step.isNext) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        stringResource(stepLabel(step.kind)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = secondary,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun stepEmoji(kind: PathStepKind) = when (kind) {
+    PathStepKind.ADVENT_START -> "🗓️"
+    PathStepKind.CHRISTMAS_EVE -> "🌟"
+    PathStepKind.CHRISTMAS -> "🎄"
+}
+
+private fun stepLabel(kind: PathStepKind) = when (kind) {
+    PathStepKind.ADVENT_START -> R.string.home_path_advent
+    PathStepKind.CHRISTMAS_EVE -> R.string.home_path_eve
+    PathStepKind.CHRISTMAS -> R.string.home_path_christmas
+}
+
+@Composable
+private fun TasksSummaryCard(state: HomeUiState.Ready, onOpen: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                "📝  " + stringResource(R.string.home_tasks_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics {
+                    heading()
+                },
+            )
+            val gifts = state.gifts
+            val readyBoxes = state.calendars.sumOf { it.ready }
+            val totalBoxes = state.calendars.sumOf { it.boxCount }
+            val progress = listOfNotNull(
+                gifts.total.takeIf { it > 0 }?.let { stringResource(R.string.home_progress_gifts, gifts.given + gifts.wrapped, it) },
+                totalBoxes.takeIf { it > 0 }?.let { stringResource(R.string.home_progress_boxes, readyBoxes, it) },
+                state.doneTasks.takeIf { it > 0 }?.let { stringResource(R.string.home_progress_tasks, it) },
+            ).joinToString(" · ")
+            if (progress.isNotBlank()) Text(progress, style = MaterialTheme.typography.bodyMedium)
+            if (state.openTasks.isEmpty()) {
+                Text(stringResource(R.string.home_tasks_none), color = secondary)
+            } else {
+                state.openTasks.take(4).forEach { Text("○  $it", style = MaterialTheme.typography.bodyLarge, maxLines = 1) }
+                if (state.openTasks.size > 4) Text(stringResource(R.string.home_tasks_more, state.openTasks.size - 4), color = secondary)
+            }
+            if (state.suggestionCount > 0) {
+                Text(stringResource(R.string.home_tasks_suggestions, state.suggestionCount), color = MaterialTheme.colorScheme.primary)
+            }
+        }
     }
 }
 

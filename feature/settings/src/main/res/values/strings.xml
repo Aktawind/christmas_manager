@@ -40,4 +40,8 @@
     <string name="settings_category_delete">Supprimer %1$s</string>
     <string name="settings_category_delete_title">Supprimer « %1$s » ?</string>
     <string name="settings_category_delete_message">Les idées et cadeaux de cette catégorie seront simplement « sans catégorie ».</string>
+    <string name="settings_suggestions">Suggestions du lutin</string>
+    <string name="settings_suggestions_subtitle">Choisir ce que le lutin peut te proposer dans « Ma liste ».</string>
+    <string name="settings_suggestions_card">Ce que le lutin peut proposer</string>
+    <string name="settings_suggestions_explain">Les suggestions ne s’ajoutent jamais toutes seules : tu choisis de les ajouter à ta liste ou de les supprimer.</string>
 </resources>

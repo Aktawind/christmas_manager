@@ -66,6 +66,8 @@ class RoomPlannedGiftRepository @Inject constructor(private val dao: PlannedGift
     override fun observeGifts(editionId: String): Flow<List<PlannedGift>> =
         dao.observeForEdition(editionId).map { list -> list.map { it.asModel() } }
 
+    override fun observeAllGifts(): Flow<List<PlannedGift>> = dao.observeAll().map { list -> list.map { it.asModel() } }
+
     override fun observeGiftsForPerson(personId: String): Flow<List<PlannedGift>> =
         dao.observeForPerson(personId).map { list -> list.map { it.asModel() } }
 

@@ -15,7 +15,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.1.0  | Les fondations              | Socle technique, CI/APK, thème, navigation, années, accueil, export/import, sauvegarde auto | ✅ |
 | v0.2.0  | La hotte                    | Personnes, idées, cadeaux prévus, statuts, photos, ajout rapide, budget et enveloppes, catégories | ✅ |
 | v0.3.0  | Les calendriers de l'Avent  | Calendriers, cases en grille, glisser-déposer, fournitures, modèles, duplication | ✅ |
-| v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ⬜ |
+| v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | 🧪 |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes, productions pâtissières                     | ⬜ |
 | v0.6.0  | La table de fête            | Repas, menus par catégories, liens recettes                           | ⬜ |
 | v0.7.0  | Les comptes du Père Noël    | Budget complet : catégories, dépassements, graphiques, comparaison    | ⬜ |
@@ -92,12 +92,12 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                    | Statut |
 | ----- | --------------------------------------------------------------------------------- | ------ |
-| P-001 | Tâches : titre, description, statut, module, éléments liés, notes                 | ⬜ |
-| P-002 | Liste regroupée par module, cases à cocher, filtre par statut                     | ⬜ |
-| P-003 | Automatisations : cadeau commandé → vérifier la livraison ; case non prête → préparer | ⬜ |
-| P-004 | Les automatisations proposent, l'utilisateur accepte / modifie / ignore ; activables une à une | ⬜ |
-| P-005 | Accueil complet : avancement des préparatifs, « Le chemin vers Noël », tâches à faire | ⬜ |
-| P-006 | Recherche globale v1 : personnes, idées, cadeaux, calendriers, tâches, résultats groupés | ⬜ |
+| P-001 | Tâches : titre, description, statut, module, éléments liés, notes                 | 🧪 |
+| P-002 | Liste regroupée par module, cases à cocher, filtre par statut                     | 🧪 |
+| P-003 | Automatisations : cadeau commandé → vérifier la livraison ; case non prête → préparer | 🧪 |
+| P-004 | Suggestions proposées : ajouter à la liste ou supprimer ; activables une à une ; coche automatique | 🧪 |
+| P-005 | Accueil complet : avancement des préparatifs, « Le chemin vers Noël », tâches à faire | 🧪 |
+| P-006 | Recherche globale (loupe dans le menu) : personnes, idées, cadeaux, calendriers, cases, tâches | 🧪 |
 | ~~—~~ | ~~Vues mensuelle / hebdomadaire, priorités, rappels~~ — supprimés (ADR 0006)       | — |
 
 ## v0.5.0 — Le fournil 🧁

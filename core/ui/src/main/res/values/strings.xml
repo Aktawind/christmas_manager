@@ -57,4 +57,34 @@
     <string name="box_status_to_prepare">À préparer</string>
     <string name="box_status_ready">Prête</string>
     <string name="action_back">Retour</string>
+    <string name="suggestion_delivery">Vérifier la livraison de « %1$s »</string>
+    <string name="suggestion_delivery_for">Vérifier la livraison de « %1$s » (pour %2$s)</string>
+    <string name="suggestion_wrap">Emballer « %1$s »</string>
+    <string name="suggestion_buy">Acheter « %1$s »</string>
+    <string name="suggestion_buy_for">Acheter « %1$s » (%2$s)</string>
+    <plurals name="suggestion_find">
+        <item quantity="one">Trouver %1$d surprise pour « %2$s »</item>
+        <item quantity="many">Trouver %1$d surprises pour « %2$s »</item>
+        <item quantity="other">Trouver %1$d surprises pour « %2$s »</item>
+    </plurals>
+    <plurals name="suggestion_prepare">
+        <item quantity="one">Préparer %1$d case de « %2$s »</item>
+        <item quantity="many">Préparer %1$d cases de « %2$s »</item>
+        <item quantity="other">Préparer %1$d cases de « %2$s »</item>
+    </plurals>
+    <string name="suggestion_kind_delivery">Vérifier la livraison des cadeaux commandés</string>
+    <string name="suggestion_kind_wrap">Emballer les cadeaux à emballer</string>
+    <string name="suggestion_kind_buy">Acheter les fournitures des calendriers</string>
+    <string name="suggestion_kind_find">Trouver les surprises des calendriers</string>
+    <string name="suggestion_kind_prepare">Préparer les cases des calendriers</string>
+    <string name="module_gifts">Cadeaux</string>
+    <string name="module_advent">Calendriers de l’Avent</string>
+    <string name="module_cooking">Cuisine</string>
+    <string name="module_meals">Repas</string>
+    <string name="module_home">Maison &amp; déco</string>
+    <string name="module_other">Autre</string>
+    <string name="task_status_todo">À faire</string>
+    <string name="task_status_in_progress">En cours</string>
+    <string name="task_status_done">Terminée</string>
+    <string name="task_status_cancelled">Annulée</string>
 </resources>

@@ -128,6 +128,9 @@ interface PlannedGiftDao {
     @Query("SELECT * FROM planned_gift")
     suspend fun getAll(): List<PlannedGiftEntity>
 
+    @Query("SELECT * FROM planned_gift")
+    fun observeAll(): Flow<List<PlannedGiftEntity>>
+
     @Query("SELECT * FROM planned_gift WHERE id = :id")
     fun observe(id: String): Flow<PlannedGiftEntity?>
 

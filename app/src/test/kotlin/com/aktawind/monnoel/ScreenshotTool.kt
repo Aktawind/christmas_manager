@@ -3,10 +3,12 @@ package com.aktawind.monnoel
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.aktawind.monnoel.core.common.AppResult
@@ -15,9 +17,12 @@ import com.aktawind.monnoel.core.domain.advent.CalendarDraft
 import com.aktawind.monnoel.core.domain.advent.SupplyDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
+import com.aktawind.monnoel.core.domain.tasks.TaskDraft
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.SurpriseType
+import com.aktawind.monnoel.core.model.TaskModule
+import com.aktawind.monnoel.core.model.TaskStatus
 import com.aktawind.monnoel.di.TestDataEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.io.File
@@ -129,6 +134,9 @@ class ScreenshotTool {
             GiftDraft(mamie.id, "Plaid tout doux", priceCents = 3_900, status = GiftStatus.TO_WRAP),
         )
         seedAdvent(data, edition.id, lea.id, tom.id)
+        data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
+        data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
+        data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
     }
 
     private suspend fun seedAdvent(data: TestDataEntryPoint, editionId: String, leaId: String, tomId: String) {
@@ -183,6 +191,16 @@ class ScreenshotTool {
         click("Léa Martin")
         waitText("Idées pour cette personne")
         shot("15-person")
+        click("Ma liste")
+        waitText("Le lutin te suggère")
+        shot("21-tasks")
+        click("Rechercher")
+        compose.onNode(hasSetTextAction()).performTextInput("choco")
+        waitText("Cases")
+        shot("22-search")
+        click("Accueil")
+        waitText("Le chemin vers Noël")
+        shot("23-home")
         click("Réglages")
         waitText("Personnaliser")
         shot("16-settings")
@@ -195,6 +213,16 @@ class ScreenshotTool {
         click("Sélectionner plusieurs cases")
         click("Les vides")
         shot("20-selection")
+        click("Ma liste")
+        waitText("Le lutin te suggère")
+        shot("21-tasks")
+        click("Rechercher")
+        compose.onNode(hasSetTextAction()).performTextInput("choco")
+        waitText("Cases")
+        shot("22-search")
+        click("Accueil")
+        waitText("Le chemin vers Noël")
+        shot("23-home")
         click("Réglages")
         waitText("Personnaliser")
         click("Catégories de cadeaux")

@@ -11,7 +11,6 @@
     <string name="home_upcoming_title">Bientôt dans ton carnet</string>
     <string name="home_upcoming_subtitle">Les pages de ton carnet arriveront au fil des versions.</string>
     <string name="home_coming_in">Arrive en v%1$s</string>
-    <string name="module_tasks">Ma liste de lutin</string>
     <string name="module_recipes">Pâtisseries &amp; recettes</string>
     <string name="module_meals">Repas de fête</string>
     <string name="module_budget">Budget</string>
@@ -63,4 +62,15 @@
     <string name="home_advent_line">%1$s · %2$d / %3$d cases prêtes</string>
     <string name="home_advent_today">Aujourd’hui, case n°%1$d : %2$s</string>
     <string name="home_advent_today_empty">encore vide</string>
+    <string name="home_path_title">Le chemin vers Noël</string>
+    <string name="home_path_advent">Ouverture des calendriers</string>
+    <string name="home_path_eve">Réveillon</string>
+    <string name="home_path_christmas">Noël</string>
+    <string name="home_tasks_title">Ma liste de lutin</string>
+    <string name="home_tasks_none">Rien à faire pour l’instant ✨</string>
+    <string name="home_tasks_more">… et %1$d autre(s)</string>
+    <string name="home_tasks_suggestions">💡 Le lutin a %1$d suggestion(s) pour toi</string>
+    <string name="home_progress_gifts">%1$d / %2$d cadeaux emballés ou offerts</string>
+    <string name="home_progress_boxes">%1$d / %2$d cases prêtes</string>
+    <string name="home_progress_tasks">%1$d chose(s) faite(s)</string>
 </resources>

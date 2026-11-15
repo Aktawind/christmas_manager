@@ -90,6 +90,8 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:gifts"))
     implementation(project(":feature:advent"))
+    implementation(project(":feature:tasks"))
+    implementation(project(":feature:search"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

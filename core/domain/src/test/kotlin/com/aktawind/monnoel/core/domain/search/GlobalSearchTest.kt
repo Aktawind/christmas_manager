@@ -20,7 +20,10 @@ class GlobalSearchTest {
         persons = listOf(Person("p", "Léa", "Martin", null, "licornes, dessin", "", t, t)),
         ideas = listOf(GiftIdea("i", "Coffret de feutres", "", null, 2_490, "", "Cultura", "", null, setOf("p"), t, t)),
         gifts = listOf(
-            PlannedGift("g", "e", "p", "Léa Martin", null, "Livre de contes de Noël", "", null, 1_800, null, "", "", "", "", null, GiftStatus.TO_BUY, t, t),
+            PlannedGift(
+                "g", "e", "p", "Léa Martin", null, "Livre de contes de Noël", "", null, 1_800, null, "", "", "", "", null,
+                GiftStatus.TO_BUY, t, t,
+            ),
         ),
         calendars = listOf(AdventCalendar("c", "e", "Calendrier de Tom", emptySet(), "", null, "Dinosaures", null, "", 24, t, t)),
         boxes = listOf(AdventBox("b", "c", 3, SurpriseType.TREAT, "Chocolat noël", null, null, "", "", BoxStatus.READY, "", null)),
@@ -43,5 +46,12 @@ class GlobalSearchTest {
         assertEquals("Calendrier de Tom", searchAll("dino", data).getValue(LinkType.CALENDAR).single().title)
         assertEquals("Léa Martin · Cultura", searchAll("feutres", data).getValue(LinkType.IDEA).single().subtitle)
         assertTrue(searchAll("   ", data).isEmpty())
+    }
+
+    @Test
+    fun `cases identiques regroupees`() {
+        val boxes = (1..3).map { AdventBox("b$it", "c", it, SurpriseType.TREAT, "Chocolat", null, null, "", "", BoxStatus.READY, "", null) }
+        val result = searchAll("choco", data.copy(boxes = boxes)).getValue(LinkType.BOX).single()
+        assertEquals("Calendrier de Tom · cases 1, 2, 3 · Noël 2026", result.subtitle)
     }
 }

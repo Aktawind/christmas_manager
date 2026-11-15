@@ -69,6 +69,8 @@ private class FakeGifts : PlannedGiftRepository {
 
     override fun observeGifts(editionId: String) = items.map { l -> l.filter { it.editionId == editionId } }
 
+    override fun observeAllGifts() = items
+
     override fun observeGiftsForPerson(personId: String) = items.map { l -> l.filter { it.personId == personId } }
 
     override fun observeGift(id: String) = items.map { l -> l.firstOrNull { it.id == id } }

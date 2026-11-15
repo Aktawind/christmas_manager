@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -32,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aktawind.monnoel.R
 import com.aktawind.monnoel.core.designsystem.icon.MonNoelIcons
+import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.feature.advent.navigation.AdventDestination
 import com.aktawind.monnoel.feature.advent.navigation.BoxEditDestination
 import com.aktawind.monnoel.feature.advent.navigation.CalendarDestination
@@ -45,9 +48,14 @@ import com.aktawind.monnoel.feature.gifts.navigation.PersonEditDestination
 import com.aktawind.monnoel.feature.gifts.navigation.giftsGraph
 import com.aktawind.monnoel.feature.home.navigation.HomeDestination
 import com.aktawind.monnoel.feature.home.navigation.homeScreen
+import com.aktawind.monnoel.feature.search.navigation.SearchDestination
+import com.aktawind.monnoel.feature.search.navigation.searchScreen
 import com.aktawind.monnoel.feature.settings.navigation.CategoriesDestination
 import com.aktawind.monnoel.feature.settings.navigation.SettingsDestination
 import com.aktawind.monnoel.feature.settings.navigation.settingsScreen
+import com.aktawind.monnoel.feature.tasks.navigation.TaskEditDestination
+import com.aktawind.monnoel.feature.tasks.navigation.TasksDestination
+import com.aktawind.monnoel.feature.tasks.navigation.tasksGraph
 import com.aktawind.monnoel.feature.years.WelcomeRoute
 import com.aktawind.monnoel.feature.years.navigation.YearsDestination
 import com.aktawind.monnoel.feature.years.navigation.yearsScreen
@@ -60,6 +68,7 @@ private enum class TopLevelDestination(
     @StringRes val label: Int,
 ) {
     HOME(HomeDestination, listOf(HomeDestination::class), Icons.Filled.Home, R.string.nav_home),
+    SEARCH(SearchDestination, listOf(SearchDestination::class), Icons.Filled.Search, R.string.nav_search),
     GIFTS(
         GiftsDestination,
         listOf(
@@ -77,6 +86,12 @@ private enum class TopLevelDestination(
         listOf(AdventDestination::class, CalendarDestination::class, CalendarEditDestination::class, BoxEditDestination::class),
         Icons.Filled.DateRange,
         R.string.nav_advent,
+    ),
+    TASKS(
+        TasksDestination,
+        listOf(TasksDestination::class, TaskEditDestination::class),
+        Icons.AutoMirrored.Filled.List,
+        R.string.nav_tasks,
     ),
     YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
     SETTINGS(
@@ -118,6 +133,19 @@ fun MonNoelApp(hasEditions: Boolean) {
         WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Bottom + WindowInsetsSides.End)
     }
 
+    // Ouvre l'élément lié à une tâche ou à un résultat de recherche.
+    val openLink: (LinkType, String) -> Unit = { type, id ->
+        val destination: Any = when (type) {
+            LinkType.PERSON -> PersonDestination(id)
+            LinkType.IDEA -> IdeaEditDestination(ideaId = id)
+            LinkType.GIFT -> GiftEditDestination(giftId = id)
+            LinkType.CALENDAR -> CalendarDestination(id)
+            LinkType.BOX -> BoxEditDestination(id)
+            LinkType.TASK -> TaskEditDestination(id)
+        }
+        navController.navigate(destination)
+    }
+
     NavigationSuiteScaffold(
         layoutType = layoutType,
         navigationSuiteItems = {
@@ -134,7 +162,13 @@ fun MonNoelApp(hasEditions: Boolean) {
     ) {
         Surface(Modifier.windowInsetsPadding(contentInsets), color = MaterialTheme.colorScheme.background) {
             NavHost(navController = navController, startDestination = HomeDestination) {
-                homeScreen(onOpenGifts = { navigate(TopLevelDestination.GIFTS) }, onOpenAdvent = { navigate(TopLevelDestination.ADVENT) })
+                homeScreen(
+                    onOpenGifts = { navigate(TopLevelDestination.GIFTS) },
+                    onOpenAdvent = { navigate(TopLevelDestination.ADVENT) },
+                    onOpenTasks = { navigate(TopLevelDestination.TASKS) },
+                )
+                searchScreen(onOpen = openLink)
+                tasksGraph(navController, onOpenLink = openLink)
                 giftsGraph(navController)
                 adventGraph(navController)
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })

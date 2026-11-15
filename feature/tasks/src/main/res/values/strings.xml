@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
+    <string name="tasks_title">Ma liste de lutin</string>
+    <string name="tasks_title_year">Ma liste de lutin · Noël %1$d</string>
+    <string name="tasks_new">Nouvelle chose à faire</string>
+    <string name="filter_open">À faire</string>
+    <string name="filter_done">Faites</string>
+    <string name="filter_all">Tout</string>
+    <string name="tasks_empty_title">Rien à faire pour l’instant</string>
+    <string name="tasks_empty_message">Note ici ce qui te passe par la tête, ou ajoute les suggestions du lutin. Pas de date, pas de pression.</string>
+    <string name="tasks_all_done">Tout est fait ✨ Profite !</string>
+    <string name="tasks_filter_empty">Rien dans ce filtre.</string>
+    <string name="suggestions_title">💡 Le lutin te suggère (%1$d)</string>
+    <string name="suggestions_hint">Ajoute à ta liste ce qui t’aide, supprime le reste. Les choses ajoutées se cochent toutes seules quand c’est fait.</string>
+    <string name="suggestions_accept">Ajouter</string>
+    <string name="suggestions_accept_all">Tout ajouter</string>
+    <string name="suggestions_dismiss">Supprimer la suggestion « %1$s »</string>
+    <string name="task_auto">se coche toute seule</string>
+    <string name="task_auto_hint">Ajoutée depuis une suggestion : elle se cochera toute seule quand ce sera fait.</string>
+    <string name="task_new_title">Nouvelle chose à faire</string>
+    <string name="task_edit_title">À faire</string>
+    <string name="task_delete_confirm">Supprimer cette chose à faire ?</string>
+    <string name="field_task_title">Quoi ?</string>
+    <string name="field_task_status">Où j’en suis</string>
+    <string name="field_task_module">Thème</string>
+    <string name="field_task_description">Détails</string>
+    <string name="field_task_notes">Notes</string>
+    <string name="task_open_gift">Voir le cadeau</string>
+    <string name="task_open_calendar">Voir le calendrier</string>
+</resources>

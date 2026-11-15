@@ -91,18 +91,20 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
                 it.coverPhotoPath,
             )
         }
+    // Les cases identiques d'un même calendrier (ex. 24 « Chocolat ») ne font qu'un résultat.
     results[LinkType.BOX] = data.boxes.filter { !it.isEmpty && matches(it.title, it.supplier, it.notes) }
-        .map { box ->
+        .groupBy { it.calendarId to normalizeForSearch(it.title) }
+        .values
+        .map { group ->
+            val first = group.minBy { it.number }
+            val numbers = group.map { it.number }.sorted()
+            val where = if (numbers.size == 1) "case ${numbers.single()}" else "cases ${numbers.joinToString(", ")}"
             SearchResult(
                 LinkType.BOX,
-                box.id,
-                box.title,
-                listOfNotNull(
-                    calendarNames[box.calendarId],
-                    "case ${box.number}",
-                    year(calendarEditions[box.calendarId]),
-                ).joinToString(" · "),
-                box.photoPath,
+                first.id,
+                first.title,
+                listOfNotNull(calendarNames[first.calendarId], where, year(calendarEditions[first.calendarId])).joinToString(" · "),
+                group.firstNotNullOfOrNull { it.photoPath },
             )
         }
     results[LinkType.TASK] = data.tasks.filter { matches(it.title, it.description, it.notes) }

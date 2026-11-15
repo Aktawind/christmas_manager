@@ -38,3 +38,4 @@
 | 2 | v0.2.0 | Personnes, souhaits, catégories, idées (+ liens personnes), cadeaux, enveloppes, photos dans `media/photos/`. Conversion 1 → 2 : ajout des catégories par défaut. |
 | 3 | v0.3.0 | Calendriers de l'Avent (+ personnes), cases, fournitures, modèles et leurs cases. Conversion 2 → 3 : rien à ajouter. |
 | 4 | v0.3.0 | Fournitures : photo, type, contenu des cases, fournisseur (valeurs par défaut pour les anciennes sauvegardes). |
+| 5 | v0.4.0 | Ma liste de lutin (tâches) et suggestions supprimées. |

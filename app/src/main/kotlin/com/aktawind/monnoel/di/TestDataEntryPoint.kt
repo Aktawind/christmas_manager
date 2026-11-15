@@ -11,6 +11,7 @@ import com.aktawind.monnoel.core.domain.gifts.SaveGiftUseCase
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.SavePersonUseCase
 import com.aktawind.monnoel.core.domain.gifts.SetPersonBudgetUseCase
+import com.aktawind.monnoel.core.domain.tasks.SaveTaskUseCase
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -40,4 +41,6 @@ interface TestDataEntryPoint {
     fun saveSupply(): SaveSupplyUseCase
 
     fun adventRepository(): AdventRepository
+
+    fun saveTask(): SaveTaskUseCase
 }

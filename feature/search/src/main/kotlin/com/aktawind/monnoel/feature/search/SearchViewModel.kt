@@ -1,0 +1,52 @@
+package com.aktawind.monnoel.feature.search
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.aktawind.monnoel.core.domain.advent.AdventRepository
+import com.aktawind.monnoel.core.domain.repository.EditionRepository
+import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
+import com.aktawind.monnoel.core.domain.repository.PersonRepository
+import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.domain.search.SearchData
+import com.aktawind.monnoel.core.domain.search.SearchResult
+import com.aktawind.monnoel.core.domain.search.searchAll
+import com.aktawind.monnoel.core.domain.tasks.TaskRepository
+import com.aktawind.monnoel.core.model.LinkType
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.stateIn
+
+data class SearchUiState(val query: String = "", val results: Map<LinkType, List<SearchResult>> = emptyMap())
+
+@OptIn(kotlinx.coroutines.FlowPreview::class)
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+    persons: PersonRepository,
+    ideas: GiftIdeaRepository,
+    gifts: PlannedGiftRepository,
+    advent: AdventRepository,
+    tasks: TaskRepository,
+    editions: EditionRepository,
+) : ViewModel() {
+    private val query = MutableStateFlow("")
+
+    private val data = combine(
+        combine(persons.observePersons(), ideas.observeIdeas(), gifts.observeAllGifts()) { p, i, g -> Triple(p, i, g) },
+        combine(advent.observeAllCalendars(), advent.observeAllBoxes()) { c, b -> c to b },
+        tasks.observeAllTasks(),
+        editions.observeEditions(),
+    ) { (p, i, g), (c, b), t, e -> SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }) }
+
+    val uiState: StateFlow<SearchUiState> = combine(query.debounce(150), data) { q, d ->
+        SearchUiState(query = q, results = searchAll(q, d))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchUiState())
+
+    fun setQuery(text: String) {
+        query.value = text
+    }
+}
