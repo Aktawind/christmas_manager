@@ -17,7 +17,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.3.0  | Les calendriers de l'Avent  | Calendriers, cases en grille, glisser-déposer, fournitures, modèles, duplication | ✅ |
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ✅ |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes (nom + photo), préparations de l'année       | ✅ |
-| v0.6.0  | La table de fête            | Repas, menus par catégories, liens recettes                           | ⬜ |
+| v0.6.0  | La table de fête            | Repas, convives, menus par moments, plats à commander                 | 🧪 |
 | v0.7.0  | Les comptes du Père Noël    | Budget complet : catégories, dépassements, graphiques, comparaison    | ⬜ |
 | v0.8.0  | Les traditions              | Catalogue de traditions, suivi annuel, listes d'inspiration           | ⬜ |
 | v0.9.0  | L'atelier des lutins        | Activités & DIY, projets créatifs, décoration                         | ⬜ |
@@ -117,11 +117,14 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| M-001 | Repas : type (réveillon, déjeuner du 25, brunch…), date, lieu, convives        | ⬜ |
-| M-002 | Menu par catégories (apéritif → boissons)                                      | ⬜ |
-| M-003 | Plat lié à une recette existante ou saisi librement                            | ⬜ |
-| M-004 | Repas créé → propositions de tâches de préparation                              | ⬜ |
-| M-005 | Budget par repas                                                                | ⬜ |
+| M-001 | Repas de l'année : type (réveillon, déjeuner du 25, brunch…), nom, date, lieu, notes | 🧪 |
+| M-002 | Convives : personnes de l'application + invités en texte libre                 | 🧪 |
+| M-003 | Menu par moments (apéritif, entrée, plat, fromage, dessert, boissons)           | 🧪 |
+| M-004 | Plat : recette de la bibliothèque (nom et photo figés) ou nom libre, « qui apporte ? » | 🧪 |
+| M-005 | Plat « à commander » → suggestion du lutin « Commander … », cochée quand c'est commandé | 🧪 |
+| M-006 | Suggestion « Préparer le menu » pour un repas sans plat                         | 🧪 |
+| M-007 | Coût estimé par repas (alimentera le budget de la v0.7)                         | 🧪 |
+| M-008 | Accueil « La table de fête », recherche des repas et des plats, sauvegarde      | 🧪 |
 
 ## v0.7.0 — Les comptes du Père Noël 💰
 

@@ -14,6 +14,7 @@ import com.aktawind.monnoel.core.domain.countdown.christmasPath
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
+import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
@@ -21,6 +22,7 @@ import com.aktawind.monnoel.core.domain.tasks.ObserveLutinUseCase
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.Meal
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
 import com.aktawind.monnoel.core.model.ProductionStatus
@@ -54,6 +56,7 @@ sealed interface HomeUiState {
         val gifts: GiftsSummary = GiftsSummary(),
         val calendars: List<CalendarProgress> = emptyList(),
         val cooking: CookingSummary = CookingSummary(),
+        val table: TableSummary = TableSummary(),
         val path: List<PathStep> = emptyList(),
         val openTasks: List<String> = emptyList(),
         val doneTasks: Int = 0,
@@ -73,6 +76,9 @@ data class CalendarProgress(
 
 /** Avancement des pâtisseries et gourmandises de l'année. */
 data class CookingSummary(val total: Int = 0, val done: Int = 0, val inProgress: Int = 0, val next: List<String> = emptyList())
+
+/** Les repas de l'année : le prochain, avec ses convives et son menu. */
+data class TableSummary(val total: Int = 0, val next: Meal? = null, val nextDishes: Int = 0, val toOrder: Int = 0)
 
 /** Résumé des cadeaux de l'année pour l'accueil. */
 data class GiftsSummary(
@@ -97,6 +103,7 @@ class HomeViewModel @Inject constructor(
     private val advent: AdventRepository,
     private val observeLutin: ObserveLutinUseCase,
     cooking: CookingRepository,
+    meals: MealRepository,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
         personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -141,12 +148,29 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private val editionAdventAndCooking = combine(editionCalendars, editionCooking) { calendars, summary -> calendars to summary }
+    private val editionTable = observeEditions().flatMapLatest { state ->
+        val edition = state.current ?: return@flatMapLatest flowOf(TableSummary())
+        combine(meals.observeMeals(edition.id), meals.observeDishes(edition.id)) { list, dishes ->
+            val today = time.today()
+            // Le prochain repas daté, sinon le premier de la liste.
+            val next = list.firstOrNull { it.date != null && !it.date!!.isBefore(today) } ?: list.firstOrNull { it.date == null }
+            TableSummary(
+                total = list.size,
+                next = next,
+                nextDishes = dishes.count { it.mealId == next?.id },
+                toOrder = dishes.count { it.toOrder && !it.ordered },
+            )
+        }
+    }
+
+    private val editionAdventAndCooking = combine(editionCalendars, editionCooking, editionTable) { calendars, summary, table ->
+        Triple(calendars, summary, table)
+    }
 
     val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionAdventAndCooking, observeLutin(), message) {
             (edition, list),
             ideaList,
-            (calendars, cookingSummary),
+            (calendars, cookingSummary, tableSummary),
             lutin,
             msg,
         ->
@@ -169,6 +193,7 @@ class HomeViewModel @Inject constructor(
             ),
             calendars = calendars,
             cooking = cookingSummary,
+            table = tableSummary,
             path = christmasPath(today, edition.year),
             openTasks = lutin.tasks.filter { it.isOpen }.map { it.title },
             doneTasks = lutin.tasks.count { it.status == TaskStatus.DONE },

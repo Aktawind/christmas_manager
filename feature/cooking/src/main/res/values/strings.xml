@@ -2,7 +2,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
     <string name="cooking_title">Cuisine</string>
     <string name="cooking_title_year">Cuisine · Noël %1$d</string>
-    <string name="tab_productions">Pour ce Noël</string>
+    <string name="tab_productions">Gourmandises</string>
+    <string name="tab_meals">Repas</string>
+    <string name="fab_new_meal">Repas</string>
     <string name="tab_recipes">Mes recettes</string>
     <string name="fab_new_recipe">Recette</string>
     <string name="fab_new_production">À préparer</string>
@@ -38,6 +40,55 @@
     <string name="field_result_photo">Photo du résultat</string>
     <string name="production_recipe_photo_hint">En attendant, la photo de la recette est utilisée.</string>
     <string name="field_notes">Notes</string>
+    <string name="meals_empty_title">La table de fête</string>
+    <string name="meals_empty_message">Ajoutez le réveillon, le déjeuner du 25, un brunch… puis composez le menu.</string>
+    <plurals name="meal_guests">
+        <item quantity="one">%1$d convive</item>
+        <item quantity="many">%1$d convives</item>
+        <item quantity="other">%1$d convives</item>
+    </plurals>
+    <plurals name="meal_dishes">
+        <item quantity="one">%1$d plat</item>
+        <item quantity="many">%1$d plats</item>
+        <item quantity="other">%1$d plats</item>
+    </plurals>
+    <plurals name="meal_to_order">
+        <item quantity="one">%1$d plat à commander</item>
+        <item quantity="many">%1$d plats à commander</item>
+        <item quantity="other">%1$d plats à commander</item>
+    </plurals>
+    <string name="meal_new_title">Nouveau repas</string>
+    <string name="meal_edit_title">Le repas</string>
+    <string name="meal_edit_action">Modifier le repas</string>
+    <string name="meal_delete_confirm">Supprimer ce repas et son menu ?</string>
+    <string name="meal_read_only">Cette année est archivée : le repas est en lecture seule.</string>
+    <string name="field_meal_type">Type de repas</string>
+    <string name="field_meal_name">Nom du repas</string>
+    <string name="field_meal_place">Lieu (chez nous, chez Mamie…)</string>
+    <string name="meal_date_none">Choisir une date</string>
+    <string name="meal_date_value">Le %1$s</string>
+    <string name="meal_date_clear">Sans date</string>
+    <string name="meal_date_ok">OK</string>
+    <string name="meal_guests_title">Convives · %1$d</string>
+    <string name="field_meal_guest">Autre invité</string>
+    <string name="meal_guest_add">Ajouter</string>
+    <string name="meal_guest_remove">Retirer %1$s</string>
+    <string name="field_meal_cost">Coût estimé du repas (facultatif)</string>
+    <string name="meal_cost_value">Coût estimé : %1$s</string>
+    <string name="dish_add">Ajouter</string>
+    <string name="dish_brought_by_value">Apporté par %1$s</string>
+    <string name="dish_to_order">À commander</string>
+    <string name="dish_ordered">Commandé ✓</string>
+    <string name="dish_new_title">Nouveau plat</string>
+    <string name="dish_edit_title">Plat</string>
+    <string name="dish_delete_confirm">Retirer ce plat du menu ?</string>
+    <string name="dish_for_meal">Pour : %1$s</string>
+    <string name="field_course">Moment du repas</string>
+    <string name="field_dish_name">Plat</string>
+    <string name="field_brought_by">Qui apporte ? (facultatif)</string>
+    <string name="field_to_order">À commander (traiteur, poissonnier…)</string>
+    <string name="field_ordered">C\'est commandé</string>
+    <string name="dish_hint">Juste le nom du plat : la recette elle-même reste dans votre application de recettes.</string>
     <string-array name="destination_shortcuts">
         <item>Pour la maison</item>
         <item>À offrir</item>

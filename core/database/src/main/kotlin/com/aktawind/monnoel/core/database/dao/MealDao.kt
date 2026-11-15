@@ -62,7 +62,9 @@ interface MealDao {
     @Query("DELETE FROM meal")
     suspend fun deleteAllMeals()
 
-    @Query("SELECT d.* FROM meal_dish d JOIN meal m ON d.meal_id = m.id WHERE m.edition_id = :editionId ORDER BY d.sort_order, d.created_at")
+    @Query(
+        "SELECT d.* FROM meal_dish d JOIN meal m ON d.meal_id = m.id WHERE m.edition_id = :editionId ORDER BY d.sort_order, d.created_at",
+    )
     fun observeDishes(editionId: String): Flow<List<MealDishEntity>>
 
     @Query("SELECT * FROM meal_dish ORDER BY sort_order, created_at")

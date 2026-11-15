@@ -40,7 +40,14 @@ fun Suggestion.label(): String = when (kind) {
         if (count > 1) stringResource(R.string.suggestion_make_many, subject, count) else stringResource(R.string.suggestion_make, subject)
     SuggestionKind.MEAL_MENU -> stringResource(R.string.suggestion_menu, subject)
     SuggestionKind.DISH_ORDER ->
-        if (detail.isBlank()) stringResource(R.string.suggestion_order, subject) else stringResource(R.string.suggestion_order_for, subject, detail)
+        if (detail.isBlank()) {
+            stringResource(
+                R.string.suggestion_order,
+                subject,
+            )
+        } else {
+            stringResource(R.string.suggestion_order_for, subject, detail)
+        }
 }
 
 @get:StringRes
@@ -118,7 +125,7 @@ val MealType.emoji: String
         MealType.CHRISTMAS_DAY -> "🎄"
         MealType.BRUNCH -> "🥐"
         MealType.SNACK -> "☕"
-        MealType.FRIENDS -> "🥂"
+        MealType.FRIENDS -> "🎉"
         MealType.OTHER -> "🍽️"
     }
 
@@ -135,10 +142,10 @@ val CourseType.label: Int
 
 val CourseType.emoji: String
     get() = when (this) {
-        CourseType.APERITIF -> "🫒"
+        CourseType.APERITIF -> "🥂"
         CourseType.STARTER -> "🦪"
         CourseType.MAIN -> "🍗"
         CourseType.CHEESE -> "🧀"
         CourseType.DESSERT -> "🍰"
-        CourseType.DRINKS -> "🥂"
+        CourseType.DRINKS -> "🍷"
     }

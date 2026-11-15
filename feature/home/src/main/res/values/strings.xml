@@ -58,6 +58,23 @@
     <string name="home_gifts_to_wrap">%1$d à emballer</string>
     <string name="home_gifts_given">%1$d offerts</string>
     <string name="home_advent_title">Les calendriers de l’Avent</string>
+    <string name="home_table_title">La table de fête</string>
+    <string name="home_table_empty">Aucun repas prévu pour l’instant : réveillon, déjeuner du 25… ?</string>
+    <plurals name="home_table_guests">
+        <item quantity="one">%1$d convive</item>
+        <item quantity="many">%1$d convives</item>
+        <item quantity="other">%1$d convives</item>
+    </plurals>
+    <plurals name="home_table_dishes">
+        <item quantity="one">%1$d plat au menu</item>
+        <item quantity="many">%1$d plats au menu</item>
+        <item quantity="other">%1$d plats au menu</item>
+    </plurals>
+    <plurals name="home_table_to_order">
+        <item quantity="one">%1$d plat à commander</item>
+        <item quantity="many">%1$d plats à commander</item>
+        <item quantity="other">%1$d plats à commander</item>
+    </plurals>
     <string name="home_cooking_title">Le fournil</string>
     <string name="home_cooking_empty">Rien de prévu pour l’instant : sablés, bûche, truffes… ?</string>
     <string name="home_cooking_progress">%1$d sur %2$d préparés</string>

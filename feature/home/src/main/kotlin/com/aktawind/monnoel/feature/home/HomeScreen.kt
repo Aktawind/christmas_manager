@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -146,6 +147,7 @@ private fun HomeContent(
         item(span = { GridItemSpan(maxLineSpan) }) { TasksSummaryCard(state, onOpenTasks) }
         item(span = { GridItemSpan(maxLineSpan) }) { GiftsSummaryCard(state.gifts, onOpenGifts, onQuickIdea) }
         item(span = { GridItemSpan(maxLineSpan) }) { AdventSummaryCard(state.calendars, onOpenAdvent) }
+        item(span = { GridItemSpan(maxLineSpan) }) { TableSummaryCard(state.table, onOpenCooking) }
         item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenCooking) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -372,6 +374,47 @@ private fun TasksSummaryCard(state: HomeUiState.Ready, onOpen: () -> Unit) {
             }
             if (state.suggestionCount > 0) {
                 Text(stringResource(R.string.home_tasks_suggestions, state.suggestionCount), color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TableSummaryCard(summary: TableSummary, onOpen: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "🍽️  " + stringResource(R.string.home_table_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            val next = summary.next
+            if (next == null) {
+                Text(stringResource(R.string.home_table_empty), color = secondary)
+            } else {
+                val date = next.date?.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH))
+                Text(
+                    listOfNotNull("${next.type.emoji} ${next.name}", date).joinToString(" · "),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    listOf(
+                        pluralStringResource(R.plurals.home_table_guests, next.guestCount, next.guestCount),
+                        pluralStringResource(R.plurals.home_table_dishes, summary.nextDishes, summary.nextDishes),
+                    ).joinToString(" · "),
+                    color = secondary,
+                )
+                if (summary.toOrder > 0) {
+                    Text(
+                        pluralStringResource(R.plurals.home_table_to_order, summary.toOrder, summary.toOrder),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
         }
     }

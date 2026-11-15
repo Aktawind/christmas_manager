@@ -151,7 +151,14 @@ class MealUseCasesTest {
     fun `le lutin propose le menu puis la commande, et coche quand c'est fait`() = runTest {
         edition()
         val meal = reveillon()
-        fun source() = SuggestionSource(emptyList(), emptyList(), emptyList(), emptyList(), meals = meals.meals.value, dishes = meals.dishes.value)
+        fun source() = SuggestionSource(
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            meals = meals.meals.value,
+            dishes = meals.dishes.value,
+        )
         assertEquals(SuggestionKind.MEAL_MENU, currentSuggestions(source(), emptySet(), emptySet(), emptyList()).single().kind)
 
         val dish = (saveDish(null, meal.id, DishDraft(CourseType.STARTER, null, "Huîtres", toOrder = true)) as AppResult.Success).value

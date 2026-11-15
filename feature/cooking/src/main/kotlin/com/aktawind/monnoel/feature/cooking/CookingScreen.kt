@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -61,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
+import com.aktawind.monnoel.core.domain.gifts.formatEuro
+import com.aktawind.monnoel.core.model.Meal
+import com.aktawind.monnoel.core.model.MealDish
 import com.aktawind.monnoel.core.model.Production
 import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.Recipe
@@ -69,8 +73,13 @@ import com.aktawind.monnoel.core.ui.PhotoImage
 import com.aktawind.monnoel.core.ui.emoji
 import com.aktawind.monnoel.core.ui.label
 import com.aktawind.monnoel.core.ui.resolve
+import com.aktawind.monnoel.feature.cooking.meal.mealDateFormat
 
-private enum class CookingTab(@StringRes val label: Int) { PRODUCTIONS(R.string.tab_productions), RECIPES(R.string.tab_recipes) }
+private enum class CookingTab(@StringRes val label: Int, @StringRes val fab: Int) {
+    MEALS(R.string.tab_meals, R.string.fab_new_meal),
+    PRODUCTIONS(R.string.tab_productions, R.string.fab_new_production),
+    RECIPES(R.string.tab_recipes, R.string.fab_new_recipe),
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,10 +88,12 @@ fun CookingRoute(
     onNewRecipe: () -> Unit,
     onOpenProduction: (String) -> Unit,
     onNewProduction: () -> Unit,
+    onOpenMeal: (String) -> Unit,
+    onNewMeal: () -> Unit,
     viewModel: CookingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var tab by rememberSaveable { mutableStateOf(CookingTab.PRODUCTIONS) }
+    var tab by rememberSaveable { mutableStateOf(CookingTab.MEALS) }
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     LaunchedEffect(state.message) {
@@ -114,27 +125,20 @@ fun CookingRoute(
             val showFab = tab == CookingTab.RECIPES || (!state.readOnly && state.edition != null)
             if (showFab) {
                 ExtendedFloatingActionButton(
-                    onClick = if (tab == CookingTab.RECIPES) onNewRecipe else onNewProduction,
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = {
-                        Text(
-                            stringResource(
-                                if (tab ==
-                                    CookingTab.RECIPES
-                                ) {
-                                    R.string.fab_new_recipe
-                                } else {
-                                    R.string.fab_new_production
-                                },
-                            ),
-                        )
+                    onClick = when (tab) {
+                        CookingTab.MEALS -> onNewMeal
+                        CookingTab.PRODUCTIONS -> onNewProduction
+                        CookingTab.RECIPES -> onNewRecipe
                     },
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text(stringResource(tab.fab)) },
                 )
             }
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (tab) {
+                CookingTab.MEALS -> MealsTab(state, onOpenMeal)
                 CookingTab.PRODUCTIONS -> ProductionsTab(state, onOpenProduction, viewModel::setProductionStatus)
                 CookingTab.RECIPES -> RecipesTab(state, onOpenRecipe)
             }
@@ -304,6 +308,61 @@ private fun RecipeCard(recipe: Recipe, category: String?, onClick: () -> Unit) {
                 if (category != null) {
                     Text(category, style = MaterialTheme.typography.bodySmall, color = LocalMonNoelColors.current.secondaryText)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MealsTab(state: CookingUiState, onOpen: (String) -> Unit) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(340.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        if (state.meals.isEmpty() && !state.loading) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                EmptyState(
+                    emoji = "🍽️",
+                    title = stringResource(R.string.meals_empty_title),
+                    message = stringResource(R.string.meals_empty_message),
+                )
+            }
+        }
+        items(state.meals, key = { it.id }) { meal ->
+            MealCard(meal, state.dishes.filter { it.mealId == meal.id }, onClick = { onOpen(meal.id) })
+        }
+    }
+}
+
+@Composable
+private fun MealCard(meal: Meal, dishes: List<MealDish>, onClick: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                "${meal.type.emoji}  ${meal.name}",
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            val whenWhere = listOfNotNull(meal.date?.format(mealDateFormat), meal.place.ifBlank { null }).joinToString(" · ")
+            if (whenWhere.isNotBlank()) Text(whenWhere, style = MaterialTheme.typography.bodyMedium)
+            val facts = listOfNotNull(
+                pluralStringResource(R.plurals.meal_guests, meal.guestCount, meal.guestCount),
+                pluralStringResource(R.plurals.meal_dishes, dishes.size, dishes.size),
+                meal.estimatedCostCents?.let { formatEuro(it) },
+            ).joinToString(" · ")
+            Text(facts, style = MaterialTheme.typography.bodySmall, color = secondary)
+            val toOrder = dishes.count { it.toOrder && !it.ordered }
+            if (toOrder > 0) {
+                Text(
+                    pluralStringResource(R.plurals.meal_to_order, toOrder, toOrder),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
         }
     }

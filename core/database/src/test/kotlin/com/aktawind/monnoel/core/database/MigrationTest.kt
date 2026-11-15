@@ -184,7 +184,9 @@ class MigrationTest {
                 "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
                     "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
             )
-            db.execSQL("INSERT INTO recipe (id, name, photo_path, category_id, url, created_at, updated_at) VALUES ('r1', 'Bûche', NULL, NULL, '', 1, 1)")
+            db.execSQL(
+                "INSERT INTO recipe (id, name, photo_path, category_id, url, created_at, updated_at) VALUES ('r1', 'Bûche', NULL, NULL, '', 1, 1)",
+            )
         }
         helper.runMigrationsAndValidate(dbName, 8, true, Migrations.MIGRATION_7_8).close()
         val db = Room.databaseBuilder(

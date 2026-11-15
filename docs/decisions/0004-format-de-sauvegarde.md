@@ -40,3 +40,4 @@
 | 4 | v0.3.0 | Fournitures : photo, type, contenu des cases, fournisseur (valeurs par défaut pour les anciennes sauvegardes). |
 | 5 | v0.4.0 | Ma liste de lutin (tâches) et suggestions supprimées. |
 | 6 | v0.5.0 | Recettes (nom, photo, catégorie, lien), catégories de recettes, préparations de l'année. Conversion 5 → 6 : ajout des catégories de recettes par défaut. |
+| 7 | v0.6.0 | Repas, convives (personnes de l'app), plats du menu. Conversion 6 → 7 : rien à ajouter. |

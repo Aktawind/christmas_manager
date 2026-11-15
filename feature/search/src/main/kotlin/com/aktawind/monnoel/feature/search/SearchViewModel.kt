@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.cooking.CookingRepository
+import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
@@ -24,6 +25,13 @@ import kotlinx.coroutines.flow.stateIn
 
 data class SearchUiState(val query: String = "", val results: Map<LinkType, List<SearchResult>> = emptyMap())
 
+private data class Kitchen(
+    val recipes: List<com.aktawind.monnoel.core.model.Recipe>,
+    val productions: List<com.aktawind.monnoel.core.model.Production>,
+    val meals: List<com.aktawind.monnoel.core.model.Meal>,
+    val dishes: List<com.aktawind.monnoel.core.model.MealDish>,
+)
+
 @OptIn(kotlinx.coroutines.FlowPreview::class)
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -34,6 +42,7 @@ class SearchViewModel @Inject constructor(
     tasks: TaskRepository,
     editions: EditionRepository,
     cooking: CookingRepository,
+    meals: MealRepository,
 ) : ViewModel() {
     private val query = MutableStateFlow("")
 
@@ -42,8 +51,17 @@ class SearchViewModel @Inject constructor(
         combine(advent.observeAllCalendars(), advent.observeAllBoxes()) { c, b -> c to b },
         tasks.observeAllTasks(),
         editions.observeEditions(),
-        combine(cooking.observeRecipes(), cooking.observeAllProductions()) { r, pr -> r to pr },
-    ) { (p, i, g), (c, b), t, e, (r, pr) -> SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, r, pr) }
+        combine(cooking.observeRecipes(), cooking.observeAllProductions(), meals.observeAllMeals(), meals.observeAllDishes()) {
+                r,
+                pr,
+                m,
+                d,
+            ->
+            Kitchen(r, pr, m, d)
+        },
+    ) { (p, i, g), (c, b), t, e, k ->
+        SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes)
+    }
 
     val uiState: StateFlow<SearchUiState> = combine(query.debounce(150), data) { q, d ->
         SearchUiState(query = q, results = searchAll(q, d))

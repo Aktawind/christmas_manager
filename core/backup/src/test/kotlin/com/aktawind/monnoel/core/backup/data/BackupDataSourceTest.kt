@@ -16,12 +16,12 @@ import com.aktawind.monnoel.core.backup.format.EditionDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
-import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
-import com.aktawind.monnoel.core.backup.format.PersonDto
-import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
 import com.aktawind.monnoel.core.backup.format.MealDishDto
 import com.aktawind.monnoel.core.backup.format.MealDto
 import com.aktawind.monnoel.core.backup.format.MealPersonDto
+import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
+import com.aktawind.monnoel.core.backup.format.PersonDto
+import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
 import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
@@ -103,7 +103,9 @@ class BackupDataSourceTest {
             recipeCategories = listOf(RecipeCategoryDto("rc", "Bûches", 0)),
             recipes = listOf(RecipeDto("r", "Bûche", "photos/r.jpg", "rc", "", 1L, 1L)),
             productions = listOf(ProductionDto("pr", "e", "r", "Bûche", "photos/rp.jpg", 2, "Réveillon", "TO_DO", null, "", 1L, 1L)),
-            meals = listOf(MealDto("m", "e", "Réveillon", "CHRISTMAS_EVE", "2026-12-24", "Chez nous", "Oncle Paul\nTata Jo", 12_000, "", 1L, 1L)),
+            meals = listOf(
+                MealDto("m", "e", "Réveillon", "CHRISTMAS_EVE", "2026-12-24", "Chez nous", "Oncle Paul\nTata Jo", 12_000, "", 1L, 1L),
+            ),
             mealPersons = listOf(MealPersonDto("m", "p")),
             mealDishes = listOf(MealDishDto("d", "m", "DESSERT", "r", "Bûche", "photos/rd.jpg", "Mamie", true, false, 0, 1L)),
             dismissedSuggestions = listOf(DismissedSuggestionDto("e", "SUPPLY_BUY:s")),

@@ -8,10 +8,10 @@ import com.aktawind.monnoel.core.database.DefaultData
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.dao.AdventDao
 import com.aktawind.monnoel.core.database.dao.CookingDao
-import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
+import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
 import com.aktawind.monnoel.core.database.dao.TaskDao

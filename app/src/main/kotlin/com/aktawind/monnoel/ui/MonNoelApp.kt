@@ -42,6 +42,9 @@ import com.aktawind.monnoel.feature.advent.navigation.CalendarDestination
 import com.aktawind.monnoel.feature.advent.navigation.CalendarEditDestination
 import com.aktawind.monnoel.feature.advent.navigation.adventGraph
 import com.aktawind.monnoel.feature.cooking.navigation.CookingDestination
+import com.aktawind.monnoel.feature.cooking.navigation.DishEditDestination
+import com.aktawind.monnoel.feature.cooking.navigation.MealDestination
+import com.aktawind.monnoel.feature.cooking.navigation.MealEditDestination
 import com.aktawind.monnoel.feature.cooking.navigation.ProductionEditDestination
 import com.aktawind.monnoel.feature.cooking.navigation.RecipeEditDestination
 import com.aktawind.monnoel.feature.cooking.navigation.cookingGraph
@@ -95,7 +98,14 @@ private enum class TopLevelDestination(
     ),
     COOKING(
         CookingDestination,
-        listOf(CookingDestination::class, RecipeEditDestination::class, ProductionEditDestination::class),
+        listOf(
+            CookingDestination::class,
+            RecipeEditDestination::class,
+            ProductionEditDestination::class,
+            MealDestination::class,
+            MealEditDestination::class,
+            DishEditDestination::class,
+        ),
         MonNoelIcons.Cupcake,
         R.string.nav_cooking,
     ),
@@ -156,6 +166,7 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.TASK -> TaskEditDestination(id)
             LinkType.RECIPE -> RecipeEditDestination(recipeId = id)
             LinkType.PRODUCTION -> ProductionEditDestination(productionId = id)
+            LinkType.MEAL -> MealDestination(id)
         }
         navController.navigate(destination)
     }

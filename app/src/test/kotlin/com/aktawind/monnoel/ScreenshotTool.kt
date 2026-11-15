@@ -19,9 +19,13 @@ import com.aktawind.monnoel.core.domain.advent.SupplyDraft
 import com.aktawind.monnoel.core.domain.cooking.ProductionDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
+import com.aktawind.monnoel.core.domain.meals.DishDraft
+import com.aktawind.monnoel.core.domain.meals.MealDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.MealType
 import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.SurpriseType
 import com.aktawind.monnoel.core.model.TaskModule
@@ -29,6 +33,7 @@ import com.aktawind.monnoel.core.model.TaskStatus
 import com.aktawind.monnoel.di.TestDataEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.io.File
+import java.time.LocalDate
 import kotlinx.coroutines.runBlocking
 import org.junit.Assume
 import org.junit.Rule
@@ -137,13 +142,13 @@ class ScreenshotTool {
             GiftDraft(mamie.id, "Plaid tout doux", priceCents = 3_900, status = GiftStatus.TO_WRAP),
         )
         seedAdvent(data, edition.id, lea.id, tom.id)
-        seedCooking(data, edition.id)
+        seedCooking(data, edition.id, setOf(lea.id, tom.id, mamie.id))
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
     }
 
-    private suspend fun seedCooking(data: TestDataEntryPoint, editionId: String) {
+    private suspend fun seedCooking(data: TestDataEntryPoint, editionId: String, family: Set<String>) {
         suspend fun recipe(name: String, category: String) = (data.saveRecipe()(null, name, null, category, "") as AppResult.Success).value
         val sables = recipe("Sablés à la cannelle", "rcat-sables")
         val buche = recipe("Bûche chocolat-marron", "rcat-buches")
@@ -155,6 +160,24 @@ class ScreenshotTool {
         save(null, editionId, ProductionDraft(truffes.id, truffes.name, 2, "À offrir", ProductionStatus.IN_PROGRESS))
         save(null, editionId, ProductionDraft(buche.id, buche.name, 1, "Repas de Noël"))
         save(null, editionId, ProductionDraft(null, "Biscuits pour l'école", 1, "École"))
+        val eve = MealDraft(
+            "Réveillon",
+            MealType.CHRISTMAS_EVE,
+            LocalDate.of(2026, 12, 24),
+            "Chez nous",
+            family,
+            listOf("Oncle Paul", "Tata Jo"),
+            15_000,
+        )
+        val meal = (data.saveMeal()(null, editionId, eve) as AppResult.Success).value
+        val dish = data.saveDish()
+        dish(null, meal.id, DishDraft(CourseType.APERITIF, null, "Toasts au saumon"))
+        dish(null, meal.id, DishDraft(CourseType.STARTER, null, "Huîtres", toOrder = true))
+        dish(null, meal.id, DishDraft(CourseType.MAIN, null, "Chapon aux marrons", broughtBy = "Mamie"))
+        dish(null, meal.id, DishDraft(CourseType.DESSERT, buche.id, buche.name))
+        dish(null, meal.id, DishDraft(CourseType.DRINKS, recipeId = null, name = "Champagne", toOrder = true, ordered = true))
+        val lunch = MealDraft("Déjeuner de Noël", MealType.CHRISTMAS_DAY, LocalDate.of(2026, 12, 25), "Chez Mamie", family)
+        data.saveMeal()(null, editionId, lunch)
     }
 
     private suspend fun seedAdvent(data: TestDataEntryPoint, editionId: String, leaId: String, tomId: String) {
@@ -242,8 +265,22 @@ class ScreenshotTool {
         waitText("Le chemin vers Noël")
         shot("23-home")
         click("Cuisine")
-        waitText("Bûche chocolat-marron")
-        shot("30-cooking")
+        waitText("Déjeuner de Noël")
+        shot("35-meals")
+        compose.onAllNodesWithText("Réveillon", substring = true).onFirst().performClick()
+        waitText("Chapon aux marrons")
+        shot("36-meal")
+        click("Chapon aux marrons")
+        waitText("Qui apporte")
+        shot("37-dish")
+        compose.onNodeWithContentDescription("Retour").performClick()
+        waitText("Chapon aux marrons")
+        compose.onNodeWithContentDescription("Modifier le repas").performClick()
+        waitText("Autre invité")
+        shot("38-meal-edit")
+        compose.onNodeWithContentDescription("Retour").performClick()
+        waitText("Chapon aux marrons")
+        compose.onNodeWithContentDescription("Retour").performClick()
         click("Mes recettes")
         waitText("Vin chaud")
         shot("31-recipes")
@@ -251,8 +288,9 @@ class ScreenshotTool {
         waitText("Préparer pour Noël")
         shot("32-recipe")
         compose.onNodeWithContentDescription("Retour").performClick()
-        click("Pour ce Noël")
+        click("Gourmandises")
         waitText("Biscuits pour l'école")
+        shot("30-cooking")
         click("Biscuits pour l'école")
         waitText("Pour qui")
         shot("33-production")
