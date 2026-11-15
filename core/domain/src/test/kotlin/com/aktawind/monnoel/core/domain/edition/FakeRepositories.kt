@@ -39,6 +39,11 @@ class FakeEditionRepository : EditionRepository {
 class FakePreferences : UserPreferencesRepository {
     override val theme = MutableStateFlow(ThemePreference.SYSTEM)
     override val selectedEditionId = MutableStateFlow<String?>(null)
+    override val disabledSuggestions = MutableStateFlow<Set<com.aktawind.monnoel.core.model.SuggestionKind>>(emptySet())
+
+    override suspend fun setSuggestionEnabled(kind: com.aktawind.monnoel.core.model.SuggestionKind, enabled: Boolean) {
+        disabledSuggestions.value = if (enabled) disabledSuggestions.value - kind else disabledSuggestions.value + kind
+    }
 
     override suspend fun setTheme(theme: ThemePreference) {
         this.theme.value = theme

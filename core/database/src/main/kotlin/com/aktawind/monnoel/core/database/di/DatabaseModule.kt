@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
+import com.aktawind.monnoel.core.database.dao.TaskDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,6 +49,9 @@ object DatabaseModule {
 
     @Provides
     fun provideGiftIdeaDao(db: MonNoelDatabase): GiftIdeaDao = db.giftIdeaDao()
+
+    @Provides
+    fun provideTaskDao(db: MonNoelDatabase): TaskDao = db.taskDao()
 
     @Provides
     fun provideAdventDao(db: MonNoelDatabase): AdventDao = db.adventDao()

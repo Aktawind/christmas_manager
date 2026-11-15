@@ -11,6 +11,7 @@ import com.aktawind.monnoel.core.backup.format.AdventTemplateBoxDto
 import com.aktawind.monnoel.core.backup.format.AdventTemplateDto
 import com.aktawind.monnoel.core.backup.format.BackupArchive
 import com.aktawind.monnoel.core.backup.format.BackupData
+import com.aktawind.monnoel.core.backup.format.DismissedSuggestionDto
 import com.aktawind.monnoel.core.backup.format.EditionDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
@@ -18,6 +19,7 @@ import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
 import com.aktawind.monnoel.core.backup.format.PersonDto
 import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
+import com.aktawind.monnoel.core.backup.format.TaskDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -91,6 +93,8 @@ class BackupDataSourceTest {
                 AdventBoxDto("b1", "c", 1, "TREAT", "Chocolat", null, 150, "", "", "READY", "", "s"),
                 AdventBoxDto("b2", "c", 2, null, "", null, null, "", "", "TO_FIND", "", null),
             ),
+            tasks = listOf(TaskDto("t", "e", "Emballer", "", "TODO", "GIFTS", "", "GIFT", "g", "GIFT_WRAP:g", 1L, 1L)),
+            dismissedSuggestions = listOf(DismissedSuggestionDto("e", "SUPPLY_BUY:s")),
             adventTemplates = listOf(AdventTemplateDto("t", "Modèle lutin", "Lutin", "", 24, 1L)),
             adventTemplateBoxes = listOf(AdventTemplateBoxDto("tb", "t", 3, "GAME", "Énigme", null, "", "", "")),
         )

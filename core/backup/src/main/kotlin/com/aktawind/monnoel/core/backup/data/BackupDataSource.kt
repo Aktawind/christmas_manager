@@ -8,6 +8,7 @@ import com.aktawind.monnoel.core.backup.format.AdventSupplyDto
 import com.aktawind.monnoel.core.backup.format.AdventTemplateBoxDto
 import com.aktawind.monnoel.core.backup.format.AdventTemplateDto
 import com.aktawind.monnoel.core.backup.format.BackupData
+import com.aktawind.monnoel.core.backup.format.DismissedSuggestionDto
 import com.aktawind.monnoel.core.backup.format.EditionDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
@@ -15,6 +16,7 @@ import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.PersonBudgetDto
 import com.aktawind.monnoel.core.backup.format.PersonDto
 import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
+import com.aktawind.monnoel.core.backup.format.TaskDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.entity.AdventBoxEntity
 import com.aktawind.monnoel.core.database.entity.AdventCalendarEntity
@@ -22,6 +24,7 @@ import com.aktawind.monnoel.core.database.entity.AdventCalendarPersonEntity
 import com.aktawind.monnoel.core.database.entity.AdventSupplyEntity
 import com.aktawind.monnoel.core.database.entity.AdventTemplateBoxEntity
 import com.aktawind.monnoel.core.database.entity.AdventTemplateEntity
+import com.aktawind.monnoel.core.database.entity.DismissedSuggestionEntity
 import com.aktawind.monnoel.core.database.entity.EditionEntity
 import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
@@ -29,6 +32,7 @@ import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.PersonBudgetEntity
 import com.aktawind.monnoel.core.database.entity.PersonEntity
 import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
+import com.aktawind.monnoel.core.database.entity.TaskEntity
 import javax.inject.Inject
 
 /** Lit toute la base pour l'export, et la remplace intégralement lors d'un import. */
@@ -65,6 +69,13 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     it.status, it.notes, it.supplyId,
                 )
             },
+            tasks = db.taskDao().getAll().map {
+                TaskDto(
+                    it.id, it.editionId, it.title, it.description, it.status, it.module, it.notes, it.linkType, it.linkId,
+                    it.suggestionKey, it.createdAt, it.updatedAt,
+                )
+            },
+            dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
             },
@@ -78,6 +89,8 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
     suspend fun replaceAll(data: BackupData) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
+            db.taskDao().deleteAll()
+            db.taskDao().deleteAllDismissed()
             db.adventDao().deleteAllCalendars()
             db.adventDao().deleteAllTemplates()
             db.plannedGiftDao().deleteAll()
@@ -95,6 +108,15 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             db.plannedGiftDao().insertBudgets(
                 data.personBudgets.map { PersonBudgetEntity(it.editionId, it.personId, it.amountCents) },
             )
+            db.taskDao().insertAll(
+                data.tasks.map {
+                    TaskEntity(
+                        it.id, it.editionId, it.title, it.description, it.status, it.module, it.notes, it.linkType, it.linkId,
+                        it.suggestionKey, it.createdAt, it.updatedAt,
+                    )
+                },
+            )
+            db.taskDao().insertDismissed(data.dismissedSuggestions.map { DismissedSuggestionEntity(it.editionId, it.suggestionKey) })
             val advent = db.adventDao()
             advent.insertCalendars(
                 data.adventCalendars.map {

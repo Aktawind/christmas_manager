@@ -28,6 +28,8 @@ internal object BackupMigrations {
         3 to { json -> json },
         // v3 -> v4 (v0.3.0) : fournitures enrichies (photo, type, contenu, fournisseur), valeurs par défaut.
         4 to { json -> json },
+        // v4 -> v5 (v0.4.0) : ma liste de lutin, absente des anciennes sauvegardes.
+        5 to { json -> json },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

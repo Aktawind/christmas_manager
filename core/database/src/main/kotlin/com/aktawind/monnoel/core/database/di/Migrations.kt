@@ -69,5 +69,16 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+    /** v0.4.0 : ma liste de lutin (tâches) et suggestions supprimées. */
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "CREATE TABLE IF NOT EXISTS `lutin_task` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `status` TEXT NOT NULL, `module` TEXT NOT NULL, `notes` TEXT NOT NULL, `link_type` TEXT, `link_id` TEXT, `suggestion_key` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_lutin_task_edition_id` ON `lutin_task` (`edition_id`)",
+                "CREATE TABLE IF NOT EXISTS `dismissed_suggestion` (`edition_id` TEXT NOT NULL, `suggestion_key` TEXT NOT NULL, PRIMARY KEY(`edition_id`, `suggestion_key`), FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+            ).forEach(db::execSQL)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 }

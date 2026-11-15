@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.aktawind.monnoel.core.backup.DefaultBackupRepository
 import com.aktawind.monnoel.core.common.ApplicationScope
+import com.aktawind.monnoel.core.domain.tasks.LutinAutoSync
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,8 @@ class MonNoelApplication :
 
     @Inject lateinit var backups: DefaultBackupRepository
 
+    @Inject lateinit var lutinAutoSync: LutinAutoSync
+
     @Inject @ApplicationScope
     lateinit var appScope: CoroutineScope
 
@@ -26,6 +29,7 @@ class MonNoelApplication :
 
     override fun onCreate() {
         super.onCreate()
+        lutinAutoSync.start()
         appScope.launch { runCatching { backups.ensureScheduled() } }
     }
 }

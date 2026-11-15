@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 4
+const val BACKUP_FORMAT_VERSION = 5
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -45,6 +45,8 @@ data class BackupData(
     val adventBoxes: List<AdventBoxDto> = emptyList(),
     val adventTemplates: List<AdventTemplateDto> = emptyList(),
     val adventTemplateBoxes: List<AdventTemplateBoxDto> = emptyList(),
+    val tasks: List<TaskDto> = emptyList(),
+    val dismissedSuggestions: List<DismissedSuggestionDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -56,6 +58,7 @@ data class BackupData(
         "adventCalendars" to adventCalendars.size,
         "adventBoxes" to adventBoxes.size,
         "adventTemplates" to adventTemplates.size,
+        "tasks" to tasks.size,
     )
 }
 
@@ -199,6 +202,25 @@ data class AdventTemplateBoxDto(
     val url: String = "",
     val notes: String = "",
 )
+
+@Serializable
+data class TaskDto(
+    val id: String,
+    val editionId: String,
+    val title: String,
+    val description: String = "",
+    val status: String,
+    val module: String,
+    val notes: String = "",
+    val linkType: String? = null,
+    val linkId: String? = null,
+    val suggestionKey: String? = null,
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+@Serializable
+data class DismissedSuggestionDto(val editionId: String, val suggestionKey: String)
 
 internal val backupJson = Json {
     prettyPrint = true
