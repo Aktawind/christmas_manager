@@ -88,6 +88,11 @@
     <string name="idea_no_persons">Ajoute des personnes dans l’onglet Personnes pour les associer.</string>
     <string name="person_idea_to_gift">🎁 En faire un cadeau pour Noël %1$d</string>
     <string name="person_idea_edit">✏️ Modifier l’idée</string>
+    <string name="gift_duplicate">Dupliquer pour…</string>
+    <string name="gift_duplicate_title">Dupliquer « %1$s » pour…</string>
+    <string name="gift_duplicate_hint">Une copie par personne, au statut « À acheter » (titre, prix, boutique, lien, catégorie et photo repris).</string>
+    <string name="gift_duplicate_confirm">Dupliquer</string>
+    <string name="gift_duplicated">Cadeau dupliqué pour %1$s 🎁</string>
     <string name="idea_offer_hint">Pour en faire un cadeau : onglet Idées → « Offrir à… ».</string>
     <string name="person_new_title">Nouvelle personne</string>
     <string name="person_edit_title">Modifier la fiche</string>

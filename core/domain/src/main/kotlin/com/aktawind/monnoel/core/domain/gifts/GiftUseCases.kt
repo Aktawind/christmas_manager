@@ -185,6 +185,46 @@ class SaveGiftUseCase @Inject constructor(
 }
 
 /** Transforme une idée en cadeau pour une personne et un Noël (copie figée de l'idée). */
+
+/**
+ * Duplique un cadeau pour d'autres personnes : mêmes titre, prix, boutique, lien, catégorie,
+ * notes et photo (copiée), au statut « À acheter ». La date d'achat et le suivi ne sont pas repris.
+ */
+class DuplicateGiftUseCase @Inject constructor(
+    private val gifts: PlannedGiftRepository,
+    private val photos: PhotoRepository,
+    private val saveGift: SaveGiftUseCase,
+) {
+    suspend operator fun invoke(giftId: String, personIds: Set<String>): AppResult<List<PlannedGift>> {
+        if (personIds.isEmpty()) return AppResult.Failure(AppError.InvalidInput)
+        val gift = gifts.getGift(giftId) ?: return AppResult.Failure(AppError.NotFound)
+        val copies = mutableListOf<PlannedGift>()
+        for (personId in personIds) {
+            val photo = gift.photoPath?.let { photos.copyPhoto(it) }
+            val draft = GiftDraft(
+                personId = personId,
+                title = gift.title,
+                description = gift.description,
+                photoPath = photo,
+                priceCents = gift.priceCents,
+                shop = gift.shop,
+                orderUrl = gift.orderUrl,
+                notes = gift.notes,
+                categoryId = gift.categoryId,
+                ideaId = gift.ideaId,
+            )
+            when (val result = saveGift(null, gift.editionId, draft)) {
+                is AppResult.Success -> copies += result.value
+                is AppResult.Failure -> {
+                    photo?.let { photos.deletePhoto(it) }
+                    return result
+                }
+            }
+        }
+        return AppResult.Success(copies)
+    }
+}
+
 class OfferIdeaUseCase @Inject constructor(
     private val ideas: GiftIdeaRepository,
     private val photos: PhotoRepository,

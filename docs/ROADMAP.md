@@ -126,6 +126,7 @@ Pas de dates ni de priorités (ADR 0006).
 | M-007 | Coût estimé par repas (alimentera le budget de la v0.7)                         | 🧪 |
 | M-008 | Accueil « La table de fête », recherche des repas et des plats, sauvegarde      | 🧪 |
 | X-101 | Retours : chemin vers Noël droit, « Ma liste », idée → cadeau depuis la fiche personne (avec photo) | 🧪 |
+| X-103 | Dupliquer un cadeau pour une ou plusieurs autres personnes                     | 🧪 |
 | X-102 | Calendrier : appui long = sélection (barre en haut), appui long + glisser = déplacer ; notes retirées | 🧪 |
 
 ## v0.7.0 — Les comptes du Père Noël 💰

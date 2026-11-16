@@ -200,4 +200,29 @@ class GiftUseCasesTest {
         SetPersonBudgetUseCase(gifts, guard)("e", "lea", null)
         assertTrue(gifts.budgets.value.isEmpty())
     }
+
+    @Test
+    fun `dupliquer un cadeau pour d'autres personnes`() = runTest {
+        setUp()
+        persons.upsert(Person("tom", "Tom", "", null, "", "", Instant.EPOCH, Instant.EPOCH))
+        persons.upsert(Person("jo", "Jo", "", null, "", "", Instant.EPOCH, Instant.EPOCH))
+        val draft =
+            GiftDraft(
+                "lea",
+                "Pyjama de Noël",
+                priceCents = 2_500,
+                shop = "Boutique",
+                photoPath = "photos/p.jpg",
+                status = GiftStatus.WRAPPED,
+            )
+        val gift = (saveGift(null, "e", draft) as AppResult.Success).value
+        val copies = (DuplicateGiftUseCase(gifts, photos, saveGift)(gift.id, setOf("tom", "jo")) as AppResult.Success).value
+        assertEquals(setOf("Tom", "Jo"), copies.map { it.recipientName }.toSet())
+        assertTrue(copies.all { it.title == "Pyjama de Noël" && it.priceCents == 2_500L && it.status == GiftStatus.TO_BUY })
+        // Chaque copie a sa propre photo.
+        assertEquals(2, copies.mapNotNull { it.photoPath }.toSet().size)
+        assertTrue(copies.none { it.photoPath == "photos/p.jpg" })
+        assertEquals(3, gifts.items.value.size)
+        assertEquals(AppResult.Failure(AppError.InvalidInput), DuplicateGiftUseCase(gifts, photos, saveGift)(gift.id, emptySet()))
+    }
 }

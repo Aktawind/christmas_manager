@@ -8,6 +8,7 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.ApplicationScope
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.DeleteGiftUseCase
+import com.aktawind.monnoel.core.domain.gifts.DuplicateGiftUseCase
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.SaveGiftUseCase
 import com.aktawind.monnoel.core.domain.gifts.centsToInput
@@ -24,6 +25,7 @@ import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
+import com.aktawind.monnoel.feature.gifts.R
 import com.aktawind.monnoel.feature.gifts.navigation.GiftEditDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
@@ -80,6 +82,7 @@ class GiftEditViewModel @Inject constructor(
     private val photos: PhotoRepository,
     private val saveGift: SaveGiftUseCase,
     private val deleteGift: DeleteGiftUseCase,
+    private val duplicateGift: DuplicateGiftUseCase,
     @ApplicationScope appScope: CoroutineScope,
 ) : ViewModel() {
     private val drafts = PhotoDrafts(photos, appScope)
@@ -181,6 +184,21 @@ class GiftEditViewModel @Inject constructor(
                     it.copy(busy = false, done = true)
                 }
                 is AppResult.Failure -> it.copy(busy = false, message = result.error.toUiMessage())
+            }
+        }
+    }
+
+    /** Copie le cadeau (tel qu'enregistré) pour d'autres personnes. */
+    fun duplicate(personIds: Set<String>) = viewModelScope.launch {
+        val id = route.giftId ?: return@launch
+        val result = duplicateGift(id, personIds)
+        state.update {
+            when (result) {
+                is AppResult.Success -> {
+                    val names = result.value.joinToString(", ") { g -> g.recipientName }
+                    it.copy(message = UiMessage(R.string.gift_duplicated, listOf(names)))
+                }
+                is AppResult.Failure -> it.copy(message = result.error.toUiMessage())
             }
         }
     }

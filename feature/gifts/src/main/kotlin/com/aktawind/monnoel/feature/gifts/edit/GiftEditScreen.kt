@@ -2,6 +2,9 @@ package com.aktawind.monnoel.feature.gifts.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -35,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.ui.DropdownField
 import com.aktawind.monnoel.core.ui.EditorScaffold
 import com.aktawind.monnoel.core.ui.MoneyInput
@@ -59,6 +64,7 @@ fun GiftEditRoute(onDone: () -> Unit, viewModel: GiftEditViewModel = hiltViewMod
     LaunchedEffect(state.done) { if (state.done) onDone() }
     var pickIdea by rememberSaveable { mutableStateOf(false) }
     var pickDate by rememberSaveable { mutableStateOf(false) }
+    var duplicating by rememberSaveable { mutableStateOf(false) }
     val form = state.form
     val enabled = !state.readOnly && !state.loading
     val uriHandler = LocalUriHandler.current
@@ -85,6 +91,9 @@ fun GiftEditRoute(onDone: () -> Unit, viewModel: GiftEditViewModel = hiltViewMod
         if (state.readOnly) Text(stringResource(R.string.gifts_read_only), color = MaterialTheme.colorScheme.tertiary)
         state.year?.let {
             Text(stringResource(R.string.gift_for_year, it), style = MaterialTheme.typography.labelLarge)
+        }
+        if (!state.isNew && !state.readOnly && state.persons.any { it.id != form.personId }) {
+            OutlinedButton(onClick = { duplicating = true }) { Text(stringResource(R.string.gift_duplicate)) }
         }
         if (state.isNew && state.ideas.isNotEmpty()) {
             OutlinedButton(onClick = { pickIdea = true }) { Text(stringResource(R.string.gift_from_idea)) }
@@ -188,6 +197,17 @@ fun GiftEditRoute(onDone: () -> Unit, viewModel: GiftEditViewModel = hiltViewMod
             onDismiss = { pickIdea = false },
         )
     }
+    if (duplicating) {
+        DuplicateDialog(
+            title = form.title,
+            persons = state.persons.filter { it.id != form.personId },
+            onConfirm = { ids ->
+                duplicating = false
+                viewModel.duplicate(ids)
+            },
+            onDismiss = { duplicating = false },
+        )
+    }
     if (pickDate) {
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = (form.purchaseDate ?: LocalDate.now()).atStartOfDay().toInstant(
@@ -256,5 +276,36 @@ private fun IdeaPickerDialog(ideas: List<GiftIdea>, onPick: (GiftIdea) -> Unit, 
                 Text(stringResource(com.aktawind.monnoel.core.ui.R.string.action_cancel))
             }
         },
+    )
+}
+
+/** Choisir les personnes pour qui dupliquer le cadeau. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DuplicateDialog(title: String, persons: List<Person>, onConfirm: (Set<String>) -> Unit, onDismiss: () -> Unit) {
+    var chosen by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.gift_duplicate_title, title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.gift_duplicate_hint), style = MaterialTheme.typography.bodySmall)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    persons.forEach { person ->
+                        FilterChip(
+                            selected = person.id in chosen,
+                            onClick = { chosen = if (person.id in chosen) chosen - person.id else chosen + person.id },
+                            label = { Text(person.displayName) },
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(chosen.toSet()) }, enabled = chosen.isNotEmpty()) {
+                Text(stringResource(R.string.gift_duplicate_confirm))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(com.aktawind.monnoel.core.ui.R.string.action_cancel)) } },
     )
 }
