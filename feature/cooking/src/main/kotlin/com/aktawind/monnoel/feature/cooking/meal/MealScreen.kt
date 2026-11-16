@@ -2,6 +2,7 @@ package com.aktawind.monnoel.feature.cooking.meal
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,13 +15,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -30,7 +35,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -103,7 +110,9 @@ fun MealRoute(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item { MealHeader(meal, state.personNames) }
-            CourseType.entries.forEach { course ->
+            // Les moments retenus pour ce repas, plus ceux qui contiennent déjà des plats.
+            val shown = CourseType.entries.filter { c -> c in meal.courses || state.dishes.any { it.course == c } }
+            shown.forEach { course ->
                 val dishes = state.dishes.filter { it.course == course }
                 if (state.readOnly && dishes.isEmpty()) return@forEach
                 item(key = "h-$course") {
@@ -120,6 +129,12 @@ fun MealRoute(
                                     Icon(Icons.Filled.Add, contentDescription = null)
                                     Text(stringResource(R.string.dish_add))
                                 }
+                                if (dishes.isEmpty()) {
+                                    val courseName = stringResource(course.label)
+                                    IconButton(onClick = { viewModel.setCourse(course, false) }) {
+                                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.course_remove, courseName))
+                                    }
+                                }
                             }
                         }
                     }
@@ -129,6 +144,32 @@ fun MealRoute(
                         onOpenDish(meal.id, dish.id)
                     }, onOrdered = { viewModel.setOrdered(dish.id, it) })
                 }
+            }
+            val missing = CourseType.entries - shown.toSet()
+            if (!state.readOnly && missing.isNotEmpty()) {
+                item(key = "add-course") { AddCourseButton(missing, onAdd = { viewModel.setCourse(it, true) }) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddCourseButton(missing: List<CourseType>, onAdd: (CourseType) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box(Modifier.widthIn(max = 840.dp).fillMaxWidth().padding(top = 20.dp)) {
+        OutlinedButton(onClick = { open = true }) {
+            Icon(Icons.Filled.Add, contentDescription = null)
+            Text(stringResource(R.string.course_add))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            missing.forEach { course ->
+                DropdownMenuItem(
+                    text = { Text("${course.emoji}  ${stringResource(course.label)}") },
+                    onClick = {
+                        open = false
+                        onAdd(course)
+                    },
+                )
             }
         }
     }

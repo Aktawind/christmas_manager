@@ -104,7 +104,10 @@ class BackupDataSourceTest {
             recipes = listOf(RecipeDto("r", "Bûche", "photos/r.jpg", "rc", "", 1L, 1L)),
             productions = listOf(ProductionDto("pr", "e", "r", "Bûche", "photos/rp.jpg", 2, "Réveillon", "TO_DO", null, "", 1L, 1L)),
             meals = listOf(
-                MealDto("m", "e", "Réveillon", "CHRISTMAS_EVE", "2026-12-24", "Chez nous", "Oncle Paul\nTata Jo", 12_000, "", 1L, 1L),
+                MealDto(
+                    "m", "e", "Réveillon", "CHRISTMAS_EVE", "2026-12-24", "Chez nous", "Oncle Paul\nTata Jo", 12_000, "", 1L, 1L,
+                    "STARTER,DESSERT",
+                ),
             ),
             mealPersons = listOf(MealPersonDto("m", "p")),
             mealDishes = listOf(MealDishDto("d", "m", "DESSERT", "r", "Bûche", "photos/rd.jpg", "Mamie", true, false, 0, 1L)),

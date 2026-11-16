@@ -1,6 +1,8 @@
 package com.aktawind.monnoel.feature.advent.calendar
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +49,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +61,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.RectangleShape
@@ -66,6 +70,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -131,8 +136,24 @@ fun CalendarRoute(
     }
     val calendar = state.calendar ?: return
 
+    fun closeSelection() {
+        selecting = false
+        selected = emptyList()
+    }
+    BackHandler(enabled = selecting) { closeSelection() }
+
     Scaffold(
         topBar = {
+            if (selecting) {
+                SelectionBar(
+                    count = selected.size,
+                    onAll = { selected = state.boxes.map { it.id } },
+                    onEmpty = { selected = state.boxes.filter { it.isEmpty }.map { it.id } },
+                    onEdit = { bulkOpen = true },
+                    onClose = ::closeSelection,
+                )
+                return@Scaffold
+            }
             TopAppBar(
                 title = { Text(calendar.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
@@ -173,21 +194,6 @@ fun CalendarRoute(
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
-        bottomBar = {
-            if (selecting) {
-                SelectionBar(
-                    count = selected.size,
-                    onAll = { selected = state.boxes.map { it.id } },
-                    onEmpty = { selected = state.boxes.filter { it.isEmpty }.map { it.id } },
-                    onNone = { selected = emptyList() },
-                    onEdit = { bulkOpen = true },
-                    onClose = {
-                        selecting = false
-                        selected = emptyList()
-                    },
-                )
-            }
-        },
     ) { padding ->
         BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
             val columns = when {
@@ -201,22 +207,34 @@ fun CalendarRoute(
                 boxes = visible,
                 shares = state.shares,
                 supplyPhotos = state.supplies.associate { it.id to it.photoPath },
-                canDrag = !state.readOnly && !onlyToPrepare && !selecting,
+                canSelect = !state.readOnly,
+                canDrag = !state.readOnly && !onlyToPrepare,
                 selected = if (selecting) selected.toSet() else null,
                 onOpenBox = { id ->
-                    if (selecting) selected = if (id in selected) selected - id else selected + id else onOpenBox(id)
+                    if (selecting) {
+                        selected = if (id in selected) selected - id else selected + id
+                        if (selected.isEmpty()) selecting = false
+                    } else {
+                        onOpenBox(id)
+                    }
+                },
+                // Appui long : la case est sélectionnée (mode sélection) ; si l'on glisse, elle se déplace.
+                onLongPress = { id ->
+                    val added = id !in selected
+                    selecting = true
+                    if (added) selected = selected + id
+                    added
+                },
+                onLongPressBecameDrag = { id ->
+                    selected = selected - id
+                    if (selected.isEmpty()) selecting = false
                 },
                 onSwap = viewModel::swap,
                 header = {
                     CalendarHeader(
                         state = state,
                         onlyToPrepare = onlyToPrepare,
-                        selecting = selecting,
                         onToggleFilter = { onlyToPrepare = !onlyToPrepare },
-                        onToggleSelecting = {
-                            selecting = !selecting
-                            selected = emptyList()
-                        },
                     )
                 },
                 footer = {
@@ -309,9 +327,7 @@ fun CalendarRoute(
 private fun CalendarHeader(
     state: CalendarUiState,
     onlyToPrepare: Boolean,
-    selecting: Boolean,
     onToggleFilter: () -> Unit,
-    onToggleSelecting: () -> Unit,
 ) {
     val calendar = state.calendar ?: return
     val summary = state.summary
@@ -358,31 +374,29 @@ private fun CalendarHeader(
             FilterChip(selected = onlyToPrepare, onClick = onToggleFilter, label = {
                 Text(stringResource(R.string.calendar_filter_to_prepare))
             })
-            if (!state.readOnly) {
-                FilterChip(selected = selecting, onClick = onToggleSelecting, label = { Text(stringResource(R.string.calendar_select)) })
-            }
-            if (!state.readOnly && !onlyToPrepare) {
-                Text(
-                    stringResource(if (selecting) R.string.calendar_select_hint else R.string.calendar_drag_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = secondary,
-                )
-            }
         }
     }
 }
 
-/** Grille des cases avec glisser-déposer : un appui long sur une case, puis la déposer sur une autre pour les échanger. */
+/**
+ * Grille des cases. Appui long : la case est sélectionnée ; en glissant sans relâcher, elle se
+ * déplace et s'échange avec la case où on la dépose.
+ */
 @Composable
 private fun BoxGrid(
     columns: Int,
     boxes: List<AdventBox>,
     shares: Map<String, Long>,
     supplyPhotos: Map<String, String?>,
+    canSelect: Boolean,
     canDrag: Boolean,
     /** Cases sélectionnées (mode sélection), ou null hors sélection. */
     selected: Set<String>?,
     onOpenBox: (String) -> Unit,
+    /** Sélectionne la case ; renvoie vrai si elle vient d'être ajoutée à la sélection. */
+    onLongPress: (String) -> Boolean,
+    /** L'appui long devient un déplacement : on annule la sélection qu'il avait faite. */
+    onLongPressBecameDrag: (String) -> Unit,
     onSwap: (String, String) -> Unit,
     header: @Composable () -> Unit,
     footer: @Composable () -> Unit,
@@ -392,6 +406,12 @@ private fun BoxGrid(
     var dragOffset by remember { mutableStateOf(Offset.Zero) }
     var hovered by remember { mutableStateOf<String?>(null) }
     val currentSwap by rememberUpdatedState(onSwap)
+    val currentLongPress by rememberUpdatedState(onLongPress)
+    val currentBecameDrag by rememberUpdatedState(onLongPressBecameDrag)
+    val dragAllowed by rememberUpdatedState(canDrag)
+    val moveThreshold = with(LocalDensity.current) { 16.dp.toPx() }
+    // Case ajoutée à la sélection par le dernier appui long (annulé si l'appui devient un déplacement).
+    var lastLongPressAdded by remember { mutableStateOf<String?>(null) }
 
     fun targetAt(id: String): String? {
         val start = bounds[id] ?: return null
@@ -428,20 +448,29 @@ private fun BoxGrid(
                         }
                     }
                     .then(
-                        if (canDrag) {
+                        if (canSelect) {
                             Modifier.pointerInput(box.id) {
+                                var total = Offset.Zero
                                 detectDragGesturesAfterLongPress(
                                     onDragStart = {
-                                        dragging = box.id
+                                        total = Offset.Zero
                                         dragOffset = Offset.Zero
                                     },
                                     onDrag = { change, amount ->
+                                        if (!dragAllowed) return@detectDragGesturesAfterLongPress
                                         change.consume()
-                                        dragOffset += amount
-                                        hovered = targetAt(box.id)
+                                        total += amount
+                                        if (dragging == null && total.getDistance() > moveThreshold) {
+                                            dragging = box.id
+                                            if (lastLongPressAdded == box.id) currentBecameDrag(box.id)
+                                        }
+                                        if (dragging == box.id) {
+                                            dragOffset = total
+                                            hovered = targetAt(box.id)
+                                        }
                                     },
                                     onDragEnd = {
-                                        targetAt(box.id)?.let { currentSwap(box.id, it) }
+                                        if (dragging == box.id) targetAt(box.id)?.let { currentSwap(box.id, it) }
                                         dragging = null
                                         hovered = null
                                         dragOffset = Offset.Zero
@@ -458,6 +487,11 @@ private fun BoxGrid(
                         },
                     ),
                 onClick = { onOpenBox(box.id) },
+                onLongClick = if (canSelect) {
+                    { lastLongPressAdded = if (currentLongPress(box.id)) box.id else null }
+                } else {
+                    null
+                },
             )
         }
         item(span = { GridItemSpan(maxLineSpan) }) { footer() }
@@ -473,6 +507,7 @@ private fun BoxCell(
     selected: Boolean?,
     modifier: Modifier,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
 ) {
     val gold = LocalMonNoelColors.current.gold
     val (container, border) = when (box.status) {
@@ -481,10 +516,10 @@ private fun BoxCell(
         BoxStatus.TO_FIND -> MaterialTheme.colorScheme.surfaceContainerLow to MaterialTheme.colorScheme.outlineVariant
     }
     val description = stringResource(R.string.box_cell_description, box.number, box.title.ifBlank { "—" }, stringResource(box.status.label))
+    val shape = MaterialTheme.shapes.medium
     Surface(
-        onClick = onClick,
         color = container,
-        shape = MaterialTheme.shapes.medium,
+        shape = shape,
         border = BorderStroke(
             if (highlighted || selected == true) 3.dp else 1.dp,
             when {
@@ -493,7 +528,11 @@ private fun BoxCell(
                 else -> border
             },
         ),
-        modifier = modifier.aspectRatio(1.3f).semantics { contentDescription = description },
+        modifier = modifier
+            .aspectRatio(1.3f)
+            .clip(shape)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .semantics { contentDescription = description },
     ) {
         Box(Modifier.fillMaxSize()) {
             if (photoPath != null) {
@@ -569,7 +608,6 @@ private fun SuppliesSection(
                 heading()
             },
         )
-        Text(stringResource(R.string.supplies_hint), style = MaterialTheme.typography.bodySmall, color = secondary)
         supplies.forEach { supply ->
             val linked = boxes.filter { it.supplyId == supply.id }.map { it.number }.sorted()
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -603,27 +641,24 @@ private fun SuppliesSection(
     }
 }
 
-/** Barre du mode sélection : nombre de cases, raccourcis de sélection, « Modifier… ». */
+/** Barre du haut en mode sélection (comme partout) : fermer, nombre, tout / les vides, « Modifier… ». */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SelectionBar(count: Int, onAll: () -> Unit, onEmpty: () -> Unit, onNone: () -> Unit, onEdit: () -> Unit, onClose: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                stringResource(R.string.selection_count, count),
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.weight(1f),
-            )
+private fun SelectionBar(count: Int, onAll: () -> Unit, onEmpty: () -> Unit, onEdit: () -> Unit, onClose: () -> Unit) {
+    TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.selection_close)) }
+        },
+        title = { Text(stringResource(R.string.selection_count, count)) },
+        actions = {
             TextButton(onClick = onAll) { Text(stringResource(R.string.selection_all)) }
             TextButton(onClick = onEmpty) { Text(stringResource(R.string.selection_empty)) }
-            TextButton(onClick = onNone) { Text(stringResource(R.string.selection_none)) }
-            Button(onClick = onEdit, enabled = count > 0) { Text(stringResource(R.string.selection_edit)) }
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.selection_close)) }
-        }
-    }
+            Button(onClick = onEdit, enabled = count > 0, modifier = Modifier.padding(end = 8.dp)) {
+                Text(stringResource(R.string.selection_edit))
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    )
 }
 
 /** Modifier plusieurs cases d'un coup. Chaque champ laissé sur « ne pas changer » est ignoré. */

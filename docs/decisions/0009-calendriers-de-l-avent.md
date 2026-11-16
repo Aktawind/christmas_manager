@@ -3,6 +3,12 @@
 - Date : 2026-11-14
 - Statut : accepté
 
+## Révision (2026-11-16, retour utilisatrice)
+
+- Plus de bouton « Sélectionner plusieurs cases » ni de notes d'aide : **appui long** sur une
+  case = elle est sélectionnée et la barre du haut devient la barre de sélection (Toutes,
+  Les vides, Modifier…). **Appui long puis glisser** sans relâcher = déplacer la case.
+
 ## Décision
 
 - `advent_calendar` (annuel) avec `box_count` (24 par défaut, 1 à 31) et personnes

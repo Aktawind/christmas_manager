@@ -15,7 +15,11 @@ qui vient, où, quand, et ce qu'on mange, toujours sans ingrédients ni étapes.
   **coût estimé facultatif par repas** (choix de l'utilisatrice : pas de prix par plat).
 - **Convives** : personnes déjà présentes dans l'application (table `meal_person`) **et**
   invités en texte libre (une ligne par invité), sans créer de fiche.
-- **Plats** rangés par moment : apéritif, entrée, plat, fromage, dessert, boissons.
+- **Moments du menu** propres à chaque repas : apéritif, entrée, plat, fromage, dessert, salé,
+  sucré, boissons. Le type propose les siens (goûter : Sucré, Boissons ; brunch : Salé, Sucré,
+  Boissons ; les autres : de l'apéritif aux boissons) ; on en ajoute ou on en retire un vide
+  (retour de l'utilisatrice : un goûter n'a pas d'entrée ni de fromage).
+- **Plats** rangés par moment.
   Un plat est une recette de la bibliothèque (nom et photo copiés, historique figé) ou un
   nom libre ; « qui apporte ? » en texte libre.
 - **À commander** : un plat peut être marqué « à commander » ; le lutin propose alors
@@ -23,7 +27,7 @@ qui vient, où, quand, et ce qu'on mange, toujours sans ingrédients ni étapes.
   donne la suggestion « Préparer le menu ». Rien n'est ajouté automatiquement (ADR 0010).
 - Choisir le type propose un nom et, pour le 24 et le 25, la date ; les deux restent modifiables.
 - Onglet Cuisine : **Repas** · Gourmandises (les préparations de la v0.5) · Mes recettes.
-- Base Room v8, format de sauvegarde v7.
+- Base Room v9 (v8 : premier test de la v0.6.0), format de sauvegarde v7.
 
 ## Conséquences
 

@@ -86,6 +86,8 @@
     <string name="idea_edit_title">Idée</string>
     <string name="idea_delete_confirm">Supprimer cette idée ? Les cadeaux déjà prévus à partir d’elle sont conservés.</string>
     <string name="idea_no_persons">Ajoute des personnes dans l’onglet Personnes pour les associer.</string>
+    <string name="person_idea_to_gift">🎁 En faire un cadeau pour Noël %1$d</string>
+    <string name="person_idea_edit">✏️ Modifier l’idée</string>
     <string name="idea_offer_hint">Pour en faire un cadeau : onglet Idées → « Offrir à… ».</string>
     <string name="person_new_title">Nouvelle personne</string>
     <string name="person_edit_title">Modifier la fiche</string>

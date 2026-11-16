@@ -8,7 +8,9 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.meals.SetDishOrderedUseCase
+import com.aktawind.monnoel.core.domain.meals.SetMealCourseUseCase
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
+import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.Meal
 import com.aktawind.monnoel.core.model.MealDish
 import com.aktawind.monnoel.core.ui.UiMessage
@@ -40,6 +42,7 @@ class MealViewModel @Inject constructor(
     persons: PersonRepository,
     observeEditions: ObserveEditionsUseCase,
     private val setOrdered: SetDishOrderedUseCase,
+    private val setCourse: SetMealCourseUseCase,
 ) : ViewModel() {
     private val mealId = savedStateHandle.toRoute<MealDestination>().mealId
     private val message = MutableStateFlow<UiMessage?>(null)
@@ -64,6 +67,10 @@ class MealViewModel @Inject constructor(
 
     fun setOrdered(dishId: String, ordered: Boolean) {
         viewModelScope.launch { (setOrdered(dishId, ordered) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() } }
+    }
+
+    fun setCourse(course: CourseType, enabled: Boolean) {
+        viewModelScope.launch { (setCourse(mealId, course, enabled) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() } }
     }
 
     fun messageShown() {

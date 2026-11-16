@@ -137,6 +137,8 @@ val CourseType.label: Int
         CourseType.MAIN -> R.string.course_main
         CourseType.CHEESE -> R.string.course_cheese
         CourseType.DESSERT -> R.string.course_dessert
+        CourseType.SAVORY -> R.string.course_savory
+        CourseType.SWEET -> R.string.course_sweet
         CourseType.DRINKS -> R.string.course_drinks
     }
 
@@ -147,5 +149,7 @@ val CourseType.emoji: String
         CourseType.MAIN -> "🍗"
         CourseType.CHEESE -> "🧀"
         CourseType.DESSERT -> "🍰"
+        CourseType.SAVORY -> "🥐"
+        CourseType.SWEET -> "🍪"
         CourseType.DRINKS -> "🍷"
     }

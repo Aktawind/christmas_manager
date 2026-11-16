@@ -5,11 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.aktawind.monnoel.core.common.AppResult
@@ -178,6 +180,9 @@ class ScreenshotTool {
         dish(null, meal.id, DishDraft(CourseType.DRINKS, recipeId = null, name = "Champagne", toOrder = true, ordered = true))
         val lunch = MealDraft("Déjeuner de Noël", MealType.CHRISTMAS_DAY, LocalDate.of(2026, 12, 25), "Chez Mamie", family)
         data.saveMeal()(null, editionId, lunch)
+        val snack = MealDraft("Goûter des cousins", MealType.SNACK, LocalDate.of(2026, 12, 26), "Chez nous")
+        val snackMeal = (data.saveMeal()(null, editionId, snack) as AppResult.Success).value
+        dish(null, snackMeal.id, DishDraft(CourseType.SWEET, sables.id, sables.name))
     }
 
     private suspend fun seedAdvent(data: TestDataEntryPoint, editionId: String, leaId: String, tomId: String) {
@@ -251,7 +256,12 @@ class ScreenshotTool {
         click("Calendrier de Tom")
         waitText("Biscuits")
         shot("19-calendar")
-        click("Sélectionner plusieurs cases")
+        compose.onAllNodesWithContentDescription("Case 3 :", substring = true).onFirst().performTouchInput {
+            down(center)
+            advanceEventTime(1_500)
+            up()
+        }
+        waitText("sélectionnée")
         click("Les vides")
         shot("20-selection")
         click("Ma liste")
@@ -281,6 +291,12 @@ class ScreenshotTool {
         compose.onNodeWithContentDescription("Retour").performClick()
         waitText("Chapon aux marrons")
         compose.onNodeWithContentDescription("Retour").performClick()
+        waitText("Goûter des cousins")
+        compose.onAllNodesWithText("Goûter des cousins", substring = true).onFirst().performClick()
+        waitText("Ajouter un moment")
+        shot("39-snack")
+        compose.onNodeWithContentDescription("Retour").performClick()
+        waitText("Déjeuner de Noël")
         click("Mes recettes")
         waitText("Vin chaud")
         shot("31-recipes")

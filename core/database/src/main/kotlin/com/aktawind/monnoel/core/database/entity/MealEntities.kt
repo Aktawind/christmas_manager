@@ -9,6 +9,7 @@ import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.Meal
 import com.aktawind.monnoel.core.model.MealDish
 import com.aktawind.monnoel.core.model.MealType
+import com.aktawind.monnoel.core.model.defaultCourses
 import java.time.Instant
 import java.time.LocalDate
 
@@ -33,6 +34,8 @@ data class MealEntity(
     val notes: String,
     @ColumnInfo(name = "created_at") val createdAt: Long,
     @ColumnInfo(name = "updated_at") val updatedAt: Long,
+    /** Moments du menu, séparés par des virgules ; vide = moments par défaut du type. */
+    @ColumnInfo(defaultValue = "") val courses: String = "",
 )
 
 @Entity(
@@ -71,24 +74,29 @@ data class MealDishEntity(
     @ColumnInfo(name = "created_at") val createdAt: Long,
 )
 
-fun MealEntity.asModel(personIds: Set<String>) = Meal(
-    id = id,
-    editionId = editionId,
-    name = name,
-    type = runCatching { MealType.valueOf(type) }.getOrDefault(MealType.OTHER),
-    date = date?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
-    place = place,
-    personIds = personIds,
-    guests = guests.split('\n').map { it.trim() }.filter { it.isNotEmpty() },
-    estimatedCostCents = estimatedCostCents,
-    notes = notes,
-    createdAt = Instant.ofEpochMilli(createdAt),
-    updatedAt = Instant.ofEpochMilli(updatedAt),
-)
+fun MealEntity.asModel(personIds: Set<String>): Meal {
+    val mealType = runCatching { MealType.valueOf(type) }.getOrDefault(MealType.OTHER)
+    val chosen = courses.split(',').mapNotNull { c -> runCatching { CourseType.valueOf(c.trim()) }.getOrNull() }
+    return Meal(
+        id = id,
+        editionId = editionId,
+        name = name,
+        type = mealType,
+        date = date?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
+        place = place,
+        personIds = personIds,
+        guests = guests.split('\n').map { it.trim() }.filter { it.isNotEmpty() },
+        estimatedCostCents = estimatedCostCents,
+        notes = notes,
+        courses = chosen.ifEmpty { mealType.defaultCourses() }.distinct().sorted(),
+        createdAt = Instant.ofEpochMilli(createdAt),
+        updatedAt = Instant.ofEpochMilli(updatedAt),
+    )
+}
 
 fun Meal.asEntity() = MealEntity(
     id, editionId, name, type.name, date?.toString(), place, guests.joinToString("\n"), estimatedCostCents, notes,
-    createdAt.toEpochMilli(), updatedAt.toEpochMilli(),
+    createdAt.toEpochMilli(), updatedAt.toEpochMilli(), courses.joinToString(",") { it.name },
 )
 
 fun MealDishEntity.asModel() = MealDish(

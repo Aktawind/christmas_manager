@@ -6,7 +6,14 @@ import java.time.LocalDate
 enum class MealType { CHRISTMAS_EVE, CHRISTMAS_DAY, BRUNCH, SNACK, FRIENDS, OTHER }
 
 /** Les moments du menu, dans l'ordre du repas. */
-enum class CourseType { APERITIF, STARTER, MAIN, CHEESE, DESSERT, DRINKS }
+enum class CourseType { APERITIF, STARTER, MAIN, CHEESE, DESSERT, SAVORY, SWEET, DRINKS }
+
+/** Moments proposés à la création d'un repas, selon son type (on peut en ajouter ou en retirer). */
+fun MealType.defaultCourses(): List<CourseType> = when (this) {
+    MealType.BRUNCH -> listOf(CourseType.SAVORY, CourseType.SWEET, CourseType.DRINKS)
+    MealType.SNACK -> listOf(CourseType.SWEET, CourseType.DRINKS)
+    else -> listOf(CourseType.APERITIF, CourseType.STARTER, CourseType.MAIN, CourseType.CHEESE, CourseType.DESSERT, CourseType.DRINKS)
+}
 
 /** Un repas de fête d'une année : quand, où, avec qui, et un coût estimé facultatif. */
 data class Meal(
@@ -22,6 +29,8 @@ data class Meal(
     val guests: List<String>,
     val estimatedCostCents: Long?,
     val notes: String,
+    /** Moments du menu retenus pour ce repas, dans l'ordre du repas. */
+    val courses: List<CourseType>,
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {

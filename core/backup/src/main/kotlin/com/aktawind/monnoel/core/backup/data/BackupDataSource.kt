@@ -100,7 +100,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             meals = db.mealDao().getAllMeals().map {
                 MealDto(
                     it.id, it.editionId, it.name, it.type, it.date, it.place, it.guests, it.estimatedCostCents, it.notes,
-                    it.createdAt, it.updatedAt,
+                    it.createdAt, it.updatedAt, it.courses,
                 )
             },
             mealPersons = db.mealDao().getAllMealPersons().map { MealPersonDto(it.mealId, it.personId) },
@@ -164,7 +164,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                 data.meals.map {
                     MealEntity(
                         it.id, it.editionId, it.name, it.type, it.date, it.place, it.guests, it.estimatedCostCents, it.notes,
-                        it.createdAt, it.updatedAt,
+                        it.createdAt, it.updatedAt, it.courses,
                     )
                 },
             )

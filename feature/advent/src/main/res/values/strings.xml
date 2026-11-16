@@ -34,10 +34,8 @@
     <string name="calendar_budget_line">Prévu %1$s · Dépensé %2$s</string>
     <string name="calendar_budget_of"> · Budget %1$s</string>
     <string name="calendar_filter_to_prepare">Seulement ce qui reste à faire</string>
-    <string name="calendar_drag_hint">Appui long sur une case, puis glisse-la sur une autre pour les échanger.</string>
     <string name="box_cell_description">Case %1$d : %2$s, %3$s</string>
     <string name="supplies_title">Fournitures et achats groupés</string>
-    <string name="supplies_hint">Sachets, étiquettes… et achats partagés entre plusieurs cases (ex. un paquet de chocolats réparti sur 24 cases).</string>
     <string name="supplies_shared">réparti sur les cases %1$s</string>
     <string name="supplies_edit">Modifier %1$s</string>
     <string name="supplies_add">+ Ajouter une fourniture</string>
@@ -75,8 +73,6 @@
     <string name="group_purchase_none">Aucun</string>
     <string name="field_url">Lien d’achat</string>
     <string name="open_link">Ouvrir le lien ↗</string>
-    <string name="calendar_select">Sélectionner plusieurs cases</string>
-    <string name="calendar_select_hint">Touche les cases à modifier ensemble, puis « Modifier… ».</string>
     <string name="selection_count">%1$d case(s) sélectionnée(s)</string>
     <string name="selection_all">Toutes</string>
     <string name="selection_empty">Les vides</string>

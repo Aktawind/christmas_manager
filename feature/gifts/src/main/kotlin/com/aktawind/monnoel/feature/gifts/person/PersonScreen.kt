@@ -1,6 +1,7 @@
 package com.aktawind.monnoel.feature.gifts.person
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,6 +33,7 @@ import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.ui.EditorScaffold
 import com.aktawind.monnoel.core.ui.MoneyInput
 import com.aktawind.monnoel.core.ui.PersonAvatar
+import com.aktawind.monnoel.core.ui.PhotoImage
 import com.aktawind.monnoel.core.ui.SectionTitle
 import com.aktawind.monnoel.feature.gifts.R
 import com.aktawind.monnoel.feature.gifts.components.EnvelopeProgress
@@ -119,14 +124,39 @@ fun PersonRoute(
         SectionTitle(stringResource(R.string.person_ideas_title))
         if (state.ideas.isEmpty()) Text(stringResource(R.string.person_no_idea), color = secondary)
         state.ideas.forEach { idea ->
-            Card(
-                onClick = { onOpenIdea(idea.id) },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(Modifier.padding(16.dp)) {
-                    Text("💡 ${idea.title}", modifier = Modifier.weight(1f))
-                    idea.estimatedPriceCents?.let { Text(formatEuro(it), color = secondary) }
+            // Toucher l'idée : en faire un cadeau de l'année, ou la modifier.
+            var menu by remember { mutableStateOf(false) }
+            Box {
+                Card(
+                    onClick = { if (state.edition != null && !state.readOnly) menu = true else onOpenIdea(idea.id) },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PhotoImage(idea.photoPath, null, size = 48.dp, shape = MaterialTheme.shapes.small, placeholder = "💡")
+                        Text(idea.title, modifier = Modifier.weight(1f))
+                        idea.estimatedPriceCents?.let { Text(formatEuro(it), color = secondary) }
+                    }
+                }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.person_idea_to_gift, state.edition?.year ?: 0)) },
+                        onClick = {
+                            menu = false
+                            viewModel.offer(idea)
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.person_idea_edit)) },
+                        onClick = {
+                            menu = false
+                            onOpenIdea(idea.id)
+                        },
+                    )
                 }
             }
         }

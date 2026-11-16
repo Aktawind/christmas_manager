@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
+import com.aktawind.monnoel.core.domain.gifts.OfferIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.PersonGiftBudget
 import com.aktawind.monnoel.core.domain.gifts.SetPersonBudgetUseCase
 import com.aktawind.monnoel.core.domain.gifts.computeGiftBudget
@@ -57,6 +58,7 @@ class PersonViewModel @Inject constructor(
     observeEditions: ObserveEditionsUseCase,
     private val setBudget: SetPersonBudgetUseCase,
     private val changeStatus: ChangeGiftStatusUseCase,
+    private val offerIdea: OfferIdeaUseCase,
 ) : ViewModel() {
     private val personId = savedStateHandle.toRoute<PersonDestination>().personId
     private val message = MutableStateFlow<UiMessage?>(null)
@@ -106,6 +108,15 @@ class PersonViewModel @Inject constructor(
 
     fun setStatus(giftId: String, status: GiftStatus) = viewModelScope.launch {
         (changeStatus(giftId, status) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() }
+    }
+
+    /** L'idée devient un cadeau de l'année pour cette personne (l'idée reste dans la liste). */
+    fun offer(idea: GiftIdea) = viewModelScope.launch {
+        val edition = uiState.value.edition ?: return@launch
+        message.value = when (val result = offerIdea(idea.id, personId, edition.id)) {
+            is AppResult.Success -> UiMessage(R.string.gifts_offered, listOf(idea.title))
+            is AppResult.Failure -> result.error.toUiMessage()
+        }
     }
 
     fun messageShown() {

@@ -76,6 +76,8 @@
     <string name="field_meal_cost">Coût estimé du repas (facultatif)</string>
     <string name="meal_cost_value">Coût estimé : %1$s</string>
     <string name="dish_add">Ajouter</string>
+    <string name="course_add">Ajouter un moment</string>
+    <string name="course_remove">Retirer « %1$s » du menu</string>
     <string name="dish_brought_by_value">Apporté par %1$s</string>
     <string name="dish_to_order">À commander</string>
     <string name="dish_ordered">Commandé ✓</string>

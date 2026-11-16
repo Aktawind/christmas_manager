@@ -115,5 +115,7 @@
     <string name="course_main">Plat</string>
     <string name="course_cheese">Fromage</string>
     <string name="course_dessert">Dessert</string>
+    <string name="course_savory">Salé</string>
+    <string name="course_sweet">Sucré</string>
     <string name="course_drinks">Boissons</string>
 </resources>

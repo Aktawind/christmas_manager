@@ -289,7 +289,8 @@ private fun ChristmasPathCard(path: List<PathStep>) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Hauteur fixe : la ligne reste droite quelle que soit la taille du point.
+                    Row(Modifier.height(18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.weight(1f).height(2.dp).background(if (index == 0) Color.Transparent else gold.copy(alpha = 0.4f)))
                         Surface(
                             shape = CircleShape,

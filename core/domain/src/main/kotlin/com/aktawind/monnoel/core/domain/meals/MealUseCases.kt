@@ -11,6 +11,7 @@ import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.Meal
 import com.aktawind.monnoel.core.model.MealDish
 import com.aktawind.monnoel.core.model.MealType
+import com.aktawind.monnoel.core.model.defaultCourses
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -23,6 +24,8 @@ data class MealDraft(
     val guests: List<String> = emptyList(),
     val estimatedCostCents: Long? = null,
     val notes: String = "",
+    /** Moments du menu ; null = garder ceux du repas, ou ceux du type pour un nouveau repas. */
+    val courses: List<CourseType>? = null,
 )
 
 class SaveMealUseCase @Inject constructor(
@@ -47,11 +50,28 @@ class SaveMealUseCase @Inject constructor(
             guests = draft.guests.map { it.trim() }.filter { it.isNotEmpty() }.distinct(),
             estimatedCostCents = draft.estimatedCostCents,
             notes = draft.notes.trim(),
+            courses = (draft.courses ?: existing?.courses ?: draft.type.defaultCourses()).distinct().sorted(),
             createdAt = existing?.createdAt ?: now,
             updatedAt = now,
         )
         meals.saveMeal(meal)
         return AppResult.Success(meal)
+    }
+}
+
+/** Ajoute ou retire un moment du menu. Un moment qui contient des plats ne peut pas être retiré. */
+class SetMealCourseUseCase @Inject constructor(
+    private val meals: MealRepository,
+    private val guard: EditionGuard,
+    private val time: TimeProvider,
+) {
+    suspend operator fun invoke(mealId: String, course: CourseType, enabled: Boolean): AppResult<Unit> {
+        val meal = meals.getMeal(mealId) ?: return AppResult.Failure(AppError.NotFound)
+        guard.check(meal.editionId)?.let { return AppResult.Failure(it) }
+        if (!enabled && meals.getDishesOfMeal(mealId).any { it.course == course }) return AppResult.Failure(AppError.InvalidInput)
+        val courses = if (enabled) meal.courses + course else meal.courses - course
+        meals.saveMeal(meal.copy(courses = courses.distinct().sorted(), updatedAt = time.now()))
+        return AppResult.Success(Unit)
     }
 }
 

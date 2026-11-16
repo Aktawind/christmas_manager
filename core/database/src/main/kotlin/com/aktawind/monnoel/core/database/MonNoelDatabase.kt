@@ -43,7 +43,7 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
  * v5 (v0.3.0) fournitures : photo, type, contenu des cases, fournisseur ;
  * v6 (v0.4.0) ma liste de lutin (tâches) et suggestions supprimées ;
  * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions ;
- * v8 (v0.6.0) repas, convives, plats du menu.
+ * v8 (v0.6.0 test) repas, convives, plats du menu ; v9 (v0.6.0) moments du menu par repas.
  */
 @Database(
     entities = [
@@ -69,7 +69,7 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
         MealPersonEntity::class,
         MealDishEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {

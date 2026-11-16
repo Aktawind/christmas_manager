@@ -87,7 +87,7 @@
     <string name="home_path_advent">Ouverture des calendriers</string>
     <string name="home_path_eve">Réveillon</string>
     <string name="home_path_christmas">Noël</string>
-    <string name="home_tasks_title">Ma liste de lutin</string>
+    <string name="home_tasks_title">Ma liste</string>
     <string name="home_tasks_none">Rien à faire pour l’instant ✨</string>
     <string name="home_tasks_more">… et %1$d autre(s)</string>
     <string name="home_tasks_suggestions">💡 Le lutin a %1$d suggestion(s) pour toi</string>

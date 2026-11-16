@@ -275,6 +275,8 @@ data class MealDto(
     val notes: String = "",
     val createdAt: Long,
     val updatedAt: Long,
+    /** Moments du menu (vide = ceux du type). */
+    val courses: String = "",
 )
 
 @Serializable

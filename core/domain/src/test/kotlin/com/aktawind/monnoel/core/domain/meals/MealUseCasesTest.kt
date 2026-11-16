@@ -186,4 +186,22 @@ class MealUseCasesTest {
         assertEquals("Réveillon", result.title)
         assertEquals("Huîtres · Noël 2026", result.subtitle)
     }
+
+    @Test
+    fun `un gouter n'a que ses moments, et on peut en ajouter ou en retirer`() = runTest {
+        edition()
+        val snack = (saveMeal(null, "e", MealDraft("Goûter", MealType.SNACK)) as AppResult.Success).value
+        assertEquals(listOf(CourseType.SWEET, CourseType.DRINKS), snack.courses)
+        val setCourse = SetMealCourseUseCase(meals, guard, time)
+        setCourse(snack.id, CourseType.SAVORY, true)
+        assertEquals(listOf(CourseType.SAVORY, CourseType.SWEET, CourseType.DRINKS), meals.getMeal(snack.id)?.courses)
+        saveDish(null, snack.id, DishDraft(CourseType.SWEET, null, "Sablés"))
+        // Un moment avec des plats ne se retire pas ; un moment vide, si.
+        assertEquals(AppResult.Failure(AppError.InvalidInput), setCourse(snack.id, CourseType.SWEET, false))
+        setCourse(snack.id, CourseType.DRINKS, false)
+        assertEquals(listOf(CourseType.SAVORY, CourseType.SWEET), meals.getMeal(snack.id)?.courses)
+        // Modifier le repas garde ses moments.
+        saveMeal(snack.id, "e", MealDraft("Goûter des enfants", MealType.SNACK))
+        assertEquals(listOf(CourseType.SAVORY, CourseType.SWEET), meals.getMeal(snack.id)?.courses)
+    }
 }

@@ -5,6 +5,8 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import com.aktawind.monnoel.core.database.di.Migrations
+import com.aktawind.monnoel.core.database.entity.asModel
+import com.aktawind.monnoel.core.model.CourseType
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -102,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 8, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 9, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -197,6 +199,31 @@ class MigrationTest {
         runBlocking {
             assertEquals("Bûche", db.cookingDao().getAllRecipes().single().name)
             assertEquals(0, db.mealDao().getAllMeals().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 8 vers 9 donne a chaque repas les moments de son type`() {
+        helper.createDatabase(dbName, 8).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO meal (id, edition_id, name, type, date, place, guests, estimated_cost_cents, notes, created_at, updated_at) " +
+                    "VALUES ('m1', 'e1', 'Goûter', 'SNACK', '2026-12-26', '', '', NULL, '', 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 9, true, Migrations.MIGRATION_8_9).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            val meal = db.mealDao().getAllMeals().single().asModel(emptySet())
+            assertEquals(listOf(CourseType.SWEET, CourseType.DRINKS), meal.courses)
         }
         db.close()
     }
