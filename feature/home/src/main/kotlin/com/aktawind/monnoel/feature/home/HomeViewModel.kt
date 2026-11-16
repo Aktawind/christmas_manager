@@ -6,6 +6,8 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.advent.boxOfTheDay
+import com.aktawind.monnoel.core.domain.budget.ObserveBudgetsUseCase
+import com.aktawind.monnoel.core.domain.budget.YearBudget
 import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
 import com.aktawind.monnoel.core.domain.countdown.PathStep
@@ -57,6 +59,7 @@ sealed interface HomeUiState {
         val calendars: List<CalendarProgress> = emptyList(),
         val cooking: CookingSummary = CookingSummary(),
         val table: TableSummary = TableSummary(),
+        val budget: YearBudget? = null,
         val path: List<PathStep> = emptyList(),
         val openTasks: List<String> = emptyList(),
         val doneTasks: Int = 0,
@@ -92,6 +95,14 @@ data class GiftsSummary(
     val ideas: Int = 0,
 )
 
+/** Calendriers, cuisine, repas et budget, regroupés pour l'accueil. */
+private data class Kitchen(
+    val calendars: List<CalendarProgress>,
+    val cooking: CookingSummary,
+    val table: TableSummary,
+    val budget: YearBudget?,
+)
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     observeEditions: ObserveEditionsUseCase,
@@ -104,6 +115,7 @@ class HomeViewModel @Inject constructor(
     private val observeLutin: ObserveLutinUseCase,
     cooking: CookingRepository,
     meals: MealRepository,
+    observeBudgets: ObserveBudgetsUseCase,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
         personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -163,14 +175,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private val editionAdventAndCooking = combine(editionCalendars, editionCooking, editionTable) { calendars, summary, table ->
-        Triple(calendars, summary, table)
-    }
+    private val editionAdventAndCooking =
+        combine(editionCalendars, editionCooking, editionTable, observeBudgets()) { calendars, summary, table, budgets ->
+            Kitchen(calendars, summary, table, budgets.current)
+        }
 
     val uiState: StateFlow<HomeUiState> = combine(editionGifts, ideas.observeIdeas(), editionAdventAndCooking, observeLutin(), message) {
             (edition, list),
             ideaList,
-            (calendars, cookingSummary, tableSummary),
+            (calendars, cookingSummary, tableSummary, yearBudget),
             lutin,
             msg,
         ->
@@ -194,6 +207,7 @@ class HomeViewModel @Inject constructor(
             calendars = calendars,
             cooking = cookingSummary,
             table = tableSummary,
+            budget = yearBudget,
             path = christmasPath(today, edition.year),
             openTasks = lutin.tasks.filter { it.isOpen }.map { it.title },
             doneTasks = lutin.tasks.count { it.status == TaskStatus.DONE },

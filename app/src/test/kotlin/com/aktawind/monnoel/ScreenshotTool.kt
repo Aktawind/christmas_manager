@@ -3,13 +3,16 @@ package com.aktawind.monnoel
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
@@ -18,6 +21,7 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.advent.BoxDraft
 import com.aktawind.monnoel.core.domain.advent.CalendarDraft
 import com.aktawind.monnoel.core.domain.advent.SupplyDraft
+import com.aktawind.monnoel.core.domain.budget.ExpenseDraft
 import com.aktawind.monnoel.core.domain.cooking.ProductionDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
@@ -26,6 +30,7 @@ import com.aktawind.monnoel.core.domain.meals.MealDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.CourseType
+import com.aktawind.monnoel.core.model.ExpenseCategory
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.MealType
 import com.aktawind.monnoel.core.model.ProductionStatus
@@ -145,6 +150,14 @@ class ScreenshotTool {
         )
         seedAdvent(data, edition.id, lea.id, tom.id)
         seedCooking(data, edition.id, setOf(lea.id, tom.id, mamie.id))
+        data.setEditionBudget()(edition.id, 80_000)
+        data.saveExpense()(null, edition.id, ExpenseDraft("Sapin Nordmann", 5_900, ExpenseCategory.TREE, paid = true))
+        data.saveExpense()(null, edition.id, ExpenseDraft("Guirlandes lumineuses", 2_490, ExpenseCategory.DECORATION))
+        data.saveExpense()(null, edition.id, ExpenseDraft("Papier cadeau", 1_200, ExpenseCategory.WRAPPING, paid = true))
+        val past = (data.createEdition()(2025) as AppResult.Success).value
+        data.saveGift()(null, past.id, GiftDraft(lea.id, "Puzzle licorne", priceCents = 22_000, status = GiftStatus.GIVEN))
+        data.saveExpense()(null, past.id, ExpenseDraft("Sapin", 4_900, ExpenseCategory.TREE, paid = true))
+        data.selectEdition()(edition.id)
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
@@ -320,6 +333,11 @@ class ScreenshotTool {
         waitText("Pour qui")
         shot("33-production")
         compose.onNodeWithContentDescription("Retour").performClick()
+        click("Budget")
+        waitText("Répartition du prévu")
+        shot("40-budget")
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Coût prévu de chaque Noël"))
+        shot("41-budget-years")
         click("Réglages")
         waitText("Personnaliser")
         click("Catégories de recettes")

@@ -18,7 +18,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ✅ |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes (nom + photo), préparations de l'année       | ✅ |
 | v0.6.0  | La table de fête            | Repas, convives, menus par moments, plats à commander                 | ✅ |
-| v0.7.0  | Les comptes du Père Noël    | Budget complet : catégories, dépassements, graphiques, comparaison    | ⬜ |
+| v0.7.0  | Les comptes du Père Noël    | Onglet Budget, autres dépenses, répartition, comparaison des années   | 🧪 |
 | v0.8.0  | Les traditions              | Catalogue de traditions, suivi annuel, listes d'inspiration           | ⬜ |
 | v0.9.0  | L'atelier des lutins        | Activités & DIY, projets créatifs, décoration                         | ⬜ |
 | v0.10.0 | La boîte à souvenirs        | Journal, archives, bilans annuels, duplication d'une année, export PDF | ⬜ |
@@ -133,11 +133,12 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| B-001 | Budget global annuel et budgets par catégorie / personne / calendrier / repas  | ⬜ |
-| B-002 | Dépenses libres (décoration, divers) rattachées à un module                    | ⬜ |
-| B-003 | Prévu / dépensé / reste, alertes de dépassement                                | ⬜ |
-| B-004 | Répartition des dépenses (graphiques)                                          | ⬜ |
-| B-005 | Comparaison entre années et graphique d'évolution                              | ⬜ |
+| B-001 | Onglet **Budget** : prévu / dépensé / budget global de l'année (facultatif), marge ou dépassement en douceur | 🧪 |
+| B-002 | Budget calculé sans double saisie : cadeaux (enveloppes), calendriers (leurs budgets), repas (dépensé à leur date) | 🧪 |
+| B-003 | Autres dépenses (sapin, déco, papier cadeau, tenues, sorties, divers), « payé » à cocher | 🧪 |
+| B-004 | Répartition du prévu (barre empilée + légende chiffrée), palette vérifiée daltonisme clair / sombre | 🧪 |
+| B-005 | Coût prévu de chaque Noël (colonnes par année, dès deux Noëls)                   | 🧪 |
+| B-006 | Accueil « Les comptes », recherche des autres dépenses, sauvegarde              | 🧪 |
 
 ## v0.8.0 — Les traditions ❤️
 

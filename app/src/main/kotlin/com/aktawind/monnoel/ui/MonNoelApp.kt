@@ -35,12 +35,15 @@ import androidx.navigation.compose.rememberNavController
 import com.aktawind.monnoel.R
 import com.aktawind.monnoel.core.designsystem.icon.Cupcake
 import com.aktawind.monnoel.core.designsystem.icon.MonNoelIcons
+import com.aktawind.monnoel.core.designsystem.icon.Wallet
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.feature.advent.navigation.AdventDestination
 import com.aktawind.monnoel.feature.advent.navigation.BoxEditDestination
 import com.aktawind.monnoel.feature.advent.navigation.CalendarDestination
 import com.aktawind.monnoel.feature.advent.navigation.CalendarEditDestination
 import com.aktawind.monnoel.feature.advent.navigation.adventGraph
+import com.aktawind.monnoel.feature.budget.navigation.BudgetDestination
+import com.aktawind.monnoel.feature.budget.navigation.budgetScreen
 import com.aktawind.monnoel.feature.cooking.navigation.CookingDestination
 import com.aktawind.monnoel.feature.cooking.navigation.DishEditDestination
 import com.aktawind.monnoel.feature.cooking.navigation.MealDestination
@@ -115,6 +118,7 @@ private enum class TopLevelDestination(
         Icons.AutoMirrored.Filled.List,
         R.string.nav_tasks,
     ),
+    BUDGET(BudgetDestination(), listOf(BudgetDestination::class), MonNoelIcons.Wallet, R.string.nav_budget),
     YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
     SETTINGS(
         SettingsDestination,
@@ -167,6 +171,7 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.RECIPE -> RecipeEditDestination(recipeId = id)
             LinkType.PRODUCTION -> ProductionEditDestination(productionId = id)
             LinkType.MEAL -> MealDestination(id)
+            LinkType.EXPENSE -> BudgetDestination(expenseId = id)
         }
         navController.navigate(destination)
     }
@@ -192,12 +197,14 @@ fun MonNoelApp(hasEditions: Boolean) {
                     onOpenAdvent = { navigate(TopLevelDestination.ADVENT) },
                     onOpenTasks = { navigate(TopLevelDestination.TASKS) },
                     onOpenCooking = { navigate(TopLevelDestination.COOKING) },
+                    onOpenBudget = { navigate(TopLevelDestination.BUDGET) },
                 )
                 searchScreen(onOpen = openLink)
                 tasksGraph(navController, onOpenLink = openLink)
                 giftsGraph(navController)
                 adventGraph(navController)
                 cookingGraph(navController)
+                budgetScreen()
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
                 settingsScreen(navController)
             }

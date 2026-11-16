@@ -2,6 +2,7 @@ package com.aktawind.monnoel.core.domain.search
 
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventCalendar
+import com.aktawind.monnoel.core.model.Expense
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.core.model.LutinTask
@@ -35,6 +36,7 @@ data class SearchData(
     val productions: List<Production> = emptyList(),
     val meals: List<Meal> = emptyList(),
     val dishes: List<MealDish> = emptyList(),
+    val expenses: List<Expense> = emptyList(),
 )
 
 /** Minuscules, sans accents : « Noël » et « noel » se valent. */
@@ -143,6 +145,9 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
             dishes.firstNotNullOfOrNull { it.photoPath },
         )
     }.sortedByDescending { data.years[it.first.editionId] ?: 0 }.map { it.second }
+    results[LinkType.EXPENSE] = data.expenses.filter { matches(it.title, it.notes) }
+        .sortedByDescending { data.years[it.editionId] ?: 0 }
+        .map { SearchResult(LinkType.EXPENSE, it.id, it.title, year(it.editionId).orEmpty(), null) }
     results[LinkType.TASK] = data.tasks.filter { matches(it.title, it.description, it.notes) }
         .map { SearchResult(LinkType.TASK, it.id, it.title, year(it.editionId).orEmpty(), null) }
     return results.mapValues { it.value.take(limitPerType) }.filterValues { it.isNotEmpty() }

@@ -123,6 +123,9 @@ interface AdventDao {
     )
     fun observeSuppliesForEdition(editionId: String): Flow<List<AdventSupplyEntity>>
 
+    @Query("SELECT * FROM advent_supply")
+    fun observeAllSupplies(): Flow<List<AdventSupplyEntity>>
+
     @Query("SELECT * FROM advent_supply WHERE calendar_id = :calendarId ORDER BY sort_order")
     suspend fun getSupplies(calendarId: String): List<AdventSupplyEntity>
 

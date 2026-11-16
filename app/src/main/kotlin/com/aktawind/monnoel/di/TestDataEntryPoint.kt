@@ -4,9 +4,12 @@ import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.advent.SaveBoxUseCase
 import com.aktawind.monnoel.core.domain.advent.SaveCalendarUseCase
 import com.aktawind.monnoel.core.domain.advent.SaveSupplyUseCase
+import com.aktawind.monnoel.core.domain.budget.SaveExpenseUseCase
+import com.aktawind.monnoel.core.domain.budget.SetEditionBudgetUseCase
 import com.aktawind.monnoel.core.domain.cooking.SaveProductionUseCase
 import com.aktawind.monnoel.core.domain.cooking.SaveRecipeUseCase
 import com.aktawind.monnoel.core.domain.edition.CreateEditionUseCase
+import com.aktawind.monnoel.core.domain.edition.SelectEditionUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
 import com.aktawind.monnoel.core.domain.gifts.OfferIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.SaveGiftUseCase
@@ -55,4 +58,10 @@ interface TestDataEntryPoint {
     fun saveMeal(): SaveMealUseCase
 
     fun saveDish(): SaveDishUseCase
+
+    fun saveExpense(): SaveExpenseUseCase
+
+    fun setEditionBudget(): SetEditionBudgetUseCase
+
+    fun selectEdition(): SelectEditionUseCase
 }

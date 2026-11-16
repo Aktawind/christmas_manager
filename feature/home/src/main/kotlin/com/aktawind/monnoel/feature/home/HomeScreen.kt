@@ -20,6 +20,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -55,6 +56,7 @@ import com.aktawind.monnoel.core.designsystem.theme.FirGreenDark
 import com.aktawind.monnoel.core.designsystem.theme.Ivory
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.designsystem.theme.MonNoelTheme
+import com.aktawind.monnoel.core.domain.budget.YearBudget
 import com.aktawind.monnoel.core.domain.countdown.CountdownState
 import com.aktawind.monnoel.core.domain.countdown.PathStep
 import com.aktawind.monnoel.core.domain.countdown.PathStepKind
@@ -71,6 +73,7 @@ fun HomeRoute(
     onOpenAdvent: () -> Unit,
     onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
+    onOpenBudget: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +94,7 @@ fun HomeRoute(
             onOpenAdvent = onOpenAdvent,
             onOpenTasks = onOpenTasks,
             onOpenCooking = onOpenCooking,
+            onOpenBudget = onOpenBudget,
             onQuickIdea = { quickIdea = true },
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
@@ -115,13 +119,14 @@ internal fun HomeScreen(
     onOpenAdvent: () -> Unit = {},
     onOpenTasks: () -> Unit = {},
     onOpenCooking: () -> Unit = {},
+    onOpenBudget: () -> Unit = {},
     onQuickIdea: () -> Unit = {},
 ) {
     when (state) {
         HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onOpenTasks, onOpenCooking, onQuickIdea)
+        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onOpenTasks, onOpenCooking, onOpenBudget, onQuickIdea)
     }
 }
 
@@ -132,6 +137,7 @@ private fun HomeContent(
     onOpenAdvent: () -> Unit,
     onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
+    onOpenBudget: () -> Unit,
     onQuickIdea: () -> Unit,
 ) {
     LazyVerticalGrid(
@@ -149,6 +155,7 @@ private fun HomeContent(
         item(span = { GridItemSpan(maxLineSpan) }) { AdventSummaryCard(state.calendars, onOpenAdvent) }
         item(span = { GridItemSpan(maxLineSpan) }) { TableSummaryCard(state.table, onOpenCooking) }
         item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenCooking) }
+        state.budget?.let { b -> item(span = { GridItemSpan(maxLineSpan) }) { BudgetSummaryCard(b, onOpenBudget) } }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -375,6 +382,46 @@ private fun TasksSummaryCard(state: HomeUiState.Ready, onOpen: () -> Unit) {
             }
             if (state.suggestionCount > 0) {
                 Text(stringResource(R.string.home_tasks_suggestions, state.suggestionCount), color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BudgetSummaryCard(budget: YearBudget, onOpen: () -> Unit) {
+    val colors = LocalMonNoelColors.current
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "💰  " + stringResource(R.string.home_budget_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                stringResource(R.string.home_budget_line, formatEuro(budget.plannedCents), formatEuro(budget.spentCents)),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            val global = budget.globalBudgetCents
+            val margin = budget.marginCents
+            if (global != null && margin != null) {
+                LinearProgressIndicator(
+                    progress = { if (global > 0) (budget.plannedCents.toFloat() / global).coerceIn(0f, 1f) else 1f },
+                    color = colors.gold,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    if (margin >= 0) {
+                        stringResource(R.string.home_budget_margin, formatEuro(global), formatEuro(margin))
+                    } else {
+                        stringResource(R.string.home_budget_over, formatEuro(global), formatEuro(-margin))
+                    },
+                    color = if (margin >= 0) colors.secondaryText else colors.burgundy,
+                )
             }
         }
     }

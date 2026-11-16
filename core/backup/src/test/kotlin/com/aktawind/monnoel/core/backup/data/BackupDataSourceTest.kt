@@ -13,6 +13,7 @@ import com.aktawind.monnoel.core.backup.format.BackupArchive
 import com.aktawind.monnoel.core.backup.format.BackupData
 import com.aktawind.monnoel.core.backup.format.DismissedSuggestionDto
 import com.aktawind.monnoel.core.backup.format.EditionDto
+import com.aktawind.monnoel.core.backup.format.ExpenseDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
@@ -110,6 +111,7 @@ class BackupDataSourceTest {
                 ),
             ),
             mealPersons = listOf(MealPersonDto("m", "p")),
+            expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),
             mealDishes = listOf(MealDishDto("d", "m", "DESSERT", "r", "Bûche", "photos/rd.jpg", "Mamie", true, false, 0, 1L)),
             dismissedSuggestions = listOf(DismissedSuggestionDto("e", "SUPPLY_BUY:s")),
             adventTemplates = listOf(AdventTemplateDto("t", "Modèle lutin", "Lutin", "", 24, 1L)),

@@ -60,6 +60,7 @@ private val LinkType.emoji: String
         LinkType.RECIPE -> "📖"
         LinkType.PRODUCTION -> "🧁"
         LinkType.MEAL -> "🍽️"
+        LinkType.EXPENSE -> "💰"
     }
 
 @get:StringRes
@@ -74,6 +75,7 @@ private val LinkType.groupLabel: Int
         LinkType.RECIPE -> R.string.search_recipes
         LinkType.PRODUCTION -> R.string.search_productions
         LinkType.MEAL -> R.string.search_meals
+        LinkType.EXPENSE -> R.string.search_expenses
     }
 
 @Composable

@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 9, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 10, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -224,6 +224,32 @@ class MigrationTest {
         runBlocking {
             val meal = db.mealDao().getAllMeals().single().asModel(emptySet())
             assertEquals(listOf(CourseType.SWEET, CourseType.DRINKS), meal.courses)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 9 vers 10 ajoute les autres depenses et garde les repas`() {
+        helper.createDatabase(dbName, 9).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', 50000, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO meal (id, edition_id, name, type, date, place, guests, estimated_cost_cents, notes, created_at, " +
+                    "updated_at, courses) " +
+                    "VALUES ('m1', 'e1', 'Réveillon', 'CHRISTMAS_EVE', '2026-12-24', '', '', 12000, '', 1, 1, '')",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 10, true, Migrations.MIGRATION_9_10).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals(12_000L, db.mealDao().getAllMeals().single().estimatedCostCents)
+            assertEquals(0, db.expenseDao().getAll().size)
         }
         db.close()
     }

@@ -67,6 +67,8 @@ class RoomAdventRepository @Inject constructor(private val dao: AdventDao) : Adv
 
     override fun observeSuppliesForEdition(editionId: String) = dao.observeSuppliesForEdition(editionId).map { l -> l.map { it.asModel() } }
 
+    override fun observeAllSupplies() = dao.observeAllSupplies().map { l -> l.map { it.asModel() } }
+
     override suspend fun getSupplies(calendarId: String) = dao.getSupplies(calendarId).map { it.asModel() }
 
     override suspend fun saveSupply(supply: AdventSupply, linkedBoxIds: Set<String>) = dao.saveSupply(supply.asEntity(), linkedBoxIds)

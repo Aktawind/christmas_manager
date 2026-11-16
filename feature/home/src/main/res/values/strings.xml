@@ -58,6 +58,10 @@
     <string name="home_gifts_to_wrap">%1$d à emballer</string>
     <string name="home_gifts_given">%1$d offerts</string>
     <string name="home_advent_title">Les calendriers de l’Avent</string>
+    <string name="home_budget_title">Les comptes</string>
+    <string name="home_budget_line">Prévu %1$s · dépensé %2$s</string>
+    <string name="home_budget_margin">Budget %1$s · encore %2$s de marge</string>
+    <string name="home_budget_over">Budget %1$s · %2$s au-dessus</string>
     <string name="home_table_title">La table de fête</string>
     <string name="home_table_empty">Aucun repas prévu pour l’instant : réveillon, déjeuner du 25… ?</string>
     <plurals name="home_table_guests">

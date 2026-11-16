@@ -16,6 +16,7 @@ import com.aktawind.monnoel.core.data.repository.HttpLinkPreviewRepository
 import com.aktawind.monnoel.core.data.repository.RoomAdventRepository
 import com.aktawind.monnoel.core.data.repository.RoomCookingRepository
 import com.aktawind.monnoel.core.data.repository.RoomEditionRepository
+import com.aktawind.monnoel.core.data.repository.RoomExpenseRepository
 import com.aktawind.monnoel.core.data.repository.RoomGiftCategoryRepository
 import com.aktawind.monnoel.core.data.repository.RoomGiftIdeaRepository
 import com.aktawind.monnoel.core.data.repository.RoomMealRepository
@@ -23,6 +24,7 @@ import com.aktawind.monnoel.core.data.repository.RoomPersonRepository
 import com.aktawind.monnoel.core.data.repository.RoomPlannedGiftRepository
 import com.aktawind.monnoel.core.data.repository.RoomTaskRepository
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
+import com.aktawind.monnoel.core.domain.budget.ExpenseRepository
 import com.aktawind.monnoel.core.domain.cooking.CookingRepository
 import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
@@ -78,6 +80,9 @@ abstract class DataBindsModule {
 
     @Binds
     abstract fun bindMeals(impl: RoomMealRepository): MealRepository
+
+    @Binds
+    abstract fun bindExpenses(impl: RoomExpenseRepository): ExpenseRepository
 
     @Binds
     abstract fun bindTasks(impl: RoomTaskRepository): TaskRepository

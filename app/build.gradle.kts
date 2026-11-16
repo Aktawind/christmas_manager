@@ -93,6 +93,7 @@ dependencies {
     implementation(project(":feature:tasks"))
     implementation(project(":feature:search"))
     implementation(project(":feature:cooking"))
+    implementation(project(":feature:budget"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

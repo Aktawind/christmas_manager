@@ -43,6 +43,9 @@ interface AdventRepository {
 
     fun observeSuppliesForEdition(editionId: String): Flow<List<AdventSupply>>
 
+    /** Toutes les fournitures, toutes années (budget comparé). */
+    fun observeAllSupplies(): Flow<List<AdventSupply>>
+
     suspend fun getSupplies(calendarId: String): List<AdventSupply>
 
     suspend fun saveSupply(supply: AdventSupply, linkedBoxIds: Set<String>)

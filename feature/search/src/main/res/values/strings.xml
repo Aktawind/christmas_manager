@@ -14,4 +14,5 @@
     <string name="search_recipes">Recettes</string>
     <string name="search_productions">Gourmandises</string>
     <string name="search_meals">Repas</string>
+    <string name="search_expenses">Autres dépenses</string>
 </resources>

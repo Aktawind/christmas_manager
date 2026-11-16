@@ -82,6 +82,8 @@ class FakeAdventRepository : AdventRepository {
 
     override fun observeSuppliesForEdition(editionId: String) = supplies
 
+    override fun observeAllSupplies() = supplies
+
     override suspend fun getSupplies(calendarId: String) = supplies.value.filter { it.calendarId == calendarId }
 
     override suspend fun saveSupply(supply: AdventSupply, linkedBoxIds: Set<String>) {

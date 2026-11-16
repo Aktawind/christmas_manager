@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 7
+const val BACKUP_FORMAT_VERSION = 8
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -53,6 +53,7 @@ data class BackupData(
     val meals: List<MealDto> = emptyList(),
     val mealPersons: List<MealPersonDto> = emptyList(),
     val mealDishes: List<MealDishDto> = emptyList(),
+    val expenses: List<ExpenseDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -69,6 +70,7 @@ data class BackupData(
         "productions" to productions.size,
         "meals" to meals.size,
         "mealDishes" to mealDishes.size,
+        "expenses" to expenses.size,
     )
 }
 
@@ -295,6 +297,19 @@ data class MealDishDto(
     val ordered: Boolean = false,
     val sortOrder: Int = 0,
     val createdAt: Long,
+)
+
+@Serializable
+data class ExpenseDto(
+    val id: String,
+    val editionId: String,
+    val title: String,
+    val amountCents: Long,
+    val category: String,
+    val paid: Boolean = false,
+    val notes: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
 )
 
 internal val backupJson = Json {
