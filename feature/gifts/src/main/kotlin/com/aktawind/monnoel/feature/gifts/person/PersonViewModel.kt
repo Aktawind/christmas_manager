@@ -49,9 +49,8 @@ data class PersonUiState(
     val history: List<Pair<Int, List<PlannedGift>>> = emptyList(),
     val ideas: List<GiftIdea> = emptyList(),
     val budget: PersonGiftBudget? = null,
-    /** Idées soufflées du Noël affiché : pour cette personne, et confiées à cette personne. */
+    /** Idées soufflées pour cette personne, pour le Noël affiché. */
     val whispersFor: List<WhisperedIdea> = emptyList(),
-    val whispersGivenTo: List<WhisperedIdea> = emptyList(),
     /** Toutes les idées soufflées du Noël (repérage des doublons). */
     val editionWhispers: List<WhisperedIdea> = emptyList(),
     val persons: List<Person> = emptyList(),
@@ -123,7 +122,6 @@ class PersonViewModel @Inject constructor(
             budget = budget,
             message = msg,
             whispersFor = edition.filter { it.recipientId == personId },
-            whispersGivenTo = edition.filter { it.givenToPersonId == personId },
             editionWhispers = edition,
             persons = people,
         )

@@ -138,7 +138,7 @@ Pas de dates ni de priorités (ADR 0006).
 | B-003 | Autres dépenses (sapin, déco, papier cadeau, tenues, sorties, divers), « payé » à cocher | 🧪 |
 | B-004 | Répartition du prévu (barre empilée + légende chiffrée), palette vérifiée daltonisme clair / sombre | 🧪 |
 | B-005 | Coût prévu de chaque Noël (colonnes par année, dès deux Noëls)                   | 🧪 |
-| G-020 | Idées soufflées : dans la fiche de chaque personne, pour un Noël, à qui (anti-doublon) | 🧪 |
+| G-020 | Idées soufflées : dans la fiche de la personne, pour un Noël, de la part de qui (anti-doublon) | 🧪 |
 | B-006 | Accueil « Les comptes », recherche des autres dépenses, sauvegarde              | 🧪 |
 
 ## v0.8.0 — Les traditions ❤️

@@ -40,10 +40,7 @@ import com.aktawind.monnoel.core.ui.SectionTitle
 import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.feature.gifts.R
 
-/**
- * Fiche d'une personne : les idées soufflées pour elle (et à qui), puis ce qu'on a soufflé
- * à cette personne pour d'autres. Le tout pour le Noël affiché.
- */
+/** Fiche d'une personne : les idées soufflées pour elle, et de la part de qui, pour le Noël affiché. */
 @Composable
 internal fun WhisperSections(state: PersonUiState, onSave: (String?, WhisperDraft) -> Unit, onDelete: (String) -> Unit) {
     val person = state.person ?: return
@@ -74,19 +71,6 @@ internal fun WhisperSections(state: PersonUiState, onSave: (String?, WhisperDraf
     }
     if (!state.readOnly) {
         OutlinedButton(onClick = { open = "" }) { Text(stringResource(R.string.whisper_add)) }
-    }
-
-    if (state.whispersGivenTo.isNotEmpty()) {
-        SectionTitle(stringResource(R.string.whispers_given_title, person.firstName.ifBlank { person.displayName }, edition.year))
-        state.whispersGivenTo.forEach { w ->
-            WhisperRow(
-                title = stringResource(R.string.whisper_for_line, names[w.recipientId].orEmpty(), w.title),
-                detail = w.priceCents?.let { formatEuro(it) }.orEmpty(),
-                warning = null,
-                received = w.received,
-                onClick = { open = w.id },
-            )
-        }
     }
 
     val current = open

@@ -157,9 +157,7 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
                 it.title,
                 listOfNotNull(
                     names[it.recipientId],
-                    it.givenToName.ifBlank {
-                        null
-                    }?.let { g -> "→ $g" },
+                    it.givenToName.ifBlank { null }?.let { g -> "de la part de $g" },
                     year(it.editionId),
                 ).joinToString(" · "),
                 null,
