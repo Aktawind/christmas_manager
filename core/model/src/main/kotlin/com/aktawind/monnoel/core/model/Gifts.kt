@@ -82,3 +82,26 @@ data class PlannedGift(
 
 /** Enveloppe budgétaire prévue pour une personne, pour un Noël. */
 data class PersonBudget(val editionId: String, val personId: String, val amountCents: Long)
+
+/**
+ * Une idée « soufflée » : pour un Noël, une idée de cadeau pour [recipientId], confiée à
+ * quelqu'un (une personne de l'application, ou un nom libre) qui pourra l'offrir.
+ */
+data class WhisperedIdea(
+    val id: String,
+    val editionId: String,
+    /** Pour qui est l'idée. */
+    val recipientId: String,
+    val title: String,
+    val priceCents: Long?,
+    val url: String,
+    /** À qui on l'a soufflée : une personne de l'application… */
+    val givenToPersonId: String?,
+    /** …ou un nom libre (« Collègues »). */
+    val givenToName: String,
+    /** Le cadeau a bien été reçu. */
+    val received: Boolean,
+    val notes: String,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+)

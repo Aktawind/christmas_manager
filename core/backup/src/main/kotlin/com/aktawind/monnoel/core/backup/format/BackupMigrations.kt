@@ -41,6 +41,8 @@ internal object BackupMigrations {
         7 to { json -> json },
         // v7 -> v8 (v0.7.0) : autres dépenses, absentes des anciennes sauvegardes.
         8 to { json -> json },
+        // v8 -> v9 (v0.7.0) : idées soufflées, absentes des anciennes sauvegardes.
+        9 to { json -> json },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

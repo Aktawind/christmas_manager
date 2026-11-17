@@ -172,6 +172,7 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.PRODUCTION -> ProductionEditDestination(productionId = id)
             LinkType.MEAL -> MealDestination(id)
             LinkType.EXPENSE -> BudgetDestination(expenseId = id)
+            LinkType.WHISPER -> PersonDestination(id)
         }
         navController.navigate(destination)
     }

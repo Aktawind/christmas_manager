@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 10, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 11, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -250,6 +250,31 @@ class MigrationTest {
         runBlocking {
             assertEquals(12_000L, db.mealDao().getAllMeals().single().estimatedCostCents)
             assertEquals(0, db.expenseDao().getAll().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 10 vers 11 ajoute les idees soufflees et garde les depenses`() {
+        helper.createDatabase(dbName, 10).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO expense (id, edition_id, title, amount_cents, category, paid, notes, created_at, updated_at) " +
+                    "VALUES ('x1', 'e1', 'Sapin', 4500, 'TREE', 1, '', 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 11, true, Migrations.MIGRATION_10_11).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals("Sapin", db.expenseDao().getAll().single().title)
+            assertEquals(0, db.whisperDao().getAll().size)
         }
         db.close()
     }

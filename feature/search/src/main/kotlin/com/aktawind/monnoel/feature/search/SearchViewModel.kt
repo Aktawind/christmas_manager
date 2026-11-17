@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.budget.ExpenseRepository
 import com.aktawind.monnoel.core.domain.cooking.CookingRepository
+import com.aktawind.monnoel.core.domain.gifts.WhisperRepository
 import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
@@ -45,13 +46,14 @@ class SearchViewModel @Inject constructor(
     cooking: CookingRepository,
     meals: MealRepository,
     expenses: ExpenseRepository,
+    whispers: WhisperRepository,
 ) : ViewModel() {
     private val query = MutableStateFlow("")
 
     private val data = combine(
         combine(persons.observePersons(), ideas.observeIdeas(), gifts.observeAllGifts()) { p, i, g -> Triple(p, i, g) },
         combine(advent.observeAllCalendars(), advent.observeAllBoxes()) { c, b -> c to b },
-        combine(tasks.observeAllTasks(), expenses.observeAllExpenses()) { t, x -> t to x },
+        combine(tasks.observeAllTasks(), expenses.observeAllExpenses(), whispers.observeAllWhispers()) { t, x, w -> Triple(t, x, w) },
         editions.observeEditions(),
         combine(cooking.observeRecipes(), cooking.observeAllProductions(), meals.observeAllMeals(), meals.observeAllDishes()) {
                 r,
@@ -61,8 +63,8 @@ class SearchViewModel @Inject constructor(
             ->
             Kitchen(r, pr, m, d)
         },
-    ) { (p, i, g), (c, b), (t, x), e, k ->
-        SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes, x)
+    ) { (p, i, g), (c, b), (t, x, w), e, k ->
+        SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes, x, w)
     }
 
     val uiState: StateFlow<SearchUiState> = combine(query.debounce(150), data) { q, d ->

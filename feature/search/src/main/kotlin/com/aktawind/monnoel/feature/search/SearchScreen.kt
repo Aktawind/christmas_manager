@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -61,6 +61,7 @@ private val LinkType.emoji: String
         LinkType.PRODUCTION -> "🧁"
         LinkType.MEAL -> "🍽️"
         LinkType.EXPENSE -> "💰"
+        LinkType.WHISPER -> "🤫"
     }
 
 @get:StringRes
@@ -76,6 +77,7 @@ private val LinkType.groupLabel: Int
         LinkType.PRODUCTION -> R.string.search_productions
         LinkType.MEAL -> R.string.search_meals
         LinkType.EXPENSE -> R.string.search_expenses
+        LinkType.WHISPER -> R.string.search_whispers
     }
 
 @Composable
@@ -148,7 +150,9 @@ fun SearchRoute(onOpen: (LinkType, String) -> Unit, viewModel: SearchViewModel =
                     )
                 }
             }
-            items(list, key = { "${it.type}-${it.id}" }) { result -> ResultRow(result, onClick = { onOpen(result.type, result.id) }) }
+            itemsIndexed(list, key = { index, it -> "${it.type}-$index-${it.id}" }) { _, result ->
+                ResultRow(result, onClick = { onOpen(result.type, result.id) })
+            }
         }
     }
 }

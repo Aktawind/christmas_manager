@@ -42,3 +42,4 @@
 | 6 | v0.5.0 | Recettes (nom, photo, catégorie, lien), catégories de recettes, préparations de l'année. Conversion 5 → 6 : ajout des catégories de recettes par défaut. |
 | 7 | v0.6.0 | Repas, convives (personnes de l'app), plats du menu. Conversion 6 → 7 : rien à ajouter. |
 | 8 | v0.7.0 | Autres dépenses (budget). Conversion 7 → 8 : rien à ajouter. |
+| 9 | v0.7.0 | Idées soufflées (pour qui, à qui, Noël). Conversion 8 → 9 : rien à ajouter. |

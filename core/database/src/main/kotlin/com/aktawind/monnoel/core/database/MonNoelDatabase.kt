@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
 import com.aktawind.monnoel.core.database.dao.TaskDao
+import com.aktawind.monnoel.core.database.dao.WhisperDao
 import com.aktawind.monnoel.core.database.entity.AdventBoxEntity
 import com.aktawind.monnoel.core.database.entity.AdventCalendarEntity
 import com.aktawind.monnoel.core.database.entity.AdventCalendarPersonEntity
@@ -34,6 +35,7 @@ import com.aktawind.monnoel.core.database.entity.ProductionEntity
 import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
 import com.aktawind.monnoel.core.database.entity.RecipeEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
+import com.aktawind.monnoel.core.database.entity.WhisperEntity
 
 /**
  * Base unique de l'application (ADR 0002). Toute évolution du schéma doit être
@@ -46,7 +48,7 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
  * v6 (v0.4.0) ma liste de lutin (tâches) et suggestions supprimées ;
  * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions ;
  * v8 (v0.6.0 test) repas, convives, plats du menu ; v9 (v0.6.0) moments du menu par repas ;
- * v10 (v0.7.0) autres dépenses (budget).
+ * v10 (v0.7.0 test) autres dépenses (budget) ; v11 (v0.7.0) idées soufflées.
  */
 @Database(
     entities = [
@@ -72,8 +74,9 @@ import com.aktawind.monnoel.core.database.entity.TaskEntity
         MealPersonEntity::class,
         MealDishEntity::class,
         ExpenseEntity::class,
+        WhisperEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {
@@ -96,6 +99,8 @@ abstract class MonNoelDatabase : RoomDatabase() {
     abstract fun mealDao(): MealDao
 
     abstract fun expenseDao(): ExpenseDao
+
+    abstract fun whisperDao(): WhisperDao
 
     companion object {
         const val NAME = "mon-noel.db"

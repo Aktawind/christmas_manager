@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 
-private class FakePersons : PersonRepository {
+internal class FakePersons : PersonRepository {
     val items = MutableStateFlow<List<Person>>(emptyList())
 
     override fun observePersons() = items

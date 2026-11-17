@@ -15,6 +15,7 @@ import com.aktawind.monnoel.core.domain.gifts.OfferIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.SaveGiftUseCase
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.SavePersonUseCase
+import com.aktawind.monnoel.core.domain.gifts.SaveWhisperUseCase
 import com.aktawind.monnoel.core.domain.gifts.SetPersonBudgetUseCase
 import com.aktawind.monnoel.core.domain.meals.SaveDishUseCase
 import com.aktawind.monnoel.core.domain.meals.SaveMealUseCase
@@ -64,4 +65,6 @@ interface TestDataEntryPoint {
     fun setEditionBudget(): SetEditionBudgetUseCase
 
     fun selectEdition(): SelectEditionUseCase
+
+    fun saveWhisper(): SaveWhisperUseCase
 }

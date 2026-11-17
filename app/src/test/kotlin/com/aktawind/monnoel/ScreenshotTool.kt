@@ -11,7 +11,9 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
@@ -25,6 +27,7 @@ import com.aktawind.monnoel.core.domain.budget.ExpenseDraft
 import com.aktawind.monnoel.core.domain.cooking.ProductionDraft
 import com.aktawind.monnoel.core.domain.gifts.GiftDraft
 import com.aktawind.monnoel.core.domain.gifts.IdeaDraft
+import com.aktawind.monnoel.core.domain.gifts.WhisperDraft
 import com.aktawind.monnoel.core.domain.meals.DishDraft
 import com.aktawind.monnoel.core.domain.meals.MealDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
@@ -158,6 +161,11 @@ class ScreenshotTool {
         data.saveGift()(null, past.id, GiftDraft(lea.id, "Puzzle licorne", priceCents = 22_000, status = GiftStatus.GIVEN))
         data.saveExpense()(null, past.id, ExpenseDraft("Sapin", 4_900, ExpenseCategory.TREE, paid = true))
         data.selectEdition()(edition.id)
+        val whisper = data.saveWhisper()
+        whisper(null, edition.id, WhisperDraft(lea.id, "Montre à paillettes", givenToPersonId = mamie.id, priceCents = 3_500))
+        whisper(null, edition.id, WhisperDraft(lea.id, "Montre à paillettes", givenToPersonId = tom.id))
+        whisper(null, edition.id, WhisperDraft(lea.id, "Atelier poterie", givenToName = "Tante Lucie", received = true))
+        whisper(null, edition.id, WhisperDraft(tom.id, "Lampe dinosaure", givenToPersonId = mamie.id))
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
@@ -250,6 +258,9 @@ class ScreenshotTool {
         click("Léa Martin")
         waitText("Idées pour cette personne")
         shot("15-person")
+        compose.onNodeWithText("+ Idée soufflée").performScrollTo()
+        shot("25-whispers")
+        compose.onNodeWithText("Livre de contes").performScrollTo()
         click("Livre de contes")
         waitText("Dupliquer pour")
         click("Dupliquer pour…")

@@ -130,8 +130,26 @@ object Migrations {
         }
     }
 
+    /** v0.7.0 : idées soufflées (pour qui, à qui, pour quel Noël). */
+    val MIGRATION_10_11 = object : Migration(10, 11) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `whispered_idea` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, " +
+                    "`recipient_id` TEXT NOT NULL, `title` TEXT NOT NULL, `price_cents` INTEGER, `url` TEXT NOT NULL, " +
+                    "`given_to_person_id` TEXT, `given_to_name` TEXT NOT NULL, `received` INTEGER NOT NULL, `notes` TEXT NOT NULL, " +
+                    "`created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`), " +
+                    "FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , " +
+                    "FOREIGN KEY(`recipient_id`) REFERENCES `person`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , " +
+                    "FOREIGN KEY(`given_to_person_id`) REFERENCES `person`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_whispered_idea_edition_id` ON `whispered_idea` (`edition_id`)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_whispered_idea_recipient_id` ON `whispered_idea` (`recipient_id`)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_whispered_idea_given_to_person_id` ON `whispered_idea` (`given_to_person_id`)")
+        }
+    }
+
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10,
+        MIGRATION_9_10, MIGRATION_10_11,
     )
 }

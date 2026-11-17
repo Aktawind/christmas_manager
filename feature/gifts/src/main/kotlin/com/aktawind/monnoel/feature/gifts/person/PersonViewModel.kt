@@ -7,9 +7,13 @@ import androidx.navigation.toRoute
 import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
+import com.aktawind.monnoel.core.domain.gifts.DeleteWhisperUseCase
 import com.aktawind.monnoel.core.domain.gifts.OfferIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.PersonGiftBudget
+import com.aktawind.monnoel.core.domain.gifts.SaveWhisperUseCase
 import com.aktawind.monnoel.core.domain.gifts.SetPersonBudgetUseCase
+import com.aktawind.monnoel.core.domain.gifts.WhisperDraft
+import com.aktawind.monnoel.core.domain.gifts.WhisperRepository
 import com.aktawind.monnoel.core.domain.gifts.computeGiftBudget
 import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
@@ -20,6 +24,7 @@ import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.model.WhisperedIdea
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
 import com.aktawind.monnoel.feature.gifts.R
@@ -44,6 +49,12 @@ data class PersonUiState(
     val history: List<Pair<Int, List<PlannedGift>>> = emptyList(),
     val ideas: List<GiftIdea> = emptyList(),
     val budget: PersonGiftBudget? = null,
+    /** Idées soufflées du Noël affiché : pour cette personne, et confiées à cette personne. */
+    val whispersFor: List<WhisperedIdea> = emptyList(),
+    val whispersGivenTo: List<WhisperedIdea> = emptyList(),
+    /** Toutes les idées soufflées du Noël (repérage des doublons). */
+    val editionWhispers: List<WhisperedIdea> = emptyList(),
+    val persons: List<Person> = emptyList(),
     val message: UiMessage? = null,
 ) {
     val readOnly: Boolean get() = edition?.isReadOnly == true
@@ -59,6 +70,9 @@ class PersonViewModel @Inject constructor(
     private val setBudget: SetPersonBudgetUseCase,
     private val changeStatus: ChangeGiftStatusUseCase,
     private val offerIdea: OfferIdeaUseCase,
+    whispers: WhisperRepository,
+    private val saveWhisper: SaveWhisperUseCase,
+    private val deleteWhisper: DeleteWhisperUseCase,
 ) : ViewModel() {
     private val personId = savedStateHandle.toRoute<PersonDestination>().personId
     private val message = MutableStateFlow<UiMessage?>(null)
@@ -93,8 +107,26 @@ class PersonViewModel @Inject constructor(
         )
     }
 
-    val uiState: StateFlow<PersonUiState> = combine(baseState, budgetFlow, message) { base, budget, msg ->
-        base.copy(budget = budget, message = msg)
+    private val whisperFlow = editionsState.flatMapLatest { state ->
+        val edition = state.current ?: return@flatMapLatest flowOf(emptyList())
+        whispers.observeWhispers(edition.id)
+    }
+
+    val uiState: StateFlow<PersonUiState> = combine(baseState, budgetFlow, whisperFlow, persons.observePersons(), message) {
+            base,
+            budget,
+            edition,
+            people,
+            msg,
+        ->
+        base.copy(
+            budget = budget,
+            message = msg,
+            whispersFor = edition.filter { it.recipientId == personId },
+            whispersGivenTo = edition.filter { it.givenToPersonId == personId },
+            editionWhispers = edition,
+            persons = people,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PersonUiState())
 
     fun saveEnvelope(input: String) = viewModelScope.launch {
@@ -117,6 +149,15 @@ class PersonViewModel @Inject constructor(
             is AppResult.Success -> UiMessage(R.string.gifts_offered, listOf(idea.title))
             is AppResult.Failure -> result.error.toUiMessage()
         }
+    }
+
+    fun saveWhisper(id: String?, draft: WhisperDraft) = viewModelScope.launch {
+        val edition = uiState.value.edition ?: return@launch
+        (saveWhisper.invoke(id, edition.id, draft) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() }
+    }
+
+    fun deleteWhisper(id: String) = viewModelScope.launch {
+        (deleteWhisper.invoke(id) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() }
     }
 
     fun messageShown() {

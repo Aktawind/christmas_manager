@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
 import com.aktawind.monnoel.core.model.Production
 import com.aktawind.monnoel.core.model.Recipe
+import com.aktawind.monnoel.core.model.WhisperedIdea
 import java.text.Normalizer
 
 /** Un résultat de recherche : de quoi l'afficher et l'ouvrir. */
@@ -37,6 +38,7 @@ data class SearchData(
     val meals: List<Meal> = emptyList(),
     val dishes: List<MealDish> = emptyList(),
     val expenses: List<Expense> = emptyList(),
+    val whispers: List<WhisperedIdea> = emptyList(),
 )
 
 /** Minuscules, sans accents : « Noël » et « noel » se valent. */
@@ -145,6 +147,24 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
             dishes.firstNotNullOfOrNull { it.photoPath },
         )
     }.sortedByDescending { data.years[it.first.editionId] ?: 0 }.map { it.second }
+    val names = data.persons.associate { it.id to it.displayName }
+    results[LinkType.WHISPER] = data.whispers.filter { matches(it.title, it.givenToName, names[it.recipientId], it.notes) }
+        .sortedByDescending { data.years[it.editionId] ?: 0 }
+        .map {
+            SearchResult(
+                LinkType.WHISPER,
+                it.recipientId,
+                it.title,
+                listOfNotNull(
+                    names[it.recipientId],
+                    it.givenToName.ifBlank {
+                        null
+                    }?.let { g -> "→ $g" },
+                    year(it.editionId),
+                ).joinToString(" · "),
+                null,
+            )
+        }
     results[LinkType.EXPENSE] = data.expenses.filter { matches(it.title, it.notes) }
         .sortedByDescending { data.years[it.editionId] ?: 0 }
         .map { SearchResult(LinkType.EXPENSE, it.id, it.title, year(it.editionId).orEmpty(), null) }

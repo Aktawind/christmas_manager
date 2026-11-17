@@ -27,6 +27,7 @@ import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
+import com.aktawind.monnoel.core.backup.format.WhisperDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -111,6 +112,7 @@ class BackupDataSourceTest {
                 ),
             ),
             mealPersons = listOf(MealPersonDto("m", "p")),
+            whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L)),
             expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),
             mealDishes = listOf(MealDishDto("d", "m", "DESSERT", "r", "Bûche", "photos/rd.jpg", "Mamie", true, false, 0, 1L)),
             dismissedSuggestions = listOf(DismissedSuggestionDto("e", "SUPPLY_BUY:s")),

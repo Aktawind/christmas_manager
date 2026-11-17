@@ -162,6 +162,8 @@ fun PersonRoute(
         }
         OutlinedButton(onClick = { onNewIdea(person.id) }) { Text(stringResource(R.string.person_add_idea)) }
 
+        WhisperSections(state, onSave = viewModel::saveWhisper, onDelete = { viewModel.deleteWhisper(it) })
+
         if (state.history.isNotEmpty()) {
             SectionTitle(stringResource(R.string.person_history_title))
             state.history.forEach { (year, gifts) ->

@@ -24,6 +24,7 @@ import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
+import com.aktawind.monnoel.core.backup.format.WhisperDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.entity.AdventBoxEntity
 import com.aktawind.monnoel.core.database.entity.AdventCalendarEntity
@@ -47,6 +48,7 @@ import com.aktawind.monnoel.core.database.entity.ProductionEntity
 import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
 import com.aktawind.monnoel.core.database.entity.RecipeEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
+import com.aktawind.monnoel.core.database.entity.WhisperEntity
 import javax.inject.Inject
 
 /** Lit toute la base pour l'export, et la remplace intégralement lors d'un import. */
@@ -115,6 +117,12 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             expenses = db.expenseDao().getAll().map {
                 ExpenseDto(it.id, it.editionId, it.title, it.amountCents, it.category, it.paid, it.notes, it.createdAt, it.updatedAt)
             },
+            whispers = db.whisperDao().getAll().map {
+                WhisperDto(
+                    it.id, it.editionId, it.recipientId, it.title, it.priceCents, it.url, it.givenToPersonId, it.givenToName, it.received,
+                    it.notes, it.createdAt, it.updatedAt,
+                )
+            },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -130,6 +138,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
             db.expenseDao().deleteAll()
+            db.whisperDao().deleteAll()
             db.mealDao().deleteAllDishes()
             db.mealDao().deleteAllMeals()
             db.cookingDao().deleteAllProductions()
@@ -163,6 +172,14 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     ProductionEntity(
                         it.id, it.editionId, it.recipeId, it.recipeName, it.recipePhotoPath, it.quantity, it.destination, it.status,
                         it.photoPath, it.notes, it.createdAt, it.updatedAt,
+                    )
+                },
+            )
+            db.whisperDao().insertAll(
+                data.whispers.map {
+                    WhisperEntity(
+                        it.id, it.editionId, it.recipientId, it.title, it.priceCents, it.url, it.givenToPersonId, it.givenToName,
+                        it.received, it.notes, it.createdAt, it.updatedAt,
                     )
                 },
             )
