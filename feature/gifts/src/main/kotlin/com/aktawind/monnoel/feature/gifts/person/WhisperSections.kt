@@ -31,6 +31,7 @@ import com.aktawind.monnoel.core.domain.gifts.centsToInput
 import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
 import com.aktawind.monnoel.core.domain.gifts.whisperDuplicates
+import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.WhisperedIdea
 import com.aktawind.monnoel.core.ui.DropdownField
@@ -42,7 +43,14 @@ import com.aktawind.monnoel.feature.gifts.R
 
 /** Fiche d'une personne : les idées soufflées pour elle, et de la part de qui, pour le Noël affiché. */
 @Composable
-internal fun WhisperSections(state: PersonUiState, onSave: (String?, WhisperDraft) -> Unit, onDelete: (String) -> Unit) {
+internal fun WhisperSections(
+    state: PersonUiState,
+    onSave: (String?, WhisperDraft) -> Unit,
+    onDelete: (String) -> Unit,
+    /** Idée de la liste à transformer en idée soufflée (fenêtre pré-remplie), ou null. */
+    fromIdea: GiftIdea? = null,
+    onFromIdeaDone: () -> Unit = {},
+) {
     val person = state.person ?: return
     val edition = state.edition ?: return
     val secondary = LocalMonNoelColors.current.secondaryText
@@ -73,6 +81,26 @@ internal fun WhisperSections(state: PersonUiState, onSave: (String?, WhisperDraf
         OutlinedButton(onClick = { open = "" }) { Text(stringResource(R.string.whisper_add)) }
     }
 
+    if (fromIdea != null && open == null) {
+        WhisperDialog(
+            whisper = null,
+            recipientId = person.id,
+            recipientName = person.displayName,
+            persons = state.persons.filter { it.id != person.id },
+            editionWhispers = state.editionWhispers,
+            editionId = edition.id,
+            readOnly = state.readOnly,
+            initialTitle = fromIdea.title,
+            initialPriceCents = fromIdea.estimatedPriceCents,
+            initialUrl = fromIdea.url,
+            onSave = { draft ->
+                onSave(null, draft)
+                onFromIdeaDone()
+            },
+            onDelete = null,
+            onDismiss = onFromIdeaDone,
+        )
+    }
     val current = open
     if (current != null) {
         val whisper = state.editionWhispers.firstOrNull { it.id == current }
@@ -132,12 +160,15 @@ private fun WhisperDialog(
     onSave: (WhisperDraft) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
+    initialTitle: String = "",
+    initialPriceCents: Long? = null,
+    initialUrl: String = "",
 ) {
-    var title by rememberSaveable { mutableStateOf(whisper?.title.orEmpty()) }
+    var title by rememberSaveable { mutableStateOf(whisper?.title ?: initialTitle) }
     var giverId by rememberSaveable { mutableStateOf(whisper?.givenToPersonId) }
     var giverName by rememberSaveable { mutableStateOf(if (whisper?.givenToPersonId == null) whisper?.givenToName.orEmpty() else "") }
-    var price by rememberSaveable { mutableStateOf(centsToInput(whisper?.priceCents)) }
-    var url by rememberSaveable { mutableStateOf(whisper?.url.orEmpty()) }
+    var price by rememberSaveable { mutableStateOf(centsToInput(whisper?.priceCents ?: initialPriceCents)) }
+    var url by rememberSaveable { mutableStateOf(whisper?.url ?: initialUrl) }
     var received by rememberSaveable { mutableStateOf(whisper?.received ?: false) }
     var notes by rememberSaveable { mutableStateOf(whisper?.notes.orEmpty()) }
     val names = persons.associate { it.id to it.displayName }

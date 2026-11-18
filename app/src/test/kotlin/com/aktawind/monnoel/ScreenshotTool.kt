@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -260,6 +261,12 @@ class ScreenshotTool {
         shot("15-person")
         compose.onNodeWithText("+ Idée soufflée").performScrollTo()
         shot("25-whispers")
+        compose.onAllNodesWithText("Coffret de feutres").onLast().performClick()
+        click("🤫 En faire une idée soufflée")
+        waitText("Idée soufflée pour")
+        compose.onNode(hasSetTextAction() and hasText("Nom (ex.", substring = true)).performTextInput("Papa")
+        compose.onAllNodesWithText("Enregistrer").onLast().performClick()
+        waitText("de la part de Papa")
         compose.onNodeWithText("Livre de contes").performScrollTo()
         click("Livre de contes")
         waitText("Dupliquer pour")

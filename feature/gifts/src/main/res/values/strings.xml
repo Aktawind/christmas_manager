@@ -87,6 +87,7 @@
     <string name="idea_delete_confirm">Supprimer cette idée ? Les cadeaux déjà prévus à partir d’elle sont conservés.</string>
     <string name="idea_no_persons">Ajoute des personnes dans l’onglet Personnes pour les associer.</string>
     <string name="person_idea_to_gift">🎁 En faire un cadeau pour Noël %1$d</string>
+    <string name="person_idea_to_whisper">🤫 En faire une idée soufflée</string>
     <string name="person_idea_edit">✏️ Modifier l’idée</string>
     <string name="whispers_for_title">Idées soufflées pour %1$s · Noël %2$d</string>
     <string name="whispers_for_hint">Les idées de cadeaux pour cette personne que tu as données à quelqu’un, et de la part de qui elles viendront.</string>

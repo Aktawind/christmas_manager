@@ -122,9 +122,10 @@ fun PersonRoute(
         }
 
         SectionTitle(stringResource(R.string.person_ideas_title))
+        var whisperIdeaId by rememberSaveable { mutableStateOf<String?>(null) }
         if (state.ideas.isEmpty()) Text(stringResource(R.string.person_no_idea), color = secondary)
         state.ideas.forEach { idea ->
-            // Toucher l'idée : en faire un cadeau de l'année, ou la modifier.
+            // Toucher l'idée : en faire un cadeau de l'année, une idée soufflée, ou la modifier.
             var menu by remember { mutableStateOf(false) }
             Box {
                 Card(
@@ -151,6 +152,13 @@ fun PersonRoute(
                         },
                     )
                     DropdownMenuItem(
+                        text = { Text(stringResource(R.string.person_idea_to_whisper)) },
+                        onClick = {
+                            menu = false
+                            whisperIdeaId = idea.id
+                        },
+                    )
+                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.person_idea_edit)) },
                         onClick = {
                             menu = false
@@ -162,7 +170,13 @@ fun PersonRoute(
         }
         OutlinedButton(onClick = { onNewIdea(person.id) }) { Text(stringResource(R.string.person_add_idea)) }
 
-        WhisperSections(state, onSave = viewModel::saveWhisper, onDelete = { viewModel.deleteWhisper(it) })
+        WhisperSections(
+            state,
+            onSave = viewModel::saveWhisper,
+            onDelete = { viewModel.deleteWhisper(it) },
+            fromIdea = state.ideas.firstOrNull { it.id == whisperIdeaId },
+            onFromIdeaDone = { whisperIdeaId = null },
+        )
 
         if (state.history.isNotEmpty()) {
             SectionTitle(stringResource(R.string.person_history_title))
