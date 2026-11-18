@@ -20,3 +20,11 @@
   regroupées. Accessible par une loupe dans le menu (décision utilisatrice).
 - Accueil : « Le chemin vers Noël » (`christmasPath`) — étapes datées par nature uniquement.
 - Base v6 (migration 5 → 6 testée), sauvegarde v5.
+
+## Révision (2026-11-18, retour utilisatrice)
+
+- La liste devenait longue : **Ma liste** est découpée en **onglets par thème** (Cadeaux,
+  Calendriers de l'Avent, Cuisine, Repas de fête, Maison & déco, Autre). Chaque onglet montre ses
+  suggestions et ses choses à faire ; son compteur additionne tâches ouvertes et suggestions.
+  L'onglet affiché au départ est le premier qui a quelque chose à faire. Une nouvelle chose à
+  faire prend le thème de l'onglet.

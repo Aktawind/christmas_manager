@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,9 +29,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -47,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -73,7 +75,7 @@ private enum class TaskFilter(@StringRes val label: Int, val accept: (LutinTask)
 @Composable
 fun TasksRoute(
     onOpenTask: (String) -> Unit,
-    onNewTask: () -> Unit,
+    onNewTask: (TaskModule) -> Unit,
     onOpenLink: (LinkType, String) -> Unit,
     viewModel: TasksViewModel = hiltViewModel(),
 ) {
@@ -88,23 +90,50 @@ fun TasksRoute(
         }
     }
     val lutin = state.lutin
-    val labeled = lutin.suggestions.map { it to it.label() }
-    val visible = lutin.tasks.filter(filter.accept)
-    val groups = TaskModule.entries.mapNotNull { m -> visible.filter { it.module == m }.takeIf { it.isNotEmpty() }?.let { m to it } }
+    // Un onglet par thème : ce qui reste à faire (tâches ouvertes + suggestions) en compteur.
+    val pending = TaskModule.entries.associateWith { m ->
+        lutin.tasks.count { it.module == m && it.isOpen } + lutin.suggestions.count { it.module == m }
+    }
+    var tabName by rememberSaveable { mutableStateOf<String?>(null) }
+    val tab = tabName?.let { n -> TaskModule.entries.firstOrNull { it.name == n } }
+        ?: TaskModule.entries.firstOrNull { (pending[it] ?: 0) > 0 }
+        ?: TaskModule.GIFTS
+    val labeled = lutin.suggestions.filter { it.module == tab }.map { it to it.label() }
+    val visible = lutin.tasks.filter { it.module == tab }.filter(filter.accept)
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(lutin.edition?.let { stringResource(R.string.tasks_title_year, it.year) } ?: stringResource(R.string.tasks_title))
-                },
-            )
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            lutin.edition?.let { stringResource(R.string.tasks_title_year, it.year) }
+                                ?: stringResource(R.string.tasks_title),
+                        )
+                    },
+                )
+                PrimaryScrollableTabRow(selectedTabIndex = tab.ordinal, edgePadding = 16.dp) {
+                    TaskModule.entries.forEach { m ->
+                        val count = pending[m] ?: 0
+                        Tab(
+                            selected = tab == m,
+                            onClick = { tabName = m.name },
+                            text = {
+                                Text(
+                                    "${m.emoji}  ${stringResource(m.label)}" + if (count > 0) " · $count" else "",
+                                    maxLines = 1,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
         },
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
             if (!state.readOnly && lutin.edition != null) {
                 ExtendedFloatingActionButton(
-                    onClick = onNewTask,
+                    onClick = { onNewTask(tab) },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.tasks_new)) },
                 )
@@ -139,11 +168,11 @@ fun TasksRoute(
                     }
                 }
             }
-            if (lutin.tasks.isEmpty() && !state.loading) {
+            if (lutin.tasks.none { it.module == tab } && !state.loading) {
                 item {
                     EmptyState(
                         emoji = "📝",
-                        title = stringResource(R.string.tasks_empty_title),
+                        title = stringResource(R.string.tasks_tab_empty_title, stringResource(tab.label)),
                         message = stringResource(R.string.tasks_empty_message),
                     )
                 }
@@ -156,22 +185,9 @@ fun TasksRoute(
                     )
                 }
             }
-            groups.forEachIndexed { index, (module, list) ->
-                item(key = "h-${module.name}") {
-                    Column(Modifier.widthIn(max = 840.dp).fillMaxWidth().padding(top = if (index == 0) 12.dp else 20.dp)) {
-                        if (index > 0) {
-                            HorizontalDivider(Modifier.padding(bottom = 16.dp), color = LocalMonNoelColors.current.gold.copy(alpha = 0.35f))
-                        }
-                        Text(
-                            "${module.emoji}  ${stringResource(module.label)}",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.semantics { heading() },
-                        )
-                    }
-                }
-                items(list, key = { it.id }) { task ->
-                    TaskRow(task, state.readOnly, onToggle = { viewModel.toggle(task.id, it) }, onClick = { onOpenTask(task.id) })
-                }
+            item { Spacer(Modifier.padding(top = 8.dp)) }
+            items(visible, key = { it.id }) { task ->
+                TaskRow(task, state.readOnly, onToggle = { viewModel.toggle(task.id, it) }, onClick = { onOpenTask(task.id) })
             }
         }
     }

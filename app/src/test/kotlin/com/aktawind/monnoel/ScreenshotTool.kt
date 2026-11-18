@@ -349,7 +349,7 @@ class ScreenshotTool {
         waitText("Préparer pour Noël")
         shot("32-recipe")
         compose.onNodeWithContentDescription("Retour").performClick()
-        click("Gourmandises")
+        click("Préparations")
         waitText("Biscuits pour l'école")
         shot("30-cooking")
         click("Biscuits pour l'école")

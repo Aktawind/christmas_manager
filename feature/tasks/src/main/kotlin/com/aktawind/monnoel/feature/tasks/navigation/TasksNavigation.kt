@@ -12,13 +12,13 @@ import kotlinx.serialization.Serializable
 data object TasksDestination
 
 @Serializable
-data class TaskEditDestination(val taskId: String? = null)
+data class TaskEditDestination(val taskId: String? = null, val module: String? = null)
 
 fun NavGraphBuilder.tasksGraph(navController: NavController, onOpenLink: (LinkType, String) -> Unit) {
     composable<TasksDestination> {
         TasksRoute(
             onOpenTask = { navController.navigate(TaskEditDestination(it)) },
-            onNewTask = { navController.navigate(TaskEditDestination()) },
+            onNewTask = { module -> navController.navigate(TaskEditDestination(module = module.name)) },
             onOpenLink = onOpenLink,
         )
     }

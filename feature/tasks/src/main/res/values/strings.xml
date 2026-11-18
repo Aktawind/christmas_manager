@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr" tools:ignore="PluralsCandidate">
+    <string name="tasks_tab_empty_title">Rien à faire pour « %1$s »</string>
     <string name="tasks_title">Ma liste</string>
     <string name="tasks_title_year">Ma liste · Noël %1$d</string>
     <string name="tasks_new">Nouvelle chose à faire</string>

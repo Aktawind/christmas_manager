@@ -26,7 +26,7 @@ qui vient, où, quand, et ce qu'on mange, toujours sans ingrédients ni étapes.
   « Commander … », qui se coche quand le plat est marqué « commandé ». Un repas sans plat
   donne la suggestion « Préparer le menu ». Rien n'est ajouté automatiquement (ADR 0010).
 - Choisir le type propose un nom et, pour le 24 et le 25, la date ; les deux restent modifiables.
-- Onglet Cuisine : **Repas** · Gourmandises (les préparations de la v0.5) · Mes recettes.
+- Onglet Cuisine : **Repas** · Préparations (celles de la v0.5 ; « Gourmandises » le temps des tests) · Mes recettes.
 - Base Room v9 (v8 : premier test de la v0.6.0), format de sauvegarde v7.
 
 ## Conséquences

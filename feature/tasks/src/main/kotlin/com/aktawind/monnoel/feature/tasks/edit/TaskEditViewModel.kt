@@ -67,7 +67,12 @@ class TaskEditViewModel @Inject constructor(
                 it.copy(
                     loading = false,
                     readOnly = edition?.isReadOnly == true,
-                    form = task?.let { t -> TaskForm(t.title, t.description, t.status, t.module, t.notes) } ?: TaskForm(),
+                    form =
+                    task?.let { t -> TaskForm(t.title, t.description, t.status, t.module, t.notes) }
+                        ?: TaskForm(
+                            module =
+                            route.module?.let { m -> runCatching { TaskModule.valueOf(m) }.getOrNull() } ?: TaskModule.OTHER,
+                        ),
                     linkType = task?.linkType,
                     linkId = task?.linkId,
                     automatic = task?.suggestionKey != null,

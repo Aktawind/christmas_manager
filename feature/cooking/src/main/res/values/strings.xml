@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
     <string name="cooking_title">Cuisine</string>
     <string name="cooking_title_year">Cuisine · Noël %1$d</string>
-    <string name="tab_productions">Gourmandises</string>
+    <string name="tab_productions">Préparations</string>
     <string name="tab_meals">Repas</string>
     <string name="fab_new_meal">Repas</string>
     <string name="tab_recipes">Mes recettes</string>
