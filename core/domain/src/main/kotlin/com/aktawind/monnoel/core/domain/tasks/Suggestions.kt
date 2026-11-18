@@ -50,6 +50,7 @@ fun suggestionStates(source: SuggestionSource): Map<String, Boolean> {
         states["${SuggestionKind.GIFT_WRAP.name}:${gift.id}"] = step >= GiftStatus.WRAPPED.ordinal
     }
     source.supplies.forEach { states["${SuggestionKind.SUPPLY_BUY.name}:${it.id}"] = it.bought }
+    source.calendars.filter { it.isReadyMade }.forEach { states["${SuggestionKind.CALENDAR_BUY.name}:${it.id}"] = it.bought }
     source.calendars.forEach { calendar ->
         val own = source.boxes.filter { it.calendarId == calendar.id }
         val toFind = own.count { it.status == BoxStatus.TO_FIND }
@@ -155,6 +156,20 @@ fun currentSuggestions(
                 ),
             )
         }
+    }
+    source.calendars.filter { it.isReadyMade && !it.bought }.forEach { calendar ->
+        add(
+            Suggestion(
+                "${SuggestionKind.CALENDAR_BUY.name}:${calendar.id}",
+                SuggestionKind.CALENDAR_BUY,
+                TaskModule.ADVENT,
+                calendar.name,
+                calendar.shop,
+                1,
+                LinkType.CALENDAR,
+                calendar.id,
+            ),
+        )
     }
     source.productions.filter { it.status != ProductionStatus.DONE }.forEach { production ->
         add(

@@ -39,6 +39,15 @@ fun Suggestion.label(): String = when (kind) {
     SuggestionKind.PRODUCTION_MAKE ->
         if (count > 1) stringResource(R.string.suggestion_make_many, subject, count) else stringResource(R.string.suggestion_make, subject)
     SuggestionKind.MEAL_MENU -> stringResource(R.string.suggestion_menu, subject)
+    SuggestionKind.CALENDAR_BUY ->
+        if (detail.isBlank()) {
+            stringResource(
+                R.string.suggestion_buy,
+                subject,
+            )
+        } else {
+            stringResource(R.string.suggestion_buy_for, subject, detail)
+        }
     SuggestionKind.DISH_ORDER ->
         if (detail.isBlank()) {
             stringResource(
@@ -60,6 +69,7 @@ val SuggestionKind.settingLabel: Int
         SuggestionKind.ADVENT_PREPARE -> R.string.suggestion_kind_prepare
         SuggestionKind.PRODUCTION_MAKE -> R.string.suggestion_kind_make
         SuggestionKind.MEAL_MENU -> R.string.suggestion_kind_menu
+        SuggestionKind.CALENDAR_BUY -> R.string.suggestion_kind_calendar_buy
         SuggestionKind.DISH_ORDER -> R.string.suggestion_kind_order
     }
 

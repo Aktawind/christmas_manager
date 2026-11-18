@@ -16,7 +16,7 @@ data object AdventDestination
 data class CalendarDestination(val calendarId: String)
 
 @Serializable
-data class CalendarEditDestination(val calendarId: String? = null)
+data class CalendarEditDestination(val calendarId: String? = null, val readyMade: Boolean = false)
 
 @Serializable
 data class BoxEditDestination(val boxId: String)
@@ -26,6 +26,8 @@ fun NavGraphBuilder.adventGraph(navController: NavController) {
         AdventListRoute(
             onOpenCalendar = { navController.navigate(CalendarDestination(it)) },
             onNewCalendar = { navController.navigate(CalendarEditDestination()) },
+            onNewReadyMade = { navController.navigate(CalendarEditDestination(readyMade = true)) },
+            onOpenReadyMade = { navController.navigate(CalendarEditDestination(it)) },
         )
     }
     composable<CalendarDestination> {
@@ -33,13 +35,18 @@ fun NavGraphBuilder.adventGraph(navController: NavController) {
             onBack = { navController.popBackStack() },
             onEdit = { navController.navigate(CalendarEditDestination(it)) },
             onOpenBox = { navController.navigate(BoxEditDestination(it)) },
+            // Un calendrier tout prêt n'a pas de cases : on ouvre directement sa fiche.
+            onReadyMade = { id ->
+                navController.popBackStack()
+                navController.navigate(CalendarEditDestination(id))
+            },
         )
     }
     composable<CalendarEditDestination> {
         CalendarEditRoute(
-            onSaved = { id, isNew ->
+            onSaved = { id, openGrid ->
                 navController.popBackStack()
-                if (isNew) navController.navigate(CalendarDestination(id))
+                if (openGrid) navController.navigate(CalendarDestination(id))
             },
             onCancel = { navController.popBackStack() },
         )

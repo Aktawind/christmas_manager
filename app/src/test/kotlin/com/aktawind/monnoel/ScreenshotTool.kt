@@ -33,6 +33,7 @@ import com.aktawind.monnoel.core.domain.meals.DishDraft
 import com.aktawind.monnoel.core.domain.meals.MealDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.ExpenseCategory
 import com.aktawind.monnoel.core.model.GiftStatus
@@ -219,6 +220,8 @@ class ScreenshotTool {
             ) as AppResult.Success
             ).value
         data.saveCalendar()(null, editionId, CalendarDraft("Lutin farceur", setOf(leaId, tomId), theme = "Farces", boxCount = 25))
+        val tisanes = CalendarDraft("Tisanes bio", setOf(leaId), kind = CalendarKind.READY_MADE, priceCents = 2_990, shop = "Herboristerie")
+        data.saveCalendar()(null, editionId, tisanes)
         val boxes = data.adventRepository().getBoxes(cal.id)
         val contents = listOf(
             Triple(SurpriseType.TREAT, "Chocolat", BoxStatus.READY),
@@ -298,6 +301,11 @@ class ScreenshotTool {
         click("Avent")
         waitText("Calendrier de Tom")
         shot("18-advent-list")
+        click("Tisanes bio")
+        waitText("Boutique ou marque")
+        shot("18b-ready-made")
+        compose.onNodeWithContentDescription("Retour").performClick()
+        waitText("Calendrier de Tom")
         click("Calendrier de Tom")
         waitText("Biscuits")
         shot("19-calendar")

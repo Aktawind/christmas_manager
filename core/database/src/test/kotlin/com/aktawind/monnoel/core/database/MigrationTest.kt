@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 13, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 14, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -327,6 +327,32 @@ class MigrationTest {
         runBlocking {
             assertEquals(2026, db.editionDao().getAll().single().year)
             assertEquals(0, db.ideaRequestDao().getAll().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 13 vers 14 garde les calendriers faits maison`() {
+        helper.createDatabase(dbName, 13).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO advent_calendar (id, edition_id, name, description, cover_photo_path, theme, budget_cents, notes, " +
+                    "box_count, created_at, updated_at) VALUES ('c1', 'e1', 'Tom', '', NULL, '', NULL, '', 24, 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 14, true, Migrations.MIGRATION_13_14).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            val calendar = db.adventDao().getAllCalendars().single()
+            assertEquals("HOMEMADE", calendar.kind)
+            assertEquals(false, calendar.bought)
         }
         db.close()
     }

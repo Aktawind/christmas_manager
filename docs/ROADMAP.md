@@ -142,6 +142,7 @@ Pas de dates ni de priorités (ADR 0006).
 | G-021 | Demandes d'idées dans la fiche personne (qui attend des idées, de qui on en attend) → tâche automatique dans Ma liste | 🧪 |
 | P-010 | Ma liste en onglets par thème (Cadeaux, Calendriers, Cuisine, Repas, Maison, Autre) avec compteurs | 🧪 |
 | P-011 | Cuisine : l'onglet « Gourmandises » devient « Préparations » | 🧪 |
+| A-020 | Calendriers achetés tout prêts : fiche simple (prix, boutique, à acheter / acheté), sans cases ; budget et suggestion « Acheter » | 🧪 |
 | B-006 | Accueil « Les comptes », recherche des autres dépenses, sauvegarde              | 🧪 |
 
 ## v0.8.0 — Les traditions ❤️

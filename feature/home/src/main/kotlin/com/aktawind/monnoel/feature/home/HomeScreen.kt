@@ -524,8 +524,16 @@ private fun AdventSummaryCard(calendars: List<CalendarProgress>, onOpen: () -> U
             }
             calendars.forEach { c ->
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(stringResource(R.string.home_advent_line, c.name, c.ready, c.boxCount), style = MaterialTheme.typography.bodyLarge)
-                    if (c.todayNumber != null) {
+                    val bought = c.readyMadeBought
+                    Text(
+                        if (bought == null) {
+                            stringResource(R.string.home_advent_line, c.name, c.ready, c.boxCount)
+                        } else {
+                            stringResource(if (bought) R.string.home_advent_ready_bought else R.string.home_advent_ready_to_buy, c.name)
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    if (c.todayNumber != null && bought == null) {
                         val content = c.todayBox?.let { box ->
                             listOfNotNull(box.type?.emoji, box.title.takeIf { it.isNotBlank() }).joinToString(" ")
                         }

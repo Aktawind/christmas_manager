@@ -102,6 +102,7 @@
     <string name="suggestion_menu">Préparer le menu « %1$s »</string>
     <string name="suggestion_order">Commander « %1$s »</string>
     <string name="suggestion_order_for">Commander « %1$s » (%2$s)</string>
+    <string name="suggestion_kind_calendar_buy">Acheter les calendriers tout prêts</string>
     <string name="suggestion_kind_menu">Préparer le menu des repas</string>
     <string name="suggestion_kind_order">Commander les plats à commander</string>
     <string name="meal_type_eve">Réveillon du 24</string>

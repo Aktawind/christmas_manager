@@ -110,6 +110,7 @@ fun CalendarRoute(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
     onOpenBox: (String) -> Unit,
+    onReadyMade: (String) -> Unit,
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -135,6 +136,8 @@ fun CalendarRoute(
         if (state.deleted || (!state.loading && state.calendar == null)) onBack()
     }
     val calendar = state.calendar ?: return
+    LaunchedEffect(calendar.id, calendar.isReadyMade) { if (calendar.isReadyMade) onReadyMade(calendar.id) }
+    if (calendar.isReadyMade) return
 
     fun closeSelection() {
         selecting = false

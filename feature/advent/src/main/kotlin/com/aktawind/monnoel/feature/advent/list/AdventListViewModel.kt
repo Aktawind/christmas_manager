@@ -7,6 +7,7 @@ import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.advent.CalendarSummary
 import com.aktawind.monnoel.core.domain.advent.CreateFromTemplateUseCase
 import com.aktawind.monnoel.core.domain.advent.DuplicateCalendarUseCase
+import com.aktawind.monnoel.core.domain.advent.SetCalendarBoughtUseCase
 import com.aktawind.monnoel.core.domain.advent.summarizeCalendar
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
@@ -61,6 +62,7 @@ class AdventListViewModel @Inject constructor(
     persons: PersonRepository,
     private val duplicate: DuplicateCalendarUseCase,
     private val createFromTemplate: CreateFromTemplateUseCase,
+    private val setCalendarBought: SetCalendarBoughtUseCase,
 ) : ViewModel() {
     private val message = MutableStateFlow<UiMessage?>(null)
     private val editions = observeEditions()
@@ -129,6 +131,10 @@ class AdventListViewModel @Inject constructor(
 
     fun deleteTemplate(id: String) {
         viewModelScope.launch { advent.deleteTemplate(id) }
+    }
+
+    fun setBought(id: String, bought: Boolean) {
+        viewModelScope.launch { (setCalendarBought(id, bought) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() } }
     }
 
     fun messageShown() {

@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.domain.advent.MAX_BOX_COUNT
+import com.aktawind.monnoel.core.ui.DropdownField
 import com.aktawind.monnoel.core.ui.EditorScaffold
 import com.aktawind.monnoel.core.ui.MoneyInput
 import com.aktawind.monnoel.core.ui.PhotoField
@@ -35,22 +36,31 @@ import com.aktawind.monnoel.feature.advent.R
 @Composable
 fun CalendarEditRoute(onSaved: (String, Boolean) -> Unit, onCancel: () -> Unit, viewModel: CalendarEditViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(state.doneWithId) { state.doneWithId?.let { onSaved(it, state.isNew) } }
+    LaunchedEffect(state.doneWithId) { state.doneWithId?.let { onSaved(it, state.isNew && !state.readyMade) } }
+    LaunchedEffect(state.deleted) { if (state.deleted) onCancel() }
     val form = state.form
     var countText by rememberSaveable(state.loading) { mutableStateOf(form.boxCount.toString()) }
     var confirmShrink by rememberSaveable { mutableStateOf(false) }
     val countValid = countText.toIntOrNull()?.let { it in 1..MAX_BOX_COUNT } == true
 
     EditorScaffold(
-        title = stringResource(if (state.isNew) R.string.calendar_new_title else R.string.calendar_edit_title),
+        title = stringResource(
+            when {
+                state.readyMade && state.isNew -> R.string.calendar_ready_new_title
+                state.readyMade -> R.string.calendar_ready_edit_title
+                state.isNew -> R.string.calendar_new_title
+                else -> R.string.calendar_edit_title
+            },
+        ),
         onBack = onCancel,
         onSave = { if (state.boxesLost > 0) confirmShrink = true else viewModel.save() },
-        saveEnabled = form.name.isNotBlank() && countValid,
+        saveEnabled = form.name.isNotBlank() && (state.readyMade || countValid),
         busy = state.busy,
         message = state.message,
         onMessageShown = viewModel::messageShown,
-        deleteConfirmation = null,
-        onDelete = null,
+        deleteConfirmation = stringResource(R.string.calendar_ready_delete_confirm),
+        // Un calendrier fait maison se supprime depuis sa grille ; un tout prêt, depuis sa fiche.
+        onDelete = if (state.readyMade && !state.isNew) ({ viewModel.delete() }) else null,
     ) {
         TextInput(form.name, { v ->
             viewModel.update { copy(name = v) }
@@ -64,6 +74,10 @@ fun CalendarEditRoute(onSaved: (String, Boolean) -> Unit, onCancel: () -> Unit, 
                     }, label = { Text(p.displayName) })
                 }
             }
+        }
+        if (state.readyMade) {
+            ReadyMadeFields(form, onUpdate = viewModel::update, onPhoto = viewModel::importPhoto)
+            return@EditorScaffold
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TextInput(
@@ -124,4 +138,30 @@ fun CalendarEditRoute(onSaved: (String, Boolean) -> Unit, onCancel: () -> Unit, 
             dismissButton = { TextButton(onClick = { confirmShrink = false }) { Text(stringResource(UiR.string.action_cancel)) } },
         )
     }
+}
+
+/** Calendrier acheté tout prêt : une simple fiche (pas de cases ni de fournitures). */
+@Composable
+private fun ReadyMadeFields(form: CalendarForm, onUpdate: (CalendarForm.() -> CalendarForm) -> Unit, onPhoto: (String) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        MoneyInput(form.price, { v -> onUpdate { copy(price = v) } }, stringResource(R.string.field_ready_price), Modifier.weight(1f))
+        TextInput(form.shop, { v -> onUpdate { copy(shop = v) } }, stringResource(R.string.field_ready_shop), Modifier.weight(1f))
+    }
+    DropdownField(
+        label = stringResource(R.string.field_ready_status),
+        selected = form.bought,
+        options = listOf(false, true),
+        optionLabel = { stringResource(if (it) R.string.advent_bought else R.string.advent_to_buy) },
+        onSelect = { v -> onUpdate { copy(bought = v) } },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    PhotoField(path = form.coverPhotoPath, onPicked = onPhoto, onRemove = { onUpdate { copy(coverPhotoPath = null) } }, placeholder = "🛍️")
+    TextInput(
+        form.notes,
+        { v -> onUpdate { copy(notes = v) } },
+        stringResource(R.string.field_notes),
+        Modifier.fillMaxWidth(),
+        singleLine = false,
+        minLines = 3,
+    )
 }

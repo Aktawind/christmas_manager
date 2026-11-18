@@ -51,7 +51,8 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
  * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions ;
  * v8 (v0.6.0 test) repas, convives, plats du menu ; v9 (v0.6.0) moments du menu par repas ;
  * v10 (v0.7.0 test) autres dépenses (budget) ; v11 (v0.7.0 test) idées soufflées ;
- * v12 (v0.7.0 test) photo des idées soufflées ; v13 (v0.7.0) demandes d'idées.
+ * v12 (v0.7.0 test) photo des idées soufflées ; v13 (v0.7.0 test) demandes d'idées ;
+ * v14 (v0.7.0) calendriers de l'Avent tout prêts.
  */
 @Database(
     entities = [
@@ -80,7 +81,7 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         WhisperEntity::class,
         IdeaRequestEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {

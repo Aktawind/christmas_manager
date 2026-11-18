@@ -37,3 +37,12 @@
   Le prix n'est pas recopié : chaque case affiche sa part.
 - **Sélection multiple** (`BulkUpdateBoxesUseCase`) : type, contenu, prix, avancement et/ou
   rattachement à un achat groupé appliqués à plusieurs cases en une fois.
+
+## Révision (2026-11-18) — calendriers tout prêts
+
+- Un calendrier est **fait maison** (cases, fournitures, comme avant) ou **acheté tout prêt**
+  (choix à la création, définitif). Un tout prêt n'a **pas de cases** : nom, pour qui, photo,
+  prix, boutique ou marque, « À acheter / Acheté », notes.
+- Budget (poste Calendriers) : son prix, dépensé une fois acheté. Le lutin propose « Acheter … »
+  tant qu'il n'est pas acheté (coche automatique). Recopié vers une autre année : à racheter.
+- Base Room v14.

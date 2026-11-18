@@ -54,6 +54,18 @@ fun computeYearBudget(edition: ChristmasEdition, source: BudgetSource, today: Lo
     val gifts =
         computeGiftBudget(source.gifts.filter { it.editionId == edition.id }, source.envelopes.filter { it.editionId == edition.id })
     val calendars = source.calendars.filter { it.editionId == edition.id }.map { calendar ->
+        // Tout prêt : son prix, dépensé une fois acheté.
+        if (calendar.isReadyMade) {
+            return@map com.aktawind.monnoel.core.domain.advent.CalendarSummary(
+                boxCount = 0,
+                ready = 0,
+                toPrepare = 0,
+                toFind = 0,
+                plannedCents = calendar.priceCents ?: 0,
+                spentCents = if (calendar.bought) calendar.priceCents ?: 0 else 0,
+                budgetCents = null,
+            )
+        }
         summarizeCalendar(
             calendar.boxCount,
             calendar.budgetCents,

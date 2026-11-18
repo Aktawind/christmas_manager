@@ -79,6 +79,8 @@
         <item quantity="many">%1$d plats à commander</item>
         <item quantity="other">%1$d plats à commander</item>
     </plurals>
+    <string name="home_advent_ready_bought">%1$s · tout prêt, acheté ✓</string>
+    <string name="home_advent_ready_to_buy">%1$s · tout prêt, à acheter</string>
     <string name="home_cooking_title">Le fournil</string>
     <string name="home_cooking_empty">Rien de prévu pour l’instant : sablés, bûche, truffes… ?</string>
     <string name="home_cooking_progress">%1$d sur %2$d préparés</string>

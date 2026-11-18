@@ -17,7 +17,17 @@ data class AdventCalendar(
     val boxCount: Int,
     val createdAt: Instant,
     val updatedAt: Instant,
-)
+    /** Fait maison (cases, fournitures) ou acheté tout prêt (une simple fiche). */
+    val kind: CalendarKind = CalendarKind.HOMEMADE,
+    /** Calendrier tout prêt : prix, boutique ou marque, acheté ou non. */
+    val priceCents: Long? = null,
+    val shop: String = "",
+    val bought: Boolean = false,
+) {
+    val isReadyMade: Boolean get() = kind == CalendarKind.READY_MADE
+}
+
+enum class CalendarKind { HOMEMADE, READY_MADE }
 
 enum class SurpriseType {
     BOUGHT,

@@ -9,6 +9,7 @@ import com.aktawind.monnoel.core.common.ApplicationScope
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.advent.CalendarDraft
 import com.aktawind.monnoel.core.domain.advent.DEFAULT_BOX_COUNT
+import com.aktawind.monnoel.core.domain.advent.DeleteCalendarUseCase
 import com.aktawind.monnoel.core.domain.advent.SaveCalendarUseCase
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.centsToInput
@@ -16,6 +17,7 @@ import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PhotoRepository
 import com.aktawind.monnoel.core.model.AdventBox
+import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
@@ -41,6 +43,10 @@ data class CalendarForm(
     val budget: String = "",
     val notes: String = "",
     val boxCount: Int = DEFAULT_BOX_COUNT,
+    val kind: CalendarKind = CalendarKind.HOMEMADE,
+    val price: String = "",
+    val shop: String = "",
+    val bought: Boolean = false,
 )
 
 data class CalendarEditUiState(
@@ -52,7 +58,10 @@ data class CalendarEditUiState(
     val busy: Boolean = false,
     val message: UiMessage? = null,
     val doneWithId: String? = null,
+    val deleted: Boolean = false,
 ) {
+    val readyMade: Boolean get() = form.kind == CalendarKind.READY_MADE
+
     /** Cases non vides qui disparaîtraient si l'on réduit le nombre de cases. */
     val boxesLost: Int get() = boxes.count { it.number > form.boxCount && !it.isEmpty }
 }
@@ -65,6 +74,7 @@ class CalendarEditViewModel @Inject constructor(
     persons: PersonRepository,
     private val photos: PhotoRepository,
     private val saveCalendar: SaveCalendarUseCase,
+    private val deleteCalendar: DeleteCalendarUseCase,
     @ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<CalendarEditDestination>()
@@ -92,8 +102,12 @@ class CalendarEditViewModel @Inject constructor(
                             centsToInput(c.budgetCents),
                             c.notes,
                             c.boxCount,
+                            c.kind,
+                            centsToInput(c.priceCents),
+                            c.shop,
+                            c.bought,
                         )
-                    } ?: CalendarForm(),
+                    } ?: CalendarForm(kind = if (route.readyMade) CalendarKind.READY_MADE else CalendarKind.HOMEMADE),
                 )
             }
         }
@@ -119,6 +133,7 @@ class CalendarEditViewModel @Inject constructor(
         viewModelScope.launch {
             val f = state.value.form
             if (f.budget.isNotBlank() && parseEuroToCents(f.budget) == null) return@launch
+            if (f.price.isNotBlank() && parseEuroToCents(f.price) == null) return@launch
             val editionId = route.calendarId?.let { advent.getCalendar(it)?.editionId }
                 ?: observeEditions().first().current?.id ?: return@launch
             state.update { it.copy(busy = true) }
@@ -132,6 +147,10 @@ class CalendarEditViewModel @Inject constructor(
                     parseEuroToCents(f.budget),
                     f.notes,
                     f.boxCount,
+                    f.kind,
+                    parseEuroToCents(f.price),
+                    f.shop,
+                    f.bought,
                 )
             val result = saveCalendar(route.calendarId, editionId, draft)
             state.update {
@@ -142,6 +161,16 @@ class CalendarEditViewModel @Inject constructor(
                     }
                     is AppResult.Failure -> it.copy(busy = false, message = result.error.toUiMessage())
                 }
+            }
+        }
+    }
+
+    fun delete() {
+        val id = route.calendarId ?: return
+        viewModelScope.launch {
+            when (val result = deleteCalendar(id)) {
+                is AppResult.Success -> state.update { it.copy(deleted = true) }
+                is AppResult.Failure -> state.update { it.copy(message = result.error.toUiMessage()) }
             }
         }
     }

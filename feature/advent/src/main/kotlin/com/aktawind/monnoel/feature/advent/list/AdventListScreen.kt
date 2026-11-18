@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
+import com.aktawind.monnoel.core.domain.gifts.formatEuro
 import com.aktawind.monnoel.core.model.AdventTemplate
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.ui.EmptyState
@@ -63,11 +64,17 @@ import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.core.ui.resolve
 import com.aktawind.monnoel.feature.advent.R
 
-private enum class NewChoice { EMPTY, TEMPLATE, COPY }
+private enum class NewChoice { EMPTY, READY_MADE, TEMPLATE, COPY }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdventListRoute(onOpenCalendar: (String) -> Unit, onNewCalendar: () -> Unit, viewModel: AdventListViewModel = hiltViewModel()) {
+fun AdventListRoute(
+    onOpenCalendar: (String) -> Unit,
+    onNewCalendar: () -> Unit,
+    onNewReadyMade: () -> Unit,
+    onOpenReadyMade: (String) -> Unit,
+    viewModel: AdventListViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -98,7 +105,7 @@ fun AdventListRoute(onOpenCalendar: (String) -> Unit, onNewCalendar: () -> Unit,
         floatingActionButton = {
             if (!state.readOnly && state.edition != null) {
                 ExtendedFloatingActionButton(
-                    onClick = { if (state.templates.isEmpty() && state.others.isEmpty()) onNewCalendar() else choosing = true },
+                    onClick = { choosing = true },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.advent_new)) },
                 )
@@ -121,7 +128,14 @@ fun AdventListRoute(onOpenCalendar: (String) -> Unit, onNewCalendar: () -> Unit,
                     )
                 }
             }
-            items(state.cards, key = { it.calendar.id }) { card -> CalendarCardView(card, onClick = { onOpenCalendar(card.calendar.id) }) }
+            items(state.cards, key = { it.calendar.id }) { card ->
+                CalendarCardView(
+                    card,
+                    readOnly = state.readOnly,
+                    onClick = { if (card.calendar.isReadyMade) onOpenReadyMade(card.calendar.id) else onOpenCalendar(card.calendar.id) },
+                    onBought = { viewModel.setBought(card.calendar.id, it) },
+                )
+            }
             if (state.templates.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) { TemplatesSection(state.templates, viewModel::deleteTemplate) }
             }
@@ -136,6 +150,7 @@ fun AdventListRoute(onOpenCalendar: (String) -> Unit, onNewCalendar: () -> Unit,
                 choosing = false
                 when (choice) {
                     NewChoice.EMPTY -> onNewCalendar()
+                    NewChoice.READY_MADE -> onNewReadyMade()
                     NewChoice.TEMPLATE -> pickTemplate = true
                     NewChoice.COPY -> pickCopy = true
                 }
@@ -179,11 +194,17 @@ fun AdventListRoute(onOpenCalendar: (String) -> Unit, onNewCalendar: () -> Unit,
 }
 
 @Composable
-private fun CalendarCardView(card: CalendarCard, onClick: () -> Unit) {
+private fun CalendarCardView(card: CalendarCard, readOnly: Boolean, onClick: () -> Unit, onBought: (Boolean) -> Unit) {
     val secondary = LocalMonNoelColors.current.secondaryText
     Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            PhotoImage(card.calendar.coverPhotoPath, null, size = 104.dp, shape = RectangleShape, placeholder = "🎄")
+            PhotoImage(
+                card.calendar.coverPhotoPath,
+                null,
+                size = 104.dp,
+                shape = RectangleShape,
+                placeholder = if (card.calendar.isReadyMade) "🛍️" else "🎄",
+            )
             Column(Modifier.weight(1f).padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(card.calendar.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 val details = listOfNotNull(
@@ -199,16 +220,38 @@ private fun CalendarCardView(card: CalendarCard, onClick: () -> Unit) {
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Text(
-                    stringResource(R.string.advent_progress, card.summary.ready, card.summary.boxCount),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                LinearProgressIndicator(
-                    progress = { card.summary.progress },
-                    color = LocalMonNoelColors.current.gold,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (card.calendar.isReadyMade) {
+                    val c = card.calendar
+                    Text(
+                        listOfNotNull(
+                            stringResource(R.string.advent_ready_made),
+                            c.shop.ifBlank {
+                                null
+                            },
+                            c.priceCents?.let { formatEuro(it) },
+                        )
+                            .joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = secondary,
+                    )
+                    FilterChip(
+                        selected = c.bought,
+                        onClick = { onBought(!c.bought) },
+                        enabled = !readOnly,
+                        label = { Text(stringResource(if (c.bought) R.string.advent_bought else R.string.advent_to_buy)) },
+                    )
+                } else {
+                    Text(
+                        stringResource(R.string.advent_progress, card.summary.ready, card.summary.boxCount),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    LinearProgressIndicator(
+                        progress = { card.summary.progress },
+                        color = LocalMonNoelColors.current.gold,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         }
     }
@@ -269,6 +312,7 @@ private fun NewCalendarChoiceDialog(hasTemplates: Boolean, hasOthers: Boolean, o
         text = {
             Column {
                 ChoiceRow("✨", stringResource(R.string.advent_new_empty)) { onChoose(NewChoice.EMPTY) }
+                ChoiceRow("🛍️", stringResource(R.string.advent_new_ready_made)) { onChoose(NewChoice.READY_MADE) }
                 if (hasTemplates) ChoiceRow("📐", stringResource(R.string.advent_new_template)) { onChoose(NewChoice.TEMPLATE) }
                 if (hasOthers) ChoiceRow("📋", stringResource(R.string.advent_new_copy)) { onChoose(NewChoice.COPY) }
             }

@@ -75,6 +75,8 @@ data class CalendarProgress(
     val boxCount: Int,
     val todayNumber: Int?,
     val todayBox: AdventBox?,
+    /** Calendrier acheté tout prêt : null pour un calendrier fait maison, sinon acheté ou non. */
+    val readyMadeBought: Boolean? = null,
 )
 
 /** Avancement des pâtisseries et gourmandises de l'année. */
@@ -143,6 +145,7 @@ class HomeViewModel @Inject constructor(
                         it.number ==
                             number
                     },
+                    readyMadeBought = if (c.isReadyMade) c.bought else null,
                 )
             }
         }

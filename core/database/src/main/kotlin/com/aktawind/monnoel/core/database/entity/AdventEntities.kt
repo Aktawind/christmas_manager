@@ -11,6 +11,7 @@ import com.aktawind.monnoel.core.model.AdventSupply
 import com.aktawind.monnoel.core.model.AdventTemplate
 import com.aktawind.monnoel.core.model.AdventTemplateBox
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.SurpriseType
 import java.time.Instant
 
@@ -38,6 +39,10 @@ data class AdventCalendarEntity(
     @ColumnInfo(name = "box_count") val boxCount: Int,
     @ColumnInfo(name = "created_at") val createdAt: Long,
     @ColumnInfo(name = "updated_at") val updatedAt: Long,
+    @ColumnInfo(defaultValue = "HOMEMADE") val kind: String = "HOMEMADE",
+    @ColumnInfo(name = "price_cents") val priceCents: Long? = null,
+    @ColumnInfo(defaultValue = "") val shop: String = "",
+    @ColumnInfo(defaultValue = "0") val bought: Boolean = false,
 )
 
 @Entity(
@@ -162,11 +167,12 @@ private fun surprise(value: String?) = value?.let { runCatching { SurpriseType.v
 fun AdventCalendarEntity.asModel(personIds: Set<String>) = AdventCalendar(
     id, editionId, name, personIds, description, coverPhotoPath, theme, budgetCents, notes, boxCount,
     Instant.ofEpochMilli(createdAt), Instant.ofEpochMilli(updatedAt),
+    runCatching { CalendarKind.valueOf(kind) }.getOrDefault(CalendarKind.HOMEMADE), priceCents, shop, bought,
 )
 
 fun AdventCalendar.asEntity() = AdventCalendarEntity(
     id, editionId, name, description, coverPhotoPath, theme, budgetCents, notes, boxCount,
-    createdAt.toEpochMilli(), updatedAt.toEpochMilli(),
+    createdAt.toEpochMilli(), updatedAt.toEpochMilli(), kind.name, priceCents, shop, bought,
 )
 
 fun AdventBoxEntity.asModel() = AdventBox(

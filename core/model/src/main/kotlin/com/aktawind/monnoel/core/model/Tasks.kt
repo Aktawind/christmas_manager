@@ -29,4 +29,14 @@ enum class TaskModule { GIFTS, ADVENT, COOKING, MEALS, HOME, OTHER }
 enum class LinkType { PERSON, IDEA, GIFT, CALENDAR, BOX, TASK, RECIPE, PRODUCTION, MEAL, EXPENSE, WHISPER }
 
 /** Types de suggestions automatiques, activables un par un dans les réglages. */
-enum class SuggestionKind { GIFT_DELIVERY, GIFT_WRAP, SUPPLY_BUY, ADVENT_FIND, ADVENT_PREPARE, PRODUCTION_MAKE, MEAL_MENU, DISH_ORDER }
+enum class SuggestionKind {
+    GIFT_DELIVERY,
+    GIFT_WRAP,
+    SUPPLY_BUY,
+    ADVENT_FIND,
+    ADVENT_PREPARE,
+    PRODUCTION_MAKE,
+    MEAL_MENU,
+    DISH_ORDER,
+    CALENDAR_BUY,
+}

@@ -88,4 +88,14 @@
     <string name="bulk_supply_hint">Relier à un achat groupé remplit les cases avec son type, son contenu et sa photo, et partage son prix.</string>
     <string name="supplies_fill_hint">Les cases choisies seront remplies automatiquement : type, contenu, photo et fournisseur ; elles passent « À préparer » une fois l’achat fait.</string>
     <string name="supplies_box_title">Contenu de chaque case (vide : « %1$s »)</string>
+    <string name="advent_new_ready_made">Un calendrier acheté tout prêt</string>
+    <string name="advent_ready_made">🛍️ Tout prêt</string>
+    <string name="advent_bought">Acheté ✓</string>
+    <string name="advent_to_buy">À acheter</string>
+    <string name="calendar_ready_new_title">Calendrier tout prêt</string>
+    <string name="calendar_ready_edit_title">Calendrier tout prêt</string>
+    <string name="calendar_ready_delete_confirm">Supprimer ce calendrier ?</string>
+    <string name="field_ready_price">Prix</string>
+    <string name="field_ready_shop">Boutique ou marque</string>
+    <string name="field_ready_status">Où j’en suis</string>
 </resources>

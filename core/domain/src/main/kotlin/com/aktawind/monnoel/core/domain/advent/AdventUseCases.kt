@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.model.AdventSupply
 import com.aktawind.monnoel.core.model.AdventTemplate
 import com.aktawind.monnoel.core.model.AdventTemplateBox
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.SurpriseType
 import javax.inject.Inject
 
@@ -25,6 +26,10 @@ data class CalendarDraft(
     val budgetCents: Long? = null,
     val notes: String = "",
     val boxCount: Int = DEFAULT_BOX_COUNT,
+    val kind: CalendarKind = CalendarKind.HOMEMADE,
+    val priceCents: Long? = null,
+    val shop: String = "",
+    val bought: Boolean = false,
 )
 
 /** Données saisies pour une case. */
@@ -67,9 +72,14 @@ class SaveCalendarUseCase @Inject constructor(
      * diminue, les dernières cases sont supprimées (l'écran prévient avant).
      */
     suspend operator fun invoke(id: String?, editionId: String, draft: CalendarDraft): AppResult<AdventCalendar> {
-        if (draft.name.isBlank() || draft.boxCount !in 1..MAX_BOX_COUNT) return AppResult.Failure(AppError.InvalidInput)
-        guard.check(editionId)?.let { return AppResult.Failure(it) }
         val existing = id?.let { advent.getCalendar(it) }
+        // Le type est choisi à la création et ne change plus (un calendrier tout prêt n'a pas de cases).
+        val kind = existing?.kind ?: draft.kind
+        val readyMade = kind == CalendarKind.READY_MADE
+        if (draft.name.isBlank() || (!readyMade && draft.boxCount !in 1..MAX_BOX_COUNT) || (draft.priceCents ?: 0) < 0) {
+            return AppResult.Failure(AppError.InvalidInput)
+        }
+        guard.check(editionId)?.let { return AppResult.Failure(it) }
         existing?.coverPhotoPath?.takeIf { it != draft.coverPhotoPath }?.let { photos.deletePhoto(it) }
         val now = time.now()
         val calendar = AdventCalendar(
@@ -82,11 +92,16 @@ class SaveCalendarUseCase @Inject constructor(
             theme = draft.theme.trim(),
             budgetCents = draft.budgetCents,
             notes = draft.notes.trim(),
-            boxCount = draft.boxCount,
+            boxCount = if (readyMade) 0 else draft.boxCount,
             createdAt = existing?.createdAt ?: now,
             updatedAt = now,
+            kind = kind,
+            priceCents = if (readyMade) draft.priceCents else null,
+            shop = if (readyMade) draft.shop.trim() else "",
+            bought = readyMade && draft.bought,
         )
         advent.saveCalendar(calendar)
+        if (readyMade) return AppResult.Success(calendar)
         val boxes = advent.getBoxes(calendar.id)
         val removed = boxes.filter { it.number > draft.boxCount }
         if (removed.isNotEmpty()) {
@@ -97,6 +112,21 @@ class SaveCalendarUseCase @Inject constructor(
         val missing = (1..draft.boxCount).filter { it !in existingNumbers }
         if (missing.isNotEmpty()) advent.saveBoxes(missing.map { emptyBox(ids.newId(), calendar.id, it) })
         return AppResult.Success(calendar)
+    }
+}
+
+/** Calendrier tout prêt : à acheter ou acheté. */
+class SetCalendarBoughtUseCase @Inject constructor(
+    private val advent: AdventRepository,
+    private val guard: EditionGuard,
+    private val time: TimeProvider,
+) {
+    suspend operator fun invoke(id: String, bought: Boolean): AppResult<Unit> {
+        val calendar = advent.getCalendar(id) ?: return AppResult.Failure(AppError.NotFound)
+        if (!calendar.isReadyMade) return AppResult.Failure(AppError.InvalidInput)
+        guard.check(calendar.editionId)?.let { return AppResult.Failure(it) }
+        advent.saveCalendar(calendar.copy(bought = bought, updatedAt = time.now()))
+        return AppResult.Success(Unit)
     }
 }
 
@@ -302,6 +332,8 @@ class DuplicateCalendarUseCase @Inject constructor(
             coverPhotoPath = source.coverPhotoPath?.let { photos.copyPhoto(it) },
             createdAt = now,
             updatedAt = now,
+            // Un calendrier tout prêt recopié est à racheter pour la nouvelle année.
+            bought = false,
         )
         advent.saveCalendar(copy)
         val supplyIds = advent.getSupplies(sourceId).associate { it.id to ids.newId() }

@@ -159,6 +159,10 @@ data class AdventCalendarDto(
     val boxCount: Int,
     val createdAt: Long,
     val updatedAt: Long,
+    val kind: String = "HOMEMADE",
+    val priceCents: Long? = null,
+    val shop: String = "",
+    val bought: Boolean = false,
 )
 
 @Serializable

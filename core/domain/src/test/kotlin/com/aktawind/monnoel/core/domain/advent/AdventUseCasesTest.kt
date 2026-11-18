@@ -2,19 +2,27 @@ package com.aktawind.monnoel.core.domain.advent
 
 import com.aktawind.monnoel.core.common.AppError
 import com.aktawind.monnoel.core.common.AppResult
+import com.aktawind.monnoel.core.domain.budget.BudgetPost
+import com.aktawind.monnoel.core.domain.budget.BudgetSource
+import com.aktawind.monnoel.core.domain.budget.computeYearBudget
 import com.aktawind.monnoel.core.domain.edition.FakeEditionRepository
 import com.aktawind.monnoel.core.domain.edition.FixedTime
 import com.aktawind.monnoel.core.domain.edition.SequentialIds
 import com.aktawind.monnoel.core.domain.gifts.EditionGuard
 import com.aktawind.monnoel.core.domain.repository.PhotoRepository
+import com.aktawind.monnoel.core.domain.tasks.SuggestionSource
+import com.aktawind.monnoel.core.domain.tasks.currentSuggestions
+import com.aktawind.monnoel.core.domain.tasks.suggestionStates
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventCalendar
 import com.aktawind.monnoel.core.model.AdventSupply
 import com.aktawind.monnoel.core.model.AdventTemplate
 import com.aktawind.monnoel.core.model.AdventTemplateBox
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.ChristmasEdition
 import com.aktawind.monnoel.core.model.EditionStatus
+import com.aktawind.monnoel.core.model.SuggestionKind
 import com.aktawind.monnoel.core.model.SurpriseType
 import java.time.Instant
 import java.time.LocalDate
@@ -321,5 +329,29 @@ class AdventUseCasesTest {
         BulkUpdateBoxesUseCase(advent, guard)(cal.id, setOf(ids5[4]), BulkBoxChange(supplyId = supply.id))
         assertEquals("Bonbon", advent.getBoxes(cal.id)[4].title)
         assertEquals(supply.id, advent.getBoxes(cal.id)[4].supplyId)
+    }
+
+    @Test
+    fun `un calendrier tout pret n'a pas de cases et se suit a l'achat`() = runTest {
+        edition("e", 2026)
+        val draft = CalendarDraft(name = "Tisanes bio", kind = CalendarKind.READY_MADE, priceCents = 2_990, shop = "Herboristerie")
+        val cal = (save(null, "e", draft) as AppResult.Success).value
+        assertTrue(advent.getBoxes(cal.id).isEmpty())
+        assertEquals(0, cal.boxCount)
+        // Le lutin propose de l'acheter, puis la suggestion se coche une fois acheté.
+        val source = SuggestionSource(emptyList(), advent.calendars.value, emptyList(), emptyList())
+        assertEquals(SuggestionKind.CALENDAR_BUY, currentSuggestions(source, emptySet(), emptySet(), emptyList()).single().kind)
+        SetCalendarBoughtUseCase(advent, guard, time)(cal.id, true)
+        val after = SuggestionSource(emptyList(), advent.calendars.value, emptyList(), emptyList())
+        assertTrue(currentSuggestions(after, emptySet(), emptySet(), emptyList()).isEmpty())
+        assertEquals(true, suggestionStates(after)["CALENDAR_BUY:${cal.id}"])
+        // Budget : son prix, dépensé une fois acheté.
+        val edition = editions.getById("e")!!
+        val budget = computeYearBudget(edition, BudgetSource(calendars = advent.calendars.value), LocalDate.of(2026, 11, 18))
+        assertEquals(2_990, budget.post(BudgetPost.ADVENT).plannedCents)
+        assertEquals(2_990, budget.post(BudgetPost.ADVENT).spentCents)
+        // Le type ne change pas après la création.
+        save(cal.id, "e", CalendarDraft(name = "Tisanes bio", kind = CalendarKind.HOMEMADE))
+        assertTrue(advent.getCalendar(cal.id)!!.isReadyMade)
     }
 }
