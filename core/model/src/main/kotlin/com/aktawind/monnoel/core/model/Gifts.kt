@@ -104,4 +104,5 @@ data class WhisperedIdea(
     val notes: String,
     val createdAt: Instant,
     val updatedAt: Instant,
+    val photoPath: String? = null,
 )

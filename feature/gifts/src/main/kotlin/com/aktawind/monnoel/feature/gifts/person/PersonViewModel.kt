@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.aktawind.monnoel.core.common.AppResult
+import com.aktawind.monnoel.core.common.ApplicationScope
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
 import com.aktawind.monnoel.core.domain.gifts.DeleteWhisperUseCase
@@ -18,6 +19,7 @@ import com.aktawind.monnoel.core.domain.gifts.computeGiftBudget
 import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
+import com.aktawind.monnoel.core.domain.repository.PhotoRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.model.ChristmasEdition
 import com.aktawind.monnoel.core.model.GiftIdea
@@ -28,9 +30,11 @@ import com.aktawind.monnoel.core.model.WhisperedIdea
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
 import com.aktawind.monnoel.feature.gifts.R
+import com.aktawind.monnoel.feature.gifts.edit.PhotoDrafts
 import com.aktawind.monnoel.feature.gifts.navigation.PersonDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -72,7 +76,11 @@ class PersonViewModel @Inject constructor(
     whispers: WhisperRepository,
     private val saveWhisper: SaveWhisperUseCase,
     private val deleteWhisper: DeleteWhisperUseCase,
+    private val photos: PhotoRepository,
+    @ApplicationScope appScope: CoroutineScope,
 ) : ViewModel() {
+    private val drafts = PhotoDrafts(photos, appScope)
+
     private val personId = savedStateHandle.toRoute<PersonDestination>().personId
     private val message = MutableStateFlow<UiMessage?>(null)
 
@@ -151,7 +159,28 @@ class PersonViewModel @Inject constructor(
 
     fun saveWhisper(id: String?, draft: WhisperDraft) = viewModelScope.launch {
         val edition = uiState.value.edition ?: return@launch
-        (saveWhisper.invoke(id, edition.id, draft) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() }
+        when (val result = saveWhisper.invoke(id, edition.id, draft)) {
+            is AppResult.Success -> drafts.committed(draft.photoPath.takeUnless { draft.photoFromIdea })
+            is AppResult.Failure -> message.value = result.error.toUiMessage()
+        }
+    }
+
+    /** Importe une photo pour une idée soufflée ; [onImported] reçoit son chemin. */
+    fun importWhisperPhoto(uri: String, onImported: (String) -> Unit) = viewModelScope.launch {
+        when (val result = photos.importPhoto(uri)) {
+            is AppResult.Success -> {
+                drafts.added(result.value)
+                onImported(result.value)
+            }
+            is AppResult.Failure -> message.value = UiMessage(com.aktawind.monnoel.core.ui.R.string.photo_error)
+        }
+    }
+
+    /** Fenêtre fermée sans enregistrer : les photos importées sont jetées. */
+    fun discardWhisperPhotos() = drafts.discard()
+
+    override fun onCleared() {
+        drafts.discard()
     }
 
     fun deleteWhisper(id: String) = viewModelScope.launch {

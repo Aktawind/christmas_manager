@@ -120,7 +120,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             whispers = db.whisperDao().getAll().map {
                 WhisperDto(
                     it.id, it.editionId, it.recipientId, it.title, it.priceCents, it.url, it.givenToPersonId, it.givenToName, it.received,
-                    it.notes, it.createdAt, it.updatedAt,
+                    it.notes, it.createdAt, it.updatedAt, it.photoPath,
                 )
             },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
@@ -179,7 +179,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                 data.whispers.map {
                     WhisperEntity(
                         it.id, it.editionId, it.recipientId, it.title, it.priceCents, it.url, it.givenToPersonId, it.givenToName,
-                        it.received, it.notes, it.createdAt, it.updatedAt,
+                        it.received, it.notes, it.createdAt, it.updatedAt, it.photoPath,
                     )
                 },
             )

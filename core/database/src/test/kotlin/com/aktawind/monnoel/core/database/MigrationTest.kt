@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 11, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 12, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -275,6 +275,37 @@ class MigrationTest {
         runBlocking {
             assertEquals("Sapin", db.expenseDao().getAll().single().title)
             assertEquals(0, db.whisperDao().getAll().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 11 vers 12 ajoute la photo des idees soufflees`() {
+        helper.createDatabase(dbName, 11).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO person (id, first_name, last_name, photo_path, interests, notes, created_at, updated_at) " +
+                    "VALUES ('p1', 'Yannick', '', NULL, '', '', 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO whispered_idea (id, edition_id, recipient_id, title, price_cents, url, given_to_person_id, " +
+                    "given_to_name, received, notes, created_at, updated_at) " +
+                    "VALUES ('w1', 'e1', 'p1', 'Montre', NULL, '', NULL, 'Christine', 0, '', 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 12, true, Migrations.MIGRATION_11_12).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            val whisper = db.whisperDao().getAll().single()
+            assertEquals("Montre", whisper.title)
+            assertEquals(null, whisper.photoPath)
         }
         db.close()
     }

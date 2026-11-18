@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -36,6 +35,8 @@ import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.WhisperedIdea
 import com.aktawind.monnoel.core.ui.DropdownField
 import com.aktawind.monnoel.core.ui.MoneyInput
+import com.aktawind.monnoel.core.ui.PhotoField
+import com.aktawind.monnoel.core.ui.PhotoImage
 import com.aktawind.monnoel.core.ui.R as UiR
 import com.aktawind.monnoel.core.ui.SectionTitle
 import com.aktawind.monnoel.core.ui.TextInput
@@ -47,6 +48,8 @@ internal fun WhisperSections(
     state: PersonUiState,
     onSave: (String?, WhisperDraft) -> Unit,
     onDelete: (String) -> Unit,
+    onImportPhoto: (String, (String) -> Unit) -> Unit,
+    onDiscardPhotos: () -> Unit,
     /** Idée de la liste à transformer en idée soufflée (fenêtre pré-remplie), ou null. */
     fromIdea: GiftIdea? = null,
     onFromIdeaDone: () -> Unit = {},
@@ -58,8 +61,7 @@ internal fun WhisperSections(
     // null : fenêtre fermée ; "" : nouvelle idée ; sinon l'id de l'idée ouverte.
     var open by rememberSaveable { mutableStateOf<String?>(null) }
 
-    SectionTitle(stringResource(R.string.whispers_for_title, person.firstName.ifBlank { person.displayName }, edition.year))
-    Text(stringResource(R.string.whispers_for_hint), style = MaterialTheme.typography.bodySmall, color = secondary)
+    SectionTitle(stringResource(R.string.whispers_for_title, edition.year))
     if (state.whispersFor.isEmpty()) Text(stringResource(R.string.whispers_none), color = secondary)
     state.whispersFor.forEach { w ->
         val duplicates =
@@ -73,7 +75,7 @@ internal fun WhisperSections(
             warning = duplicates.takeIf { it.isNotEmpty() }?.let { d ->
                 stringResource(R.string.whisper_also_given, d.joinToString(", ") { it.givenToPersonId?.let(names::get) ?: it.givenToName })
             },
-            received = w.received,
+            photoPath = w.photoPath,
             onClick = { open = w.id },
         )
     }
@@ -85,7 +87,6 @@ internal fun WhisperSections(
         WhisperDialog(
             whisper = null,
             recipientId = person.id,
-            recipientName = person.displayName,
             persons = state.persons.filter { it.id != person.id },
             editionWhispers = state.editionWhispers,
             editionId = edition.id,
@@ -93,12 +94,17 @@ internal fun WhisperSections(
             initialTitle = fromIdea.title,
             initialPriceCents = fromIdea.estimatedPriceCents,
             initialUrl = fromIdea.url,
+            initialPhotoPath = fromIdea.photoPath,
+            onImportPhoto = onImportPhoto,
             onSave = { draft ->
                 onSave(null, draft)
                 onFromIdeaDone()
             },
             onDelete = null,
-            onDismiss = onFromIdeaDone,
+            onDismiss = {
+                onDiscardPhotos()
+                onFromIdeaDone()
+            },
         )
     }
     val current = open
@@ -108,11 +114,11 @@ internal fun WhisperSections(
         WhisperDialog(
             whisper = whisper,
             recipientId = recipientId,
-            recipientName = names[recipientId].orEmpty(),
             persons = state.persons.filter { it.id != recipientId },
             editionWhispers = state.editionWhispers,
             editionId = edition.id,
             readOnly = state.readOnly,
+            onImportPhoto = onImportPhoto,
             onSave = { draft ->
                 onSave(whisper?.id, draft)
                 open = null
@@ -123,13 +129,16 @@ internal fun WhisperSections(
                     open = null
                 }
             },
-            onDismiss = { open = null },
+            onDismiss = {
+                onDiscardPhotos()
+                open = null
+            },
         )
     }
 }
 
 @Composable
-private fun WhisperRow(title: String, detail: String, warning: String?, received: Boolean, onClick: () -> Unit) {
+private fun WhisperRow(title: String, detail: String, warning: String?, photoPath: String?, onClick: () -> Unit) {
     val colors = LocalMonNoelColors.current
     Column(Modifier.fillMaxWidth()) {
         Row(
@@ -137,7 +146,7 @@ private fun WhisperRow(title: String, detail: String, warning: String?, received
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(if (received) "✅" else "🤫", style = MaterialTheme.typography.titleMedium)
+            PhotoImage(photoPath, null, size = 44.dp, shape = MaterialTheme.shapes.small, placeholder = "🤫")
             Column(Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.bodyLarge)
                 if (detail.isNotBlank()) Text(detail, style = MaterialTheme.typography.bodySmall, color = colors.secondaryText)
@@ -152,7 +161,6 @@ private fun WhisperRow(title: String, detail: String, warning: String?, received
 private fun WhisperDialog(
     whisper: WhisperedIdea?,
     recipientId: String,
-    recipientName: String,
     persons: List<Person>,
     editionWhispers: List<WhisperedIdea>,
     editionId: String,
@@ -163,13 +171,15 @@ private fun WhisperDialog(
     initialTitle: String = "",
     initialPriceCents: Long? = null,
     initialUrl: String = "",
+    initialPhotoPath: String? = null,
+    onImportPhoto: (String, (String) -> Unit) -> Unit,
 ) {
     var title by rememberSaveable { mutableStateOf(whisper?.title ?: initialTitle) }
     var giverId by rememberSaveable { mutableStateOf(whisper?.givenToPersonId) }
     var giverName by rememberSaveable { mutableStateOf(if (whisper?.givenToPersonId == null) whisper?.givenToName.orEmpty() else "") }
     var price by rememberSaveable { mutableStateOf(centsToInput(whisper?.priceCents ?: initialPriceCents)) }
     var url by rememberSaveable { mutableStateOf(whisper?.url ?: initialUrl) }
-    var received by rememberSaveable { mutableStateOf(whisper?.received ?: false) }
+    var photo by rememberSaveable { mutableStateOf(whisper?.photoPath ?: initialPhotoPath) }
     var notes by rememberSaveable { mutableStateOf(whisper?.notes.orEmpty()) }
     val names = persons.associate { it.id to it.displayName }
     val duplicates = whisperDuplicates(editionWhispers, editionId, recipientId, title, giverId, giverName, whisper?.id)
@@ -177,7 +187,7 @@ private fun WhisperDialog(
     val hasGiver = giverId != null || giverName.isNotBlank()
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.whisper_dialog_title, recipientName)) },
+        title = { Text(stringResource(R.string.whisper_dialog_title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextInput(title, { title = it }, stringResource(R.string.field_whisper_title), Modifier.fillMaxWidth(), enabled = !readOnly)
@@ -219,10 +229,13 @@ private fun WhisperDialog(
                     enabled = !readOnly,
                     keyboardType = KeyboardType.Uri,
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = received, onCheckedChange = { received = it }, enabled = !readOnly)
-                    Text(stringResource(R.string.field_whisper_received))
-                }
+                PhotoField(
+                    path = photo,
+                    onPicked = { uri -> onImportPhoto(uri) { photo = it } },
+                    onRemove = { photo = null },
+                    enabled = !readOnly,
+                    placeholder = "🤫",
+                )
                 TextInput(notes, { notes = it }, stringResource(R.string.field_notes), Modifier.fillMaxWidth(), enabled = !readOnly)
             }
         },
@@ -238,8 +251,11 @@ private fun WhisperDialog(
                                 givenToName = if (giverId == null) giverName else "",
                                 priceCents = parseEuroToCents(price),
                                 url = url,
-                                received = received,
+                                received = whisper?.received ?: false,
                                 notes = notes,
+                                photoPath = photo,
+                                // Photo reprise de l'idée de la liste : elle sera copiée.
+                                photoFromIdea = whisper == null && photo != null && photo == initialPhotoPath,
                             ),
                         )
                     },

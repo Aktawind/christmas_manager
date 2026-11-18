@@ -89,13 +89,12 @@
     <string name="person_idea_to_gift">🎁 En faire un cadeau pour Noël %1$d</string>
     <string name="person_idea_to_whisper">🤫 En faire une idée soufflée</string>
     <string name="person_idea_edit">✏️ Modifier l’idée</string>
-    <string name="whispers_for_title">Idées soufflées pour %1$s · Noël %2$d</string>
-    <string name="whispers_for_hint">Les idées de cadeaux pour cette personne que tu as données à quelqu’un, et de la part de qui elles viendront.</string>
+    <string name="whispers_for_title">Idées soufflées · Noël %1$d</string>
     <string name="whispers_none">Aucune idée soufflée pour l’instant.</string>
     <string name="whisper_given_to">de la part de %1$s</string>
     <string name="whisper_also_given">Aussi de la part de %1$s</string>
     <string name="whisper_add">+ Idée soufflée</string>
-    <string name="whisper_dialog_title">Idée soufflée pour %1$s</string>
+    <string name="whisper_dialog_title">Idée soufflée</string>
     <string name="field_whisper_title">L’idée</string>
     <string name="field_whisper_given_to">De la part de</string>
     <string name="whisper_someone_else">Quelqu’un d’autre (nom libre)</string>
@@ -103,7 +102,6 @@
     <string name="whisper_duplicate">Attention : cette idée est déjà prévue de la part de %1$s pour ce Noël.</string>
     <string name="field_whisper_price">Prix indicatif (facultatif)</string>
     <string name="field_whisper_url">Lien (facultatif)</string>
-    <string name="field_whisper_received">Reçue</string>
     <string name="gift_duplicate">Dupliquer pour…</string>
     <string name="gift_duplicate_title">Dupliquer « %1$s » pour…</string>
     <string name="gift_duplicate_hint">Une copie par personne, au statut « À acheter » (titre, prix, boutique, lien, catégorie et photo repris).</string>

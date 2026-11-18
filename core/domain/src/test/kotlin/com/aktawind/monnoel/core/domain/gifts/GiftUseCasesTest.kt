@@ -93,7 +93,7 @@ private class FakeGifts : PlannedGiftRepository {
     }
 }
 
-private class FakePhotos : PhotoRepository {
+internal class FakePhotos : PhotoRepository {
     val deleted = mutableListOf<String>()
     var copies = 0
 

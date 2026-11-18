@@ -121,8 +121,18 @@ fun PersonRoute(
             }
         }
 
-        SectionTitle(stringResource(R.string.person_ideas_title))
         var whisperIdeaId by rememberSaveable { mutableStateOf<String?>(null) }
+        WhisperSections(
+            state,
+            onSave = viewModel::saveWhisper,
+            onDelete = { viewModel.deleteWhisper(it) },
+            onImportPhoto = { uri, done -> viewModel.importWhisperPhoto(uri, done) },
+            onDiscardPhotos = viewModel::discardWhisperPhotos,
+            fromIdea = state.ideas.firstOrNull { it.id == whisperIdeaId },
+            onFromIdeaDone = { whisperIdeaId = null },
+        )
+
+        SectionTitle(stringResource(R.string.person_ideas_title))
         if (state.ideas.isEmpty()) Text(stringResource(R.string.person_no_idea), color = secondary)
         state.ideas.forEach { idea ->
             // Toucher l'idée : en faire un cadeau de l'année, une idée soufflée, ou la modifier.
@@ -169,14 +179,6 @@ fun PersonRoute(
             }
         }
         OutlinedButton(onClick = { onNewIdea(person.id) }) { Text(stringResource(R.string.person_add_idea)) }
-
-        WhisperSections(
-            state,
-            onSave = viewModel::saveWhisper,
-            onDelete = { viewModel.deleteWhisper(it) },
-            fromIdea = state.ideas.firstOrNull { it.id == whisperIdeaId },
-            onFromIdeaDone = { whisperIdeaId = null },
-        )
 
         if (state.history.isNotEmpty()) {
             SectionTitle(stringResource(R.string.person_history_title))

@@ -112,7 +112,7 @@ class BackupDataSourceTest {
                 ),
             ),
             mealPersons = listOf(MealPersonDto("m", "p")),
-            whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L)),
+            whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L, "photos/w.jpg")),
             expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),
             mealDishes = listOf(MealDishDto("d", "m", "DESSERT", "r", "Bûche", "photos/rd.jpg", "Mamie", true, false, 0, 1L)),
             dismissedSuggestions = listOf(DismissedSuggestionDto("e", "SUPPLY_BUY:s")),

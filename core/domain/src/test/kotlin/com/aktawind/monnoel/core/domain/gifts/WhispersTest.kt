@@ -41,7 +41,8 @@ class WhispersTest {
     private val persons = FakePersons()
     private val whispers = FakeWhispers()
     private val guard = EditionGuard(editions)
-    private val save = SaveWhisperUseCase(whispers, persons, guard, FixedTime(), SequentialIds())
+    private val photos = FakePhotos()
+    private val save = SaveWhisperUseCase(whispers, persons, photos, guard, FixedTime(), SequentialIds())
 
     private suspend fun setUp() {
         editions.insert(ChristmasEdition("e", 2026, EditionStatus.ACTIVE, null, t, t))
@@ -83,5 +84,15 @@ class WhispersTest {
         assertTrue(whisperDuplicates(all, "e", "yannick", "Montre connectée", "christine", "", null).isEmpty())
         assertTrue(whisperDuplicates(all, "e", "papa", "Montre connectée", "christine", "", null).isEmpty())
         assertTrue(whisperDuplicates(all, "old", "yannick", "Montre connectée", "papa", "", null).isEmpty())
+    }
+
+    @Test
+    fun `la photo d'une idee est copiee, et supprimee avec l'idee soufflee`() = runTest {
+        setUp()
+        val draft = WhisperDraft("yannick", "Montre", givenToName = "Papa", photoPath = "photos/idee.jpg", photoFromIdea = true)
+        val w = (save(null, "e", draft) as AppResult.Success).value
+        assertEquals("photos/copy-0.jpg", w.photoPath)
+        DeleteWhisperUseCase(whispers, photos, guard)(w.id)
+        assertEquals(listOf("photos/copy-0.jpg"), photos.deleted)
     }
 }

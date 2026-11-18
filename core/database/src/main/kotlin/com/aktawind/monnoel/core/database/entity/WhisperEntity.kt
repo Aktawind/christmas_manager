@@ -35,14 +35,15 @@ data class WhisperEntity(
     val notes: String,
     @ColumnInfo(name = "created_at") val createdAt: Long,
     @ColumnInfo(name = "updated_at") val updatedAt: Long,
+    @ColumnInfo(name = "photo_path") val photoPath: String? = null,
 )
 
 fun WhisperEntity.asModel() = WhisperedIdea(
     id, editionId, recipientId, title, priceCents, url, givenToPersonId, givenToName, received, notes,
-    Instant.ofEpochMilli(createdAt), Instant.ofEpochMilli(updatedAt),
+    Instant.ofEpochMilli(createdAt), Instant.ofEpochMilli(updatedAt), photoPath,
 )
 
 fun WhisperedIdea.asEntity() = WhisperEntity(
     id, editionId, recipientId, title, priceCents, url, givenToPersonId, givenToName, received, notes,
-    createdAt.toEpochMilli(), updatedAt.toEpochMilli(),
+    createdAt.toEpochMilli(), updatedAt.toEpochMilli(), photoPath,
 )

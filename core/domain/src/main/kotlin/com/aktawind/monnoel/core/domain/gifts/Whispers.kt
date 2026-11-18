@@ -5,6 +5,7 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.common.IdGenerator
 import com.aktawind.monnoel.core.common.TimeProvider
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
+import com.aktawind.monnoel.core.domain.repository.PhotoRepository
 import com.aktawind.monnoel.core.domain.search.normalizeForSearch
 import com.aktawind.monnoel.core.model.WhisperedIdea
 import javax.inject.Inject
@@ -31,6 +32,9 @@ data class WhisperDraft(
     val url: String = "",
     val received: Boolean = false,
     val notes: String = "",
+    val photoPath: String? = null,
+    /** La photo est celle d'une idée de la liste : elle est copiée (l'idée garde la sienne). */
+    val photoFromIdea: Boolean = false,
 )
 
 /**
@@ -61,6 +65,7 @@ fun whisperDuplicates(
 class SaveWhisperUseCase @Inject constructor(
     private val whispers: WhisperRepository,
     private val persons: PersonRepository,
+    private val photos: PhotoRepository,
     private val guard: EditionGuard,
     private val time: TimeProvider,
     private val ids: IdGenerator,
@@ -70,6 +75,8 @@ class SaveWhisperUseCase @Inject constructor(
         if (draft.title.isBlank() || giverName.isBlank() || (draft.priceCents ?: 0) < 0) return AppResult.Failure(AppError.InvalidInput)
         val existing = id?.let { whispers.getWhisper(it) }
         guard.check(existing?.editionId ?: editionId)?.let { return AppResult.Failure(it) }
+        val photo = if (draft.photoFromIdea) draft.photoPath?.let { photos.copyPhoto(it) } else draft.photoPath
+        existing?.photoPath?.takeIf { it != photo }?.let { photos.deletePhoto(it) }
         val now = time.now()
         val whisper = WhisperedIdea(
             id = existing?.id ?: ids.newId(),
@@ -85,17 +92,23 @@ class SaveWhisperUseCase @Inject constructor(
             notes = draft.notes.trim(),
             createdAt = existing?.createdAt ?: now,
             updatedAt = now,
+            photoPath = photo,
         )
         whispers.saveWhisper(whisper)
         return AppResult.Success(whisper)
     }
 }
 
-class DeleteWhisperUseCase @Inject constructor(private val whispers: WhisperRepository, private val guard: EditionGuard) {
+class DeleteWhisperUseCase @Inject constructor(
+    private val whispers: WhisperRepository,
+    private val photos: PhotoRepository,
+    private val guard: EditionGuard,
+) {
     suspend operator fun invoke(id: String): AppResult<Unit> {
         val whisper = whispers.getWhisper(id) ?: return AppResult.Failure(AppError.NotFound)
         guard.check(whisper.editionId)?.let { return AppResult.Failure(it) }
         whispers.deleteWhisper(id)
+        whisper.photoPath?.let { photos.deletePhoto(it) }
         return AppResult.Success(Unit)
     }
 }

@@ -328,6 +328,7 @@ data class WhisperDto(
     val notes: String = "",
     val createdAt: Long,
     val updatedAt: Long,
+    val photoPath: String? = null,
 )
 
 internal val backupJson = Json {
