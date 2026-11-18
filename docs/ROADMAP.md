@@ -18,7 +18,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.4.0  | Ma liste de lutin           | Tâches sans dates ni priorités, automatisations, accueil complet, recherche globale | ✅ |
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes (nom + photo), préparations de l'année       | ✅ |
 | v0.6.0  | La table de fête            | Repas, convives, menus par moments, plats à commander                 | ✅ |
-| v0.7.0  | Les comptes du Père Noël    | Onglet Budget, autres dépenses, répartition, comparaison des années   | 🧪 |
+| v0.7.0  | Les comptes du Père Noël    | Onglet Budget, autres dépenses, répartition, comparaison des années   | ✅ |
 | v0.8.0  | Les traditions              | Catalogue de traditions, suivi annuel, listes d'inspiration           | ⬜ |
 | v0.9.0  | L'atelier des lutins        | Activités & DIY, projets créatifs, décoration                         | ⬜ |
 | v0.10.0 | La boîte à souvenirs        | Journal, archives, bilans annuels, duplication d'une année, export PDF | ⬜ |
@@ -133,17 +133,17 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| B-001 | Onglet **Budget** : prévu / dépensé / budget global de l'année (facultatif), marge ou dépassement en douceur | 🧪 |
-| B-002 | Budget calculé sans double saisie : cadeaux (enveloppes), calendriers (leurs budgets), repas (dépensé à leur date) | 🧪 |
-| B-003 | Autres dépenses (sapin, déco, papier cadeau, tenues, sorties, divers), « payé » à cocher | 🧪 |
-| B-004 | Répartition du prévu (barre empilée + légende chiffrée), palette vérifiée daltonisme clair / sombre | 🧪 |
-| B-005 | Coût prévu de chaque Noël (colonnes par année, dès deux Noëls)                   | 🧪 |
-| G-020 | Idées soufflées : dans la fiche de la personne, pour un Noël, de la part de qui (anti-doublon) | 🧪 |
-| G-021 | Demandes d'idées dans la fiche personne (qui attend des idées, de qui on en attend) → tâche automatique dans Ma liste | 🧪 |
-| P-010 | Ma liste en onglets par thème (Cadeaux, Calendriers, Cuisine, Repas, Maison, Autre) avec compteurs | 🧪 |
-| P-011 | Cuisine : l'onglet « Gourmandises » devient « Préparations » | 🧪 |
-| A-020 | Calendriers achetés tout prêts : fiche simple (prix, boutique, à acheter / acheté), sans cases ; budget et suggestion « Acheter » | 🧪 |
-| B-006 | Accueil « Les comptes », recherche des autres dépenses, sauvegarde              | 🧪 |
+| B-001 | Onglet **Budget** : prévu / dépensé / budget global de l'année (facultatif), marge ou dépassement en douceur | ✅ |
+| B-002 | Budget calculé sans double saisie : cadeaux (enveloppes), calendriers (leurs budgets), repas (dépensé à leur date) | ✅ |
+| B-003 | Autres dépenses (sapin, déco, papier cadeau, tenues, sorties, divers), « payé » à cocher | ✅ |
+| B-004 | Répartition du prévu (barre empilée + légende chiffrée), palette vérifiée daltonisme clair / sombre | ✅ |
+| B-005 | Coût prévu de chaque Noël (colonnes par année, dès deux Noëls)                   | ✅ |
+| G-020 | Idées soufflées : dans la fiche de la personne, pour un Noël, de la part de qui (anti-doublon) | ✅ |
+| G-021 | Demandes d'idées dans la fiche personne (qui attend des idées, de qui on en attend) → tâche automatique dans Ma liste | ✅ |
+| P-010 | Ma liste en onglets par thème (Cadeaux, Calendriers, Cuisine, Repas, Maison, Autre) avec compteurs | ✅ |
+| P-011 | Cuisine : l'onglet « Gourmandises » devient « Préparations » | ✅ |
+| A-020 | Calendriers achetés tout prêts : fiche simple (prix, boutique, à acheter / acheté), sans cases ; budget et suggestion « Acheter » | ✅ |
+| B-006 | Accueil « Les comptes », recherche des autres dépenses, sauvegarde              | ✅ |
 
 ## v0.8.0 — Les traditions ❤️
 
