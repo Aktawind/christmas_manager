@@ -121,6 +121,12 @@ fun PersonRoute(
             }
         }
 
+        IdeaRequestSection(
+            state,
+            onAdd = { kind, otherId, name -> viewModel.addRequest(kind, otherId, name) },
+            onDone = { id, done -> viewModel.setRequestDone(id, done) },
+            onRemove = { viewModel.removeRequest(it) },
+        )
         var whisperIdeaId by rememberSaveable { mutableStateOf<String?>(null) }
         WhisperSections(
             state,

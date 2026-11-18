@@ -36,6 +36,7 @@ import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.ExpenseCategory
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.IdeaRequestKind
 import com.aktawind.monnoel.core.model.MealType
 import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.SurpriseType
@@ -167,6 +168,8 @@ class ScreenshotTool {
         whisper(null, edition.id, WhisperDraft(lea.id, "Montre à paillettes", givenToPersonId = tom.id))
         whisper(null, edition.id, WhisperDraft(lea.id, "Atelier poterie", givenToName = "Tante Lucie", received = true))
         whisper(null, edition.id, WhisperDraft(tom.id, "Lampe dinosaure", givenToPersonId = mamie.id))
+        data.createIdeaRequest()(edition.id, IdeaRequestKind.TO_SEND, lea.id, tom.id)
+        data.createIdeaRequest()(edition.id, IdeaRequestKind.TO_RECEIVE, lea.id, mamie.id)
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
@@ -261,6 +264,8 @@ class ScreenshotTool {
         shot("15-person")
         compose.onNodeWithText("+ Idée soufflée").performScrollTo()
         shot("25-whispers")
+        compose.onNodeWithText("+ J’attends des idées de Léa").performScrollTo()
+        shot("26-requests")
         compose.onAllNodesWithText("Coffret de feutres").onLast().performScrollTo().performClick()
         click("🤫 En faire une idée soufflée")
         waitText("De la part de")

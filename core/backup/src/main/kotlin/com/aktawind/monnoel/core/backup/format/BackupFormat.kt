@@ -55,6 +55,7 @@ data class BackupData(
     val mealDishes: List<MealDishDto> = emptyList(),
     val expenses: List<ExpenseDto> = emptyList(),
     val whispers: List<WhisperDto> = emptyList(),
+    val ideaRequests: List<IdeaRequestDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -329,6 +330,18 @@ data class WhisperDto(
     val createdAt: Long,
     val updatedAt: Long,
     val photoPath: String? = null,
+)
+
+@Serializable
+data class IdeaRequestDto(
+    val id: String,
+    val editionId: String,
+    val kind: String,
+    val personId: String,
+    val otherPersonId: String? = null,
+    val otherName: String = "",
+    val taskId: String? = null,
+    val createdAt: Long,
 )
 
 internal val backupJson = Json {

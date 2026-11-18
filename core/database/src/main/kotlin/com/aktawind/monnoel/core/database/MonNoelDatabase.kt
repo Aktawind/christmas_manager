@@ -8,6 +8,7 @@ import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.ExpenseDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
 import com.aktawind.monnoel.core.database.dao.GiftIdeaDao
+import com.aktawind.monnoel.core.database.dao.IdeaRequestDao
 import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
@@ -25,6 +26,7 @@ import com.aktawind.monnoel.core.database.entity.ExpenseEntity
 import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
 import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
+import com.aktawind.monnoel.core.database.entity.IdeaRequestEntity
 import com.aktawind.monnoel.core.database.entity.MealDishEntity
 import com.aktawind.monnoel.core.database.entity.MealEntity
 import com.aktawind.monnoel.core.database.entity.MealPersonEntity
@@ -49,7 +51,7 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
  * v7 (v0.5.0) recettes (nom et photo), catégories de recettes, productions ;
  * v8 (v0.6.0 test) repas, convives, plats du menu ; v9 (v0.6.0) moments du menu par repas ;
  * v10 (v0.7.0 test) autres dépenses (budget) ; v11 (v0.7.0 test) idées soufflées ;
- * v12 (v0.7.0) photo des idées soufflées.
+ * v12 (v0.7.0 test) photo des idées soufflées ; v13 (v0.7.0) demandes d'idées.
  */
 @Database(
     entities = [
@@ -76,8 +78,9 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         MealDishEntity::class,
         ExpenseEntity::class,
         WhisperEntity::class,
+        IdeaRequestEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {
@@ -102,6 +105,8 @@ abstract class MonNoelDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
 
     abstract fun whisperDao(): WhisperDao
+
+    abstract fun ideaRequestDao(): IdeaRequestDao
 
     companion object {
         const val NAME = "mon-noel.db"

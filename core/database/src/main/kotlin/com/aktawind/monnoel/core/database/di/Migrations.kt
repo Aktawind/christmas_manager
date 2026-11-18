@@ -155,8 +155,25 @@ object Migrations {
         }
     }
 
+    /** v0.7.0 : demandes d'idées (qui attend des idées, de qui on en attend). */
+    val MIGRATION_12_13 = object : Migration(12, 13) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `idea_request` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, `kind` TEXT NOT NULL, " +
+                    "`person_id` TEXT NOT NULL, `other_person_id` TEXT, `other_name` TEXT NOT NULL, `task_id` TEXT, " +
+                    "`created_at` INTEGER NOT NULL, PRIMARY KEY(`id`), " +
+                    "FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , " +
+                    "FOREIGN KEY(`person_id`) REFERENCES `person`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , " +
+                    "FOREIGN KEY(`other_person_id`) REFERENCES `person`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_idea_request_edition_id` ON `idea_request` (`edition_id`)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_idea_request_person_id` ON `idea_request` (`person_id`)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_idea_request_other_person_id` ON `idea_request` (`other_person_id`)")
+        }
+    }
+
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
+        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
     )
 }

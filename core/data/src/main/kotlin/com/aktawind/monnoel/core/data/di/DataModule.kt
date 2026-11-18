@@ -19,6 +19,7 @@ import com.aktawind.monnoel.core.data.repository.RoomEditionRepository
 import com.aktawind.monnoel.core.data.repository.RoomExpenseRepository
 import com.aktawind.monnoel.core.data.repository.RoomGiftCategoryRepository
 import com.aktawind.monnoel.core.data.repository.RoomGiftIdeaRepository
+import com.aktawind.monnoel.core.data.repository.RoomIdeaRequestRepository
 import com.aktawind.monnoel.core.data.repository.RoomMealRepository
 import com.aktawind.monnoel.core.data.repository.RoomPersonRepository
 import com.aktawind.monnoel.core.data.repository.RoomPlannedGiftRepository
@@ -27,6 +28,7 @@ import com.aktawind.monnoel.core.data.repository.RoomWhisperRepository
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.budget.ExpenseRepository
 import com.aktawind.monnoel.core.domain.cooking.CookingRepository
+import com.aktawind.monnoel.core.domain.gifts.IdeaRequestRepository
 import com.aktawind.monnoel.core.domain.gifts.WhisperRepository
 import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.EditionRepository
@@ -88,6 +90,9 @@ abstract class DataBindsModule {
 
     @Binds
     abstract fun bindWhispers(impl: RoomWhisperRepository): WhisperRepository
+
+    @Binds
+    abstract fun bindIdeaRequests(impl: RoomIdeaRequestRepository): IdeaRequestRepository
 
     @Binds
     abstract fun bindTasks(impl: RoomTaskRepository): TaskRepository

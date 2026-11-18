@@ -106,3 +106,27 @@ data class WhisperedIdea(
     val updatedAt: Instant,
     val photoPath: String? = null,
 )
+
+enum class IdeaRequestKind {
+    /** Quelqu'un attend que je lui envoie des idées pour la personne de la fiche. */
+    TO_SEND,
+
+    /** J'attends des idées de la part de la personne de la fiche (pour elle-même ou quelqu'un d'autre). */
+    TO_RECEIVE,
+}
+
+/**
+ * Une demande d'idées pour un Noël, rangée dans la fiche de [personId]. L'autre personne est
+ * celle qui attend (TO_SEND) ou celle pour qui sont les idées (TO_RECEIVE). Son avancement est
+ * celui de la tâche créée dans Ma liste ([taskId]).
+ */
+data class IdeaRequest(
+    val id: String,
+    val editionId: String,
+    val kind: IdeaRequestKind,
+    val personId: String,
+    val otherPersonId: String?,
+    val otherName: String,
+    val taskId: String?,
+    val createdAt: Instant,
+)

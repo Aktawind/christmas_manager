@@ -11,6 +11,7 @@ import com.aktawind.monnoel.core.domain.cooking.SaveRecipeUseCase
 import com.aktawind.monnoel.core.domain.edition.CreateEditionUseCase
 import com.aktawind.monnoel.core.domain.edition.SelectEditionUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
+import com.aktawind.monnoel.core.domain.gifts.CreateIdeaRequestUseCase
 import com.aktawind.monnoel.core.domain.gifts.OfferIdeaUseCase
 import com.aktawind.monnoel.core.domain.gifts.SaveGiftUseCase
 import com.aktawind.monnoel.core.domain.gifts.SaveIdeaUseCase
@@ -67,4 +68,6 @@ interface TestDataEntryPoint {
     fun selectEdition(): SelectEditionUseCase
 
     fun saveWhisper(): SaveWhisperUseCase
+
+    fun createIdeaRequest(): CreateIdeaRequestUseCase
 }

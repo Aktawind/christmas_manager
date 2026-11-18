@@ -139,6 +139,7 @@ Pas de dates ni de priorités (ADR 0006).
 | B-004 | Répartition du prévu (barre empilée + légende chiffrée), palette vérifiée daltonisme clair / sombre | 🧪 |
 | B-005 | Coût prévu de chaque Noël (colonnes par année, dès deux Noëls)                   | 🧪 |
 | G-020 | Idées soufflées : dans la fiche de la personne, pour un Noël, de la part de qui (anti-doublon) | 🧪 |
+| G-021 | Demandes d'idées dans la fiche personne (qui attend des idées, de qui on en attend) → tâche automatique dans Ma liste | 🧪 |
 | B-006 | Accueil « Les comptes », recherche des autres dépenses, sauvegarde              | 🧪 |
 
 ## v0.8.0 — Les traditions ❤️

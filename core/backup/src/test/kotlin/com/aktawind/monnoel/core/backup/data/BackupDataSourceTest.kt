@@ -17,6 +17,7 @@ import com.aktawind.monnoel.core.backup.format.ExpenseDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
+import com.aktawind.monnoel.core.backup.format.IdeaRequestDto
 import com.aktawind.monnoel.core.backup.format.MealDishDto
 import com.aktawind.monnoel.core.backup.format.MealDto
 import com.aktawind.monnoel.core.backup.format.MealPersonDto
@@ -112,6 +113,7 @@ class BackupDataSourceTest {
                 ),
             ),
             mealPersons = listOf(MealPersonDto("m", "p")),
+            ideaRequests = listOf(IdeaRequestDto("r", "e", "TO_SEND", "p", null, "Collègues", "t", 1L)),
             whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L, "photos/w.jpg")),
             expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),
             mealDishes = listOf(MealDishDto("d", "m", "DESSERT", "r", "Bûche", "photos/rd.jpg", "Mamie", true, false, 0, 1L)),

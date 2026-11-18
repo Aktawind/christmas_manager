@@ -14,6 +14,7 @@ import com.aktawind.monnoel.core.backup.format.ExpenseDto
 import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
+import com.aktawind.monnoel.core.backup.format.IdeaRequestDto
 import com.aktawind.monnoel.core.backup.format.MealDishDto
 import com.aktawind.monnoel.core.backup.format.MealDto
 import com.aktawind.monnoel.core.backup.format.MealPersonDto
@@ -38,6 +39,7 @@ import com.aktawind.monnoel.core.database.entity.ExpenseEntity
 import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
 import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
+import com.aktawind.monnoel.core.database.entity.IdeaRequestEntity
 import com.aktawind.monnoel.core.database.entity.MealDishEntity
 import com.aktawind.monnoel.core.database.entity.MealEntity
 import com.aktawind.monnoel.core.database.entity.MealPersonEntity
@@ -123,6 +125,9 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     it.notes, it.createdAt, it.updatedAt, it.photoPath,
                 )
             },
+            ideaRequests = db.ideaRequestDao().getAll().map {
+                IdeaRequestDto(it.id, it.editionId, it.kind, it.personId, it.otherPersonId, it.otherName, it.taskId, it.createdAt)
+            },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -139,6 +144,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             // Suppression des enfants vers les parents.
             db.expenseDao().deleteAll()
             db.whisperDao().deleteAll()
+            db.ideaRequestDao().deleteAll()
             db.mealDao().deleteAllDishes()
             db.mealDao().deleteAllMeals()
             db.cookingDao().deleteAllProductions()
@@ -173,6 +179,11 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                         it.id, it.editionId, it.recipeId, it.recipeName, it.recipePhotoPath, it.quantity, it.destination, it.status,
                         it.photoPath, it.notes, it.createdAt, it.updatedAt,
                     )
+                },
+            )
+            db.ideaRequestDao().insertAll(
+                data.ideaRequests.map {
+                    IdeaRequestEntity(it.id, it.editionId, it.kind, it.personId, it.otherPersonId, it.otherName, it.taskId, it.createdAt)
                 },
             )
             db.whisperDao().insertAll(

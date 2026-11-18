@@ -25,3 +25,14 @@ pour ne pas donner la même idée deux fois. Une liste « pour moi » isolée ne
   avertissement dans la fenêtre de saisie (sans bloquer).
 - Hors budget (ce ne sont pas nos dépenses). Recherche : groupe « Idées soufflées ».
 - Base Room v12 (v11 : premier test), format de sauvegarde v9.
+
+## Demandes d'idées (2026-11-18)
+
+- Dans la fiche d'une personne X, section « Demandes d'idées · Noël AAAA » (table `idea_request`) :
+  - « Christine attend des idées pour X » → tâche « Envoyer la liste au Père Noël de X à Christine » ;
+  - « J'attends de X des idées pour Christine » → « En attente de la liste au Père Noël de Christine
+    (de la part de X) », ou « En attente de la liste au Père Noël de X » pour ses propres idées.
+- La tâche est **ajoutée automatiquement** à Ma liste (demande explicite de l'utilisatrice, à la
+  différence des suggestions du lutin, ADR 0010). L'état « fait » est porté par la tâche seule :
+  cocher la demande coche la tâche et inversement ; supprimer la demande supprime sa tâche.
+- Base Room v13.

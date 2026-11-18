@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 12, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 13, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -306,6 +306,27 @@ class MigrationTest {
             val whisper = db.whisperDao().getAll().single()
             assertEquals("Montre", whisper.title)
             assertEquals(null, whisper.photoPath)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 12 vers 13 ajoute les demandes d'idees`() {
+        helper.createDatabase(dbName, 12).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 13, true, Migrations.MIGRATION_12_13).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals(2026, db.editionDao().getAll().single().year)
+            assertEquals(0, db.ideaRequestDao().getAll().size)
         }
         db.close()
     }
