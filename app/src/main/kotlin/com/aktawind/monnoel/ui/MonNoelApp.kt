@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -68,6 +69,9 @@ import com.aktawind.monnoel.feature.settings.navigation.settingsScreen
 import com.aktawind.monnoel.feature.tasks.navigation.TaskEditDestination
 import com.aktawind.monnoel.feature.tasks.navigation.TasksDestination
 import com.aktawind.monnoel.feature.tasks.navigation.tasksGraph
+import com.aktawind.monnoel.feature.traditions.navigation.TraditionEditDestination
+import com.aktawind.monnoel.feature.traditions.navigation.TraditionsDestination
+import com.aktawind.monnoel.feature.traditions.navigation.traditionsGraph
 import com.aktawind.monnoel.feature.years.WelcomeRoute
 import com.aktawind.monnoel.feature.years.navigation.YearsDestination
 import com.aktawind.monnoel.feature.years.navigation.yearsScreen
@@ -119,6 +123,12 @@ private enum class TopLevelDestination(
         R.string.nav_tasks,
     ),
     BUDGET(BudgetDestination(), listOf(BudgetDestination::class), MonNoelIcons.Wallet, R.string.nav_budget),
+    TRADITIONS(
+        TraditionsDestination(),
+        listOf(TraditionsDestination::class, TraditionEditDestination::class),
+        Icons.Filled.Favorite,
+        R.string.nav_traditions,
+    ),
     YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
     SETTINGS(
         SettingsDestination,
@@ -173,6 +183,8 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.MEAL -> MealDestination(id)
             LinkType.EXPENSE -> BudgetDestination(expenseId = id)
             LinkType.WHISPER -> PersonDestination(id)
+            LinkType.TRADITION -> TraditionEditDestination(id)
+            LinkType.INSPIRATION -> TraditionsDestination(inspirationId = id)
         }
         navController.navigate(destination)
     }
@@ -199,6 +211,7 @@ fun MonNoelApp(hasEditions: Boolean) {
                     onOpenTasks = { navigate(TopLevelDestination.TASKS) },
                     onOpenCooking = { navigate(TopLevelDestination.COOKING) },
                     onOpenBudget = { navigate(TopLevelDestination.BUDGET) },
+                    onOpenTraditions = { navigate(TopLevelDestination.TRADITIONS) },
                 )
                 searchScreen(onOpen = openLink)
                 tasksGraph(navController, onOpenLink = openLink)
@@ -206,6 +219,7 @@ fun MonNoelApp(hasEditions: Boolean) {
                 adventGraph(navController)
                 cookingGraph(navController)
                 budgetScreen()
+                traditionsGraph(navController)
                 yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
                 settingsScreen(navController)
             }

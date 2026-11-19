@@ -119,4 +119,15 @@
     <string name="course_savory">Salé</string>
     <string name="course_sweet">Sucré</string>
     <string name="course_drinks">Boissons</string>
+    <string name="kind_film">Films</string>
+    <string name="kind_cartoon">Dessins animés</string>
+    <string name="kind_book">Livres</string>
+    <string name="kind_music">Musiques</string>
+    <string name="kind_outing">Sorties</string>
+    <string name="kind_activity">Activités</string>
+    <string name="quick_share_inspiration">Inspiration (film, livre, sortie…)</string>
+    <string name="quick_inspiration_title">Garder une inspiration</string>
+    <string name="quick_inspiration_kind">Type</string>
+    <string name="quick_inspiration_hint">Elle rejoint l’onglet Traditions → Inspirations, à cocher chaque année.</string>
+    <string name="quick_recipe_name_generic">Nom</string>
 </resources>

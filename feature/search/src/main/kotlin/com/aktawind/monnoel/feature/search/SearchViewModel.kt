@@ -15,6 +15,7 @@ import com.aktawind.monnoel.core.domain.search.SearchData
 import com.aktawind.monnoel.core.domain.search.SearchResult
 import com.aktawind.monnoel.core.domain.search.searchAll
 import com.aktawind.monnoel.core.domain.tasks.TaskRepository
+import com.aktawind.monnoel.core.domain.traditions.TraditionRepository
 import com.aktawind.monnoel.core.model.LinkType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -26,6 +27,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 
 data class SearchUiState(val query: String = "", val results: Map<LinkType, List<SearchResult>> = emptyMap())
+
+private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
 private data class Kitchen(
     val recipes: List<com.aktawind.monnoel.core.model.Recipe>,
@@ -47,12 +50,20 @@ class SearchViewModel @Inject constructor(
     meals: MealRepository,
     expenses: ExpenseRepository,
     whispers: WhisperRepository,
+    traditions: TraditionRepository,
 ) : ViewModel() {
     private val query = MutableStateFlow("")
 
     private val data = combine(
         combine(persons.observePersons(), ideas.observeIdeas(), gifts.observeAllGifts()) { p, i, g -> Triple(p, i, g) },
-        combine(advent.observeAllCalendars(), advent.observeAllBoxes()) { c, b -> c to b },
+        combine(advent.observeAllCalendars(), advent.observeAllBoxes(), traditions.observeTraditions(), traditions.observeInspirations()) {
+                c,
+                b,
+                tr,
+                ins,
+            ->
+            Quad(c, b, tr, ins)
+        },
         combine(tasks.observeAllTasks(), expenses.observeAllExpenses(), whispers.observeAllWhispers()) { t, x, w -> Triple(t, x, w) },
         editions.observeEditions(),
         combine(cooking.observeRecipes(), cooking.observeAllProductions(), meals.observeAllMeals(), meals.observeAllDishes()) {
@@ -63,8 +74,8 @@ class SearchViewModel @Inject constructor(
             ->
             Kitchen(r, pr, m, d)
         },
-    ) { (p, i, g), (c, b), (t, x, w), e, k ->
-        SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes, x, w)
+    ) { (p, i, g), (c, b, tr, ins), (t, x, w), e, k ->
+        SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes, x, w, tr, ins)
     }
 
     val uiState: StateFlow<SearchUiState> = combine(query.debounce(150), data) { q, d ->

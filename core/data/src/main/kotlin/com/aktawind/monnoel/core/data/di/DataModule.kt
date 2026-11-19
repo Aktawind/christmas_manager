@@ -24,6 +24,7 @@ import com.aktawind.monnoel.core.data.repository.RoomMealRepository
 import com.aktawind.monnoel.core.data.repository.RoomPersonRepository
 import com.aktawind.monnoel.core.data.repository.RoomPlannedGiftRepository
 import com.aktawind.monnoel.core.data.repository.RoomTaskRepository
+import com.aktawind.monnoel.core.data.repository.RoomTraditionRepository
 import com.aktawind.monnoel.core.data.repository.RoomWhisperRepository
 import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.budget.ExpenseRepository
@@ -39,6 +40,7 @@ import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
 import com.aktawind.monnoel.core.domain.tasks.TaskRepository
+import com.aktawind.monnoel.core.domain.traditions.TraditionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -93,6 +95,9 @@ abstract class DataBindsModule {
 
     @Binds
     abstract fun bindIdeaRequests(impl: RoomIdeaRequestRepository): IdeaRequestRepository
+
+    @Binds
+    abstract fun bindTraditions(impl: RoomTraditionRepository): TraditionRepository
 
     @Binds
     abstract fun bindTasks(impl: RoomTaskRepository): TaskRepository

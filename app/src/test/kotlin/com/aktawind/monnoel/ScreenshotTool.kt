@@ -3,6 +3,7 @@ package com.aktawind.monnoel
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -32,17 +33,22 @@ import com.aktawind.monnoel.core.domain.gifts.WhisperDraft
 import com.aktawind.monnoel.core.domain.meals.DishDraft
 import com.aktawind.monnoel.core.domain.meals.MealDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
+import com.aktawind.monnoel.core.domain.traditions.InspirationDraft
+import com.aktawind.monnoel.core.domain.traditions.TraditionDraft
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.CourseType
 import com.aktawind.monnoel.core.model.ExpenseCategory
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.IdeaRequestKind
+import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.MealType
 import com.aktawind.monnoel.core.model.ProductionStatus
 import com.aktawind.monnoel.core.model.SurpriseType
 import com.aktawind.monnoel.core.model.TaskModule
 import com.aktawind.monnoel.core.model.TaskStatus
+import com.aktawind.monnoel.core.model.TraditionCategory
+import com.aktawind.monnoel.core.model.TraditionPeriod
 import com.aktawind.monnoel.di.TestDataEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.io.File
@@ -171,6 +177,18 @@ class ScreenshotTool {
         whisper(null, edition.id, WhisperDraft(tom.id, "Lampe dinosaure", givenToPersonId = mamie.id))
         data.createIdeaRequest()(edition.id, IdeaRequestKind.TO_SEND, lea.id, tom.id)
         data.createIdeaRequest()(edition.id, IdeaRequestKind.TO_RECEIVE, lea.id, mamie.id)
+        suspend fun tradition(name: String, category: TraditionCategory, period: TraditionPeriod, favorite: Boolean = false) =
+            (data.saveTradition()(null, TraditionDraft(name, category, period, favorite = favorite)) as AppResult.Success).value
+        val lutin = tradition("Le lutin farceur", TraditionCategory.HOME, TraditionPeriod.ADVENT, favorite = true)
+        val sapin = tradition("Décorer le sapin ensemble", TraditionCategory.HOME, TraditionPeriod.ADVENT)
+        val marche = tradition("Marché de Noël de Strasbourg", TraditionCategory.OUTINGS, TraditionPeriod.ADVENT)
+        tradition("Pyjamas assortis du réveillon", TraditionCategory.FAMILY, TraditionPeriod.EVE)
+        listOf(lutin, sapin, marche).forEach { data.planTradition()(edition.id, it.id, true) }
+        data.saveTraditionMemory()(edition.id, sapin.id, true, null, "Tom a mis l'étoile tout seul")
+        val film = (data.saveInspiration()(null, InspirationDraft("Le Pôle Express", InspirationKind.FILM)) as AppResult.Success).value
+        data.saveInspiration()(null, InspirationDraft("Le Grinch", InspirationKind.CARTOON))
+        data.saveInspiration()(null, InspirationDraft("Patinoire de Noël", InspirationKind.OUTING))
+        data.setInspirationDone()(edition.id, film.id, true)
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
@@ -369,6 +387,20 @@ class ScreenshotTool {
         shot("40-budget")
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Coût prévu de chaque Noël"))
         shot("41-budget-years")
+        click("Traditions")
+        waitText("Au programme de Noël")
+        shot("42-traditions")
+        click("Inspirations")
+        waitText("Le Pôle Express")
+        shot("43-inspirations")
+        click("Nos traditions")
+        waitText("Le lutin farceur")
+        compose.onAllNodesWithText("Le lutin farceur").onLast().performTouchInput {
+            click(androidx.compose.ui.geometry.Offset(width / 2f, 6f))
+        }
+        waitText("Période")
+        shot("44-tradition-edit")
+        compose.onNodeWithContentDescription("Retour").performClick()
         click("Réglages")
         waitText("Personnaliser")
         click("Catégories de recettes")

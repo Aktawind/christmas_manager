@@ -17,6 +17,7 @@ import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
 import com.aktawind.monnoel.core.database.dao.TaskDao
+import com.aktawind.monnoel.core.database.dao.TraditionDao
 import com.aktawind.monnoel.core.database.dao.WhisperDao
 import dagger.Module
 import dagger.Provides
@@ -70,6 +71,9 @@ object DatabaseModule {
 
     @Provides
     fun provideIdeaRequestDao(db: MonNoelDatabase): IdeaRequestDao = db.ideaRequestDao()
+
+    @Provides
+    fun provideTraditionDao(db: MonNoelDatabase): TraditionDao = db.traditionDao()
 
     @Provides
     fun provideTaskDao(db: MonNoelDatabase): TaskDao = db.taskDao()

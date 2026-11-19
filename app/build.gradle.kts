@@ -94,6 +94,7 @@ dependencies {
     implementation(project(":feature:search"))
     implementation(project(":feature:cooking"))
     implementation(project(":feature:budget"))
+    implementation(project(":feature:traditions"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

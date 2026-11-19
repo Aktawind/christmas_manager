@@ -21,6 +21,11 @@ import com.aktawind.monnoel.core.domain.gifts.SetPersonBudgetUseCase
 import com.aktawind.monnoel.core.domain.meals.SaveDishUseCase
 import com.aktawind.monnoel.core.domain.meals.SaveMealUseCase
 import com.aktawind.monnoel.core.domain.tasks.SaveTaskUseCase
+import com.aktawind.monnoel.core.domain.traditions.SaveInspirationUseCase
+import com.aktawind.monnoel.core.domain.traditions.SaveTraditionMemoryUseCase
+import com.aktawind.monnoel.core.domain.traditions.SaveTraditionUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetInspirationDoneUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetTraditionPlannedUseCase
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -70,4 +75,14 @@ interface TestDataEntryPoint {
     fun saveWhisper(): SaveWhisperUseCase
 
     fun createIdeaRequest(): CreateIdeaRequestUseCase
+
+    fun saveTradition(): SaveTraditionUseCase
+
+    fun planTradition(): SetTraditionPlannedUseCase
+
+    fun saveTraditionMemory(): SaveTraditionMemoryUseCase
+
+    fun saveInspiration(): SaveInspirationUseCase
+
+    fun setInspirationDone(): SetInspirationDoneUseCase
 }

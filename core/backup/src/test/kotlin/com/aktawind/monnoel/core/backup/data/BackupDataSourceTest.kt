@@ -18,6 +18,8 @@ import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.IdeaRequestDto
+import com.aktawind.monnoel.core.backup.format.InspirationDoneDto
+import com.aktawind.monnoel.core.backup.format.InspirationDto
 import com.aktawind.monnoel.core.backup.format.MealDishDto
 import com.aktawind.monnoel.core.backup.format.MealDto
 import com.aktawind.monnoel.core.backup.format.MealPersonDto
@@ -28,6 +30,9 @@ import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
+import com.aktawind.monnoel.core.backup.format.TraditionDto
+import com.aktawind.monnoel.core.backup.format.TraditionPersonDto
+import com.aktawind.monnoel.core.backup.format.TraditionYearDto
 import com.aktawind.monnoel.core.backup.format.WhisperDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import java.io.ByteArrayInputStream
@@ -113,6 +118,11 @@ class BackupDataSourceTest {
                 ),
             ),
             mealPersons = listOf(MealPersonDto("m", "p")),
+            traditions = listOf(TraditionDto("tr", "Lutin farceur", null, "HOME", "ADVENT", "", true, 1L, 1L)),
+            traditionPersons = listOf(TraditionPersonDto("tr", "p")),
+            traditionYears = listOf(TraditionYearDto("ty", "e", "tr", true, "photos/ty.jpg", "Magique", 1L)),
+            inspirations = listOf(InspirationDto("in", "FILM", "Le Pôle Express", null, "", "", 1L, 1L)),
+            inspirationsDone = listOf(InspirationDoneDto("e", "in")),
             ideaRequests = listOf(IdeaRequestDto("r", "e", "TO_SEND", "p", null, "Collègues", "t", 1L)),
             whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L, "photos/w.jpg")),
             expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),

@@ -16,4 +16,6 @@
     <string name="search_meals">Repas</string>
     <string name="search_expenses">Autres dépenses</string>
     <string name="search_whispers">Idées soufflées</string>
+    <string name="search_traditions">Traditions</string>
+    <string name="search_inspirations">Inspirations</string>
 </resources>

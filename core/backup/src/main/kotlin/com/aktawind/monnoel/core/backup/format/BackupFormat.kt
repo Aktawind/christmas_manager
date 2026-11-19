@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 9
+const val BACKUP_FORMAT_VERSION = 10
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -56,6 +56,11 @@ data class BackupData(
     val expenses: List<ExpenseDto> = emptyList(),
     val whispers: List<WhisperDto> = emptyList(),
     val ideaRequests: List<IdeaRequestDto> = emptyList(),
+    val traditions: List<TraditionDto> = emptyList(),
+    val traditionPersons: List<TraditionPersonDto> = emptyList(),
+    val traditionYears: List<TraditionYearDto> = emptyList(),
+    val inspirations: List<InspirationDto> = emptyList(),
+    val inspirationsDone: List<InspirationDoneDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -74,6 +79,8 @@ data class BackupData(
         "mealDishes" to mealDishes.size,
         "expenses" to expenses.size,
         "whispers" to whispers.size,
+        "traditions" to traditions.size,
+        "inspirations" to inspirations.size,
     )
 }
 
@@ -347,6 +354,48 @@ data class IdeaRequestDto(
     val taskId: String? = null,
     val createdAt: Long,
 )
+
+@Serializable
+data class TraditionDto(
+    val id: String,
+    val name: String,
+    val photoPath: String? = null,
+    val category: String,
+    val period: String,
+    val notes: String = "",
+    val favorite: Boolean = false,
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+@Serializable
+data class TraditionPersonDto(val traditionId: String, val personId: String)
+
+@Serializable
+data class TraditionYearDto(
+    val id: String,
+    val editionId: String,
+    val traditionId: String,
+    val done: Boolean = false,
+    val memoryPhotoPath: String? = null,
+    val memoryNote: String = "",
+    val createdAt: Long,
+)
+
+@Serializable
+data class InspirationDto(
+    val id: String,
+    val kind: String,
+    val title: String,
+    val photoPath: String? = null,
+    val url: String = "",
+    val notes: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+@Serializable
+data class InspirationDoneDto(val editionId: String, val inspirationId: String)
 
 internal val backupJson = Json {
     prettyPrint = true

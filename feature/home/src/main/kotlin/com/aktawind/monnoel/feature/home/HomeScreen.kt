@@ -74,6 +74,7 @@ fun HomeRoute(
     onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
     onOpenBudget: () -> Unit,
+    onOpenTraditions: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,6 +96,7 @@ fun HomeRoute(
             onOpenTasks = onOpenTasks,
             onOpenCooking = onOpenCooking,
             onOpenBudget = onOpenBudget,
+            onOpenTraditions = onOpenTraditions,
             onQuickIdea = { quickIdea = true },
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
@@ -120,13 +122,23 @@ internal fun HomeScreen(
     onOpenTasks: () -> Unit = {},
     onOpenCooking: () -> Unit = {},
     onOpenBudget: () -> Unit = {},
+    onOpenTraditions: () -> Unit = {},
     onQuickIdea: () -> Unit = {},
 ) {
     when (state) {
         HomeUiState.Loading, HomeUiState.NoEdition -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-        is HomeUiState.Ready -> HomeContent(state, onOpenGifts, onOpenAdvent, onOpenTasks, onOpenCooking, onOpenBudget, onQuickIdea)
+        is HomeUiState.Ready -> HomeContent(
+            state,
+            onOpenGifts,
+            onOpenAdvent,
+            onOpenTasks,
+            onOpenCooking,
+            onOpenBudget,
+            onOpenTraditions,
+            onQuickIdea,
+        )
     }
 }
 
@@ -138,6 +150,7 @@ private fun HomeContent(
     onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
     onOpenBudget: () -> Unit,
+    onOpenTraditions: () -> Unit,
     onQuickIdea: () -> Unit,
 ) {
     LazyVerticalGrid(
@@ -156,6 +169,7 @@ private fun HomeContent(
         item(span = { GridItemSpan(maxLineSpan) }) { TableSummaryCard(state.table, onOpenCooking) }
         item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenCooking) }
         state.budget?.let { b -> item(span = { GridItemSpan(maxLineSpan) }) { BudgetSummaryCard(b, onOpenBudget) } }
+        item(span = { GridItemSpan(maxLineSpan) }) { TraditionsSummaryCard(state.traditions, onOpenTraditions) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -382,6 +396,40 @@ private fun TasksSummaryCard(state: HomeUiState.Ready, onOpen: () -> Unit) {
             }
             if (state.suggestionCount > 0) {
                 Text(stringResource(R.string.home_tasks_suggestions, state.suggestionCount), color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TraditionsSummaryCard(summary: TraditionsSummary, onOpen: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "❤️  " + stringResource(R.string.home_traditions_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (summary.planned == 0) {
+                Text(stringResource(R.string.home_traditions_empty), color = secondary)
+            } else {
+                Text(
+                    stringResource(R.string.home_traditions_progress, summary.done, summary.planned),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                if (summary.next.isNotEmpty()) {
+                    Text(
+                        summary.next.take(3).joinToString(" · "),
+                        color = secondary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }

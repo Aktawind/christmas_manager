@@ -4,6 +4,7 @@ import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventCalendar
 import com.aktawind.monnoel.core.model.Expense
 import com.aktawind.monnoel.core.model.GiftIdea
+import com.aktawind.monnoel.core.model.Inspiration
 import com.aktawind.monnoel.core.model.LinkType
 import com.aktawind.monnoel.core.model.LutinTask
 import com.aktawind.monnoel.core.model.Meal
@@ -12,6 +13,7 @@ import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
 import com.aktawind.monnoel.core.model.Production
 import com.aktawind.monnoel.core.model.Recipe
+import com.aktawind.monnoel.core.model.Tradition
 import com.aktawind.monnoel.core.model.WhisperedIdea
 import java.text.Normalizer
 
@@ -39,6 +41,8 @@ data class SearchData(
     val dishes: List<MealDish> = emptyList(),
     val expenses: List<Expense> = emptyList(),
     val whispers: List<WhisperedIdea> = emptyList(),
+    val traditions: List<Tradition> = emptyList(),
+    val inspirations: List<Inspiration> = emptyList(),
 )
 
 /** Minuscules, sans accents : « Noël » et « noel » se valent. */
@@ -163,6 +167,10 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
                 null,
             )
         }
+    results[LinkType.TRADITION] = data.traditions.filter { matches(it.name, it.notes) }
+        .map { SearchResult(LinkType.TRADITION, it.id, it.name, "", it.photoPath) }
+    results[LinkType.INSPIRATION] = data.inspirations.filter { matches(it.title, it.notes) }
+        .map { SearchResult(LinkType.INSPIRATION, it.id, it.title, "", it.photoPath) }
     results[LinkType.EXPENSE] = data.expenses.filter { matches(it.title, it.notes) }
         .sortedByDescending { data.years[it.editionId] ?: 0 }
         .map { SearchResult(LinkType.EXPENSE, it.id, it.title, year(it.editionId).orEmpty(), null) }

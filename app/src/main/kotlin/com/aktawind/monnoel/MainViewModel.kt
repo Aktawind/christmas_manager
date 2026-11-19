@@ -14,6 +14,9 @@ import com.aktawind.monnoel.core.domain.gifts.parseSharedText
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PhotoRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
+import com.aktawind.monnoel.core.domain.traditions.InspirationDraft
+import com.aktawind.monnoel.core.domain.traditions.SaveInspirationUseCase
+import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.ThemePreference
 import com.aktawind.monnoel.core.ui.QuickIdeaInput
@@ -29,7 +32,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class SharedSaved { IDEA, RECIPE }
+enum class SharedSaved { IDEA, RECIPE, INSPIRATION }
 
 sealed interface MainUiState {
     data object Loading : MainUiState
@@ -46,6 +49,7 @@ class MainViewModel @Inject constructor(
     private val prepareSharedIdea: PrepareSharedIdeaUseCase,
     private val photos: PhotoRepository,
     private val saveRecipe: SaveRecipeUseCase,
+    private val saveInspiration: SaveInspirationUseCase,
     @ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
@@ -124,6 +128,16 @@ class MainViewModel @Inject constructor(
     private fun discardSharedPhoto() {
         val photo = _sharedIdea.value?.photoPath ?: return
         appScope.launch { photos.deletePhoto(photo) }
+    }
+
+    /** Le partage devient une inspiration (film, livre, sortie…) avec la photo de la page. */
+    fun saveSharedInspiration(title: String, url: String, kind: InspirationKind) {
+        val shared = _sharedIdea.value ?: return
+        _sharedIdea.value = null
+        viewModelScope.launch {
+            val draft = InspirationDraft(title, kind, shared.photoPath, url)
+            if (saveInspiration(null, draft) is AppResult.Success) _sharedSaved.value = SharedSaved.INSPIRATION
+        }
     }
 
     fun sharedSavedShown() {

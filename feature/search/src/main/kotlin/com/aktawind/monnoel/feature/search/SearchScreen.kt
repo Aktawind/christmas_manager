@@ -62,6 +62,8 @@ private val LinkType.emoji: String
         LinkType.MEAL -> "🍽️"
         LinkType.EXPENSE -> "💰"
         LinkType.WHISPER -> "🤫"
+        LinkType.TRADITION -> "❤️"
+        LinkType.INSPIRATION -> "🎬"
     }
 
 @get:StringRes
@@ -78,6 +80,8 @@ private val LinkType.groupLabel: Int
         LinkType.MEAL -> R.string.search_meals
         LinkType.EXPENSE -> R.string.search_expenses
         LinkType.WHISPER -> R.string.search_whispers
+        LinkType.TRADITION -> R.string.search_traditions
+        LinkType.INSPIRATION -> R.string.search_inspirations
     }
 
 @Composable

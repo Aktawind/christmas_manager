@@ -15,6 +15,8 @@ import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.IdeaRequestDto
+import com.aktawind.monnoel.core.backup.format.InspirationDoneDto
+import com.aktawind.monnoel.core.backup.format.InspirationDto
 import com.aktawind.monnoel.core.backup.format.MealDishDto
 import com.aktawind.monnoel.core.backup.format.MealDto
 import com.aktawind.monnoel.core.backup.format.MealPersonDto
@@ -25,6 +27,9 @@ import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
+import com.aktawind.monnoel.core.backup.format.TraditionDto
+import com.aktawind.monnoel.core.backup.format.TraditionPersonDto
+import com.aktawind.monnoel.core.backup.format.TraditionYearDto
 import com.aktawind.monnoel.core.backup.format.WhisperDto
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.entity.AdventBoxEntity
@@ -40,6 +45,8 @@ import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
 import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.IdeaRequestEntity
+import com.aktawind.monnoel.core.database.entity.InspirationDoneEntity
+import com.aktawind.monnoel.core.database.entity.InspirationEntity
 import com.aktawind.monnoel.core.database.entity.MealDishEntity
 import com.aktawind.monnoel.core.database.entity.MealEntity
 import com.aktawind.monnoel.core.database.entity.MealPersonEntity
@@ -50,6 +57,9 @@ import com.aktawind.monnoel.core.database.entity.ProductionEntity
 import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
 import com.aktawind.monnoel.core.database.entity.RecipeEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
+import com.aktawind.monnoel.core.database.entity.TraditionEntity
+import com.aktawind.monnoel.core.database.entity.TraditionPersonEntity
+import com.aktawind.monnoel.core.database.entity.TraditionYearEntity
 import com.aktawind.monnoel.core.database.entity.WhisperEntity
 import javax.inject.Inject
 
@@ -128,6 +138,17 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             ideaRequests = db.ideaRequestDao().getAll().map {
                 IdeaRequestDto(it.id, it.editionId, it.kind, it.personId, it.otherPersonId, it.otherName, it.taskId, it.createdAt)
             },
+            traditions = db.traditionDao().getAllTraditions().map {
+                TraditionDto(it.id, it.name, it.photoPath, it.category, it.period, it.notes, it.favorite, it.createdAt, it.updatedAt)
+            },
+            traditionPersons = db.traditionDao().getAllTraditionPersons().map { TraditionPersonDto(it.traditionId, it.personId) },
+            traditionYears = db.traditionDao().getAllYears().map {
+                TraditionYearDto(it.id, it.editionId, it.traditionId, it.done, it.memoryPhotoPath, it.memoryNote, it.createdAt)
+            },
+            inspirations = db.traditionDao().getAllInspirations().map {
+                InspirationDto(it.id, it.kind, it.title, it.photoPath, it.url, it.notes, it.createdAt, it.updatedAt)
+            },
+            inspirationsDone = db.traditionDao().getAllDone().map { InspirationDoneDto(it.editionId, it.inspirationId) },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -143,6 +164,10 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
             db.expenseDao().deleteAll()
+            db.traditionDao().deleteAllDone()
+            db.traditionDao().deleteAllInspirations()
+            db.traditionDao().deleteAllYears()
+            db.traditionDao().deleteAllTraditions()
             db.whisperDao().deleteAll()
             db.ideaRequestDao().deleteAll()
             db.mealDao().deleteAllDishes()
@@ -181,6 +206,23 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                     )
                 },
             )
+            db.traditionDao().insertTraditions(
+                data.traditions.map {
+                    TraditionEntity(it.id, it.name, it.photoPath, it.category, it.period, it.notes, it.favorite, it.createdAt, it.updatedAt)
+                },
+            )
+            db.traditionDao().insertTraditionPersons(data.traditionPersons.map { TraditionPersonEntity(it.traditionId, it.personId) })
+            db.traditionDao().insertYears(
+                data.traditionYears.map {
+                    TraditionYearEntity(it.id, it.editionId, it.traditionId, it.done, it.memoryPhotoPath, it.memoryNote, it.createdAt)
+                },
+            )
+            db.traditionDao().insertInspirations(
+                data.inspirations.map {
+                    InspirationEntity(it.id, it.kind, it.title, it.photoPath, it.url, it.notes, it.createdAt, it.updatedAt)
+                },
+            )
+            db.traditionDao().insertDone(data.inspirationsDone.map { InspirationDoneEntity(it.editionId, it.inspirationId) })
             db.ideaRequestDao().insertAll(
                 data.ideaRequests.map {
                     IdeaRequestEntity(it.id, it.editionId, it.kind, it.personId, it.otherPersonId, it.otherName, it.taskId, it.createdAt)

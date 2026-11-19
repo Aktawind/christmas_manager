@@ -184,8 +184,41 @@ object Migrations {
         }
     }
 
+    /** v0.8.0 : traditions, programme de chaque Noël, inspirations. */
+    val MIGRATION_14_15 = object : Migration(14, 15) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "CREATE TABLE IF NOT EXISTS `tradition` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `photo_path` TEXT, " +
+                    "`category` TEXT NOT NULL, `period` TEXT NOT NULL, `notes` TEXT NOT NULL, `favorite` INTEGER NOT " +
+                    "NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                "CREATE TABLE IF NOT EXISTS `tradition_person` (`tradition_id` TEXT NOT NULL, `person_id` TEXT NOT " +
+                    "NULL, PRIMARY KEY(`tradition_id`, `person_id`), FOREIGN KEY(`tradition_id`) REFERENCES " +
+                    "`tradition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`person_id`) REFERENCES " +
+                    "`person`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_tradition_person_person_id` ON `tradition_person` (`person_id`)",
+                "CREATE TABLE IF NOT EXISTS `tradition_year` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, " +
+                    "`tradition_id` TEXT NOT NULL, `done` INTEGER NOT NULL, `memory_photo_path` TEXT, `memory_note` TEXT " +
+                    "NOT NULL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`edition_id`) REFERENCES " +
+                    "`christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`tradition_id`) " +
+                    "REFERENCES `tradition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE UNIQUE INDEX IF NOT EXISTS `index_tradition_year_edition_id_tradition_id` ON `tradition_year` " +
+                    "(`edition_id`, `tradition_id`)",
+                "CREATE INDEX IF NOT EXISTS `index_tradition_year_tradition_id` ON `tradition_year` (`tradition_id`)",
+                "CREATE TABLE IF NOT EXISTS `inspiration` (`id` TEXT NOT NULL, `kind` TEXT NOT NULL, `title` TEXT NOT " +
+                    "NULL, `photo_path` TEXT, `url` TEXT NOT NULL, `notes` TEXT NOT NULL, `created_at` INTEGER NOT NULL, " +
+                    "`updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                "CREATE TABLE IF NOT EXISTS `inspiration_done` (`edition_id` TEXT NOT NULL, `inspiration_id` TEXT NOT " +
+                    "NULL, PRIMARY KEY(`edition_id`, `inspiration_id`), FOREIGN KEY(`edition_id`) REFERENCES " +
+                    "`christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`inspiration_id`) " +
+                    "REFERENCES `inspiration`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_inspiration_done_inspiration_id` ON `inspiration_done` " +
+                    "(`inspiration_id`)",
+            ).forEach(db::execSQL)
+        }
+    }
+
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
+        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
     )
 }

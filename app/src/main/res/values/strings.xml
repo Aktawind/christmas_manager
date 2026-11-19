@@ -6,11 +6,13 @@
     <string name="nav_advent">Avent</string>
     <string name="nav_cooking">Cuisine</string>
     <string name="nav_budget">Budget</string>
+    <string name="nav_traditions">Traditions</string>
     <string name="nav_search">Rechercher</string>
     <string name="nav_tasks">Ma liste</string>
     <string name="nav_years">Mes Noëls</string>
     <string name="nav_settings">Réglages</string>
     <string name="share_as_idea">Ajouter comme idée</string>
     <string name="share_saved">Idée notée dans Mon Noël ✨</string>
+    <string name="share_inspiration_saved">Inspiration rangée dans Traditions → Inspirations ✨</string>
     <string name="share_recipe_saved">Recette rangée dans Cuisine → Mes recettes ✨</string>
 </resources>

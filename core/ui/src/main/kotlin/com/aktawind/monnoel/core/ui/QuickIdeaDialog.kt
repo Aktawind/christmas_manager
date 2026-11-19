@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.domain.gifts.centsToInput
 import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
+import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.Person
 
 /**
@@ -47,15 +48,31 @@ fun QuickIdeaDialog(
     note: String? = null,
     /** Si renseigné, on peut aussi ranger le partage comme recette (nom, photo, lien). */
     onSaveRecipe: ((title: String, url: String) -> Unit)? = null,
+    /** Si renseigné, on peut aussi ranger le partage comme inspiration (film, livre, sortie…). */
+    onSaveInspiration: ((title: String, url: String, kind: InspirationKind) -> Unit)? = null,
 ) {
     var title by rememberSaveable { mutableStateOf(initialTitle) }
     var url by rememberSaveable { mutableStateOf(initialUrl) }
     var price by rememberSaveable { mutableStateOf(centsToInput(initialPriceCents)) }
     var selected by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    var asRecipe by rememberSaveable { mutableStateOf(false) }
+    // 0 : idée cadeau ; 1 : recette ; 2 : inspiration.
+    var target by rememberSaveable { mutableStateOf(0) }
+    var kind by rememberSaveable { mutableStateOf(InspirationKind.FILM) }
+    val asRecipe = target == 1
+    val asIdea = target == 0
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(if (asRecipe) R.string.quick_recipe_title else R.string.quick_idea_title)) },
+        title = {
+            Text(
+                stringResource(
+                    when (target) {
+                        1 -> R.string.quick_recipe_title
+                        2 -> R.string.quick_inspiration_title
+                        else -> R.string.quick_idea_title
+                    },
+                ),
+            )
+        },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (photoPath != null) {
@@ -68,23 +85,48 @@ fun QuickIdeaDialog(
                         color = LocalMonNoelColors.current.secondaryText,
                     )
                 }
-                if (onSaveRecipe != null) {
+                val targets = listOfNotNull(0, 1.takeIf { onSaveRecipe != null }, 2.takeIf { onSaveInspiration != null })
+                if (targets.size > 1) {
                     DropdownField(
                         label = stringResource(R.string.quick_share_kind),
-                        selected = asRecipe,
-                        options = listOf(false, true),
-                        optionLabel = { stringResource(if (it) R.string.quick_share_recipe else R.string.quick_share_idea) },
-                        onSelect = { asRecipe = it },
+                        selected = target,
+                        options = targets,
+                        optionLabel = {
+                            stringResource(
+                                when (it) {
+                                    1 -> R.string.quick_share_recipe
+                                    2 -> R.string.quick_share_inspiration
+                                    else -> R.string.quick_share_idea
+                                },
+                            )
+                        },
+                        onSelect = { target = it },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                if (target == 2) {
+                    DropdownField(
+                        label = stringResource(R.string.quick_inspiration_kind),
+                        selected = kind,
+                        options = InspirationKind.entries,
+                        optionLabel = { "${it.emoji}  ${stringResource(it.label)}" },
+                        onSelect = { kind = it },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 TextInput(
                     title,
                     { title = it },
-                    stringResource(if (asRecipe) R.string.quick_recipe_name else R.string.quick_idea_name),
+                    stringResource(
+                        when (target) {
+                            1 -> R.string.quick_recipe_name
+                            2 -> R.string.quick_recipe_name_generic
+                            else -> R.string.quick_idea_name
+                        },
+                    ),
                     Modifier.fillMaxWidth(),
                 )
-                if (!asRecipe) MoneyInput(price, { price = it }, stringResource(R.string.quick_idea_price), Modifier.fillMaxWidth())
+                if (asIdea) MoneyInput(price, { price = it }, stringResource(R.string.quick_idea_price), Modifier.fillMaxWidth())
                 TextInput(
                     url,
                     { url = it },
@@ -92,7 +134,7 @@ fun QuickIdeaDialog(
                     Modifier.fillMaxWidth(),
                     keyboardType = KeyboardType.Uri,
                 )
-                if (persons.isNotEmpty() && !asRecipe) {
+                if (persons.isNotEmpty() && asIdea) {
                     Text(stringResource(R.string.quick_idea_for_whom), style = MaterialTheme.typography.titleSmall)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         persons.forEach { person ->
@@ -108,7 +150,13 @@ fun QuickIdeaDialog(
                     }
                 }
                 Text(
-                    stringResource(if (asRecipe) R.string.quick_recipe_hint else R.string.quick_idea_hint),
+                    stringResource(
+                        when (target) {
+                            1 -> R.string.quick_recipe_hint
+                            2 -> R.string.quick_inspiration_hint
+                            else -> R.string.quick_idea_hint
+                        },
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = LocalMonNoelColors.current.secondaryText,
                 )
@@ -120,11 +168,13 @@ fun QuickIdeaDialog(
                 onClick = {
                     if (asRecipe && onSaveRecipe != null) {
                         onSaveRecipe(title, url)
+                    } else if (target == 2 && onSaveInspiration != null) {
+                        onSaveInspiration(title, url, kind)
                     } else {
                         onSave(QuickIdeaInput(title, url, parseEuroToCents(price), selected.toSet()))
                     }
                 },
-                enabled = title.isNotBlank() && (asRecipe || priceValid),
+                enabled = title.isNotBlank() && (!asIdea || priceValid),
             ) {
                 Text(stringResource(R.string.quick_idea_save))
             }

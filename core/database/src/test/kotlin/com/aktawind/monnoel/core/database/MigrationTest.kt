@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 14, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 15, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -353,6 +353,32 @@ class MigrationTest {
             val calendar = db.adventDao().getAllCalendars().single()
             assertEquals("HOMEMADE", calendar.kind)
             assertEquals(false, calendar.bought)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 14 vers 15 ajoute les traditions et garde les calendriers`() {
+        helper.createDatabase(dbName, 14).use { db ->
+            db.execSQL(
+                "INSERT INTO christmas_edition (id, year, status, planned_budget_cents, created_at, updated_at) " +
+                    "VALUES ('e1', 2026, 'ACTIVE', NULL, 1, 1)",
+            )
+            db.execSQL(
+                "INSERT INTO advent_calendar (id, edition_id, name, description, cover_photo_path, theme, budget_cents, notes, " +
+                    "box_count, created_at, updated_at, kind, price_cents, shop, bought) " +
+                    "VALUES ('c1', 'e1', 'Tisanes', '', NULL, '', NULL, '', 0, 1, 1, 'READY_MADE', 2990, '', 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 15, true, Migrations.MIGRATION_14_15).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals("READY_MADE", db.adventDao().getAllCalendars().single().kind)
+            assertEquals(0, db.traditionDao().getAllTraditions().size)
         }
         db.close()
     }

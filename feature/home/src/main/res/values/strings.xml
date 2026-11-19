@@ -58,6 +58,9 @@
     <string name="home_gifts_to_wrap">%1$d à emballer</string>
     <string name="home_gifts_given">%1$d offerts</string>
     <string name="home_advent_title">Les calendriers de l’Avent</string>
+    <string name="home_traditions_title">Nos traditions</string>
+    <string name="home_traditions_empty">Rien au programme pour l’instant : choisis tes traditions de l’année dans l’onglet Traditions.</string>
+    <string name="home_traditions_progress">%1$d sur %2$d faites cette année</string>
     <string name="home_budget_title">Les comptes</string>
     <string name="home_budget_line">Prévu %1$s · dépensé %2$s</string>
     <string name="home_budget_margin">Budget %1$s · encore %2$s de marge</string>
