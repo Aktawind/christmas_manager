@@ -28,3 +28,11 @@
   suggestions et ses choses à faire ; son compteur additionne tâches ouvertes et suggestions.
   L'onglet affiché au départ est le premier qui a quelque chose à faire. Une nouvelle chose à
   faire prend le thème de l'onglet.
+
+## Révision (2026-11-19, retour utilisatrice) — Ma liste supprimée
+
+- L'onglet **Ma liste** est supprimé : chaque onglet (cadeaux, calendriers, cuisine, traditions)
+  montre déjà ce qu'il reste à faire. Les réglages « Suggestions du lutin » disparaissent aussi.
+- La **recherche** n'est plus un onglet : une loupe en haut à droite de **Mes Noëls** l'ouvre.
+- Les demandes d'idées gardent leur état « fait » dans une tâche interne (non affichée) ; elles se
+  consultent dans le nouvel onglet **Cadeaux → Listes** et dans les fiches des personnes.

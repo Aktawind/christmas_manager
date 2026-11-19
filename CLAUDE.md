@@ -85,9 +85,10 @@ après année. Ambiance chaleureuse et féérique, jamais « outil de gestion de
   - `:core:domain` — cas d'usage transverses (années, budget, recherche, tâches auto).
   - `:core:media` — import, redimensionnement et stockage des photos.
   - `:core:backup` — export / import / sauvegarde automatique.
-  - `:feature:<module>` — un module par domaine (home, years, gifts, advent, recipes,
-    meals, tasks, budget, traditions, activities, decoration, memories, search,
-    settings).
+  - `:feature:<module>` — un module par domaine (home, years, gifts, advent, cooking, budget,
+    traditions, search, settings ; à venir : activities, decoration, memories).
+    « Ma liste » (tâches) a été supprimée de l'interface en v0.8.0 : les tâches restent en
+    interne pour l'état des demandes d'idées.
 - Un module `feature` ne dépend jamais d'un autre module `feature`.
 - Les ViewModels exposent un `StateFlow<UiState>` unique ; les écrans sont des
   fonctions `@Composable` sans état métier.

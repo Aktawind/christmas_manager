@@ -2,7 +2,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
     <string name="traditions_title">Traditions</string>
     <string name="traditions_title_year">Traditions · Noël %1$d</string>
+    <string name="tab_program">Au programme</string>
     <string name="tab_traditions">Nos traditions</string>
+    <string name="program_empty_title">Rien au programme pour l’instant</string>
+    <string name="program_empty_message">Dans « Nos traditions », touche « + Au programme » sur celles que vous ferez ce Noël.</string>
+    <string name="program_go_catalog">Voir nos traditions</string>
     <string name="tab_inspirations">Inspirations</string>
     <string name="fab_tradition">Tradition</string>
     <string name="fab_inspiration">Inspiration</string>

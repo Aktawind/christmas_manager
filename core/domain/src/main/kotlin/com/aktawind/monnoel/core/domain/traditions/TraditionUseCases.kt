@@ -28,7 +28,7 @@ data class TraditionDraft(
 /** Une idée de tradition à piocher (ajoutée seulement si on la choisit). */
 data class TraditionIdea(val name: String, val category: TraditionCategory, val period: TraditionPeriod)
 
-/** Une vingtaine d'idées pour commencer ; on garde celles qui plaisent, on supprime les autres. */
+/** Une cinquantaine d'idées pour commencer ; on garde celles qui plaisent, on supprime les autres. */
 val traditionIdeas: List<TraditionIdea> = listOf(
     TraditionIdea("Le lutin farceur", TraditionCategory.HOME, TraditionPeriod.ADVENT),
     TraditionIdea("Décorer le sapin ensemble", TraditionCategory.HOME, TraditionPeriod.ADVENT),
@@ -52,6 +52,36 @@ val traditionIdeas: List<TraditionIdea> = listOf(
     TraditionIdea("Jeux de société en famille", TraditionCategory.FAMILY, TraditionPeriod.AFTER),
     TraditionIdea("Écrire des mots de remerciement", TraditionCategory.FAMILY, TraditionPeriod.AFTER),
     TraditionIdea("La galette des rois", TraditionCategory.COOKING, TraditionPeriod.AFTER),
+    TraditionIdea("Choisir le sapin en famille", TraditionCategory.HOME, TraditionPeriod.ADVENT),
+    TraditionIdea("Installer la crèche", TraditionCategory.HOME, TraditionPeriod.ADVENT),
+    TraditionIdea("Décorer les fenêtres", TraditionCategory.HOME, TraditionPeriod.ADVENT),
+    TraditionIdea("Fabriquer des décorations maison", TraditionCategory.HOME, TraditionPeriod.ADVENT),
+    TraditionIdea("Une bougie allumée chaque dimanche de l'Avent", TraditionCategory.HOME, TraditionPeriod.ADVENT),
+    TraditionIdea("Accrocher les chaussettes à la cheminée", TraditionCategory.HOME, TraditionPeriod.ADVENT),
+    TraditionIdea("Construire une maison en pain d'épices", TraditionCategory.COOKING, TraditionPeriod.ADVENT),
+    TraditionIdea("Préparer des bredele", TraditionCategory.COOKING, TraditionPeriod.ADVENT),
+    TraditionIdea("Faire des truffes au chocolat à offrir", TraditionCategory.COOKING, TraditionPeriod.ADVENT),
+    TraditionIdea("Vin chaud ou chocolat chaud au marché", TraditionCategory.COOKING, TraditionPeriod.ADVENT),
+    TraditionIdea("Cuisiner la bûche ensemble", TraditionCategory.COOKING, TraditionPeriod.EVE),
+    TraditionIdea("Préparer le repas du réveillon ensemble", TraditionCategory.COOKING, TraditionPeriod.EVE),
+    TraditionIdea("Voir un spectacle de Noël", TraditionCategory.OUTINGS, TraditionPeriod.ADVENT),
+    TraditionIdea("Rencontrer le Père Noël", TraditionCategory.OUTINGS, TraditionPeriod.ADVENT),
+    TraditionIdea("Patiner à la patinoire de Noël", TraditionCategory.OUTINGS, TraditionPeriod.ADVENT),
+    TraditionIdea("Concert ou chorale de Noël", TraditionCategory.OUTINGS, TraditionPeriod.ADVENT),
+    TraditionIdea("Messe de minuit ou veillée", TraditionCategory.OUTINGS, TraditionPeriod.EVE),
+    TraditionIdea("Balade aux flambeaux", TraditionCategory.OUTINGS, TraditionPeriod.AFTER),
+    TraditionIdea("Soirée films de Noël en pyjama", TraditionCategory.FILMS_BOOKS, TraditionPeriod.ADVENT),
+    TraditionIdea("Lire « La nuit avant Noël »", TraditionCategory.FILMS_BOOKS, TraditionPeriod.EVE),
+    TraditionIdea("Regarder un dessin animé de Noël chaque week-end", TraditionCategory.FILMS_BOOKS, TraditionPeriod.ADVENT),
+    TraditionIdea("Emballer les cadeaux en musique", TraditionCategory.FAMILY, TraditionPeriod.ADVENT),
+    TraditionIdea("Écrire un mot doux dans chaque cadeau", TraditionCategory.FAMILY, TraditionPeriod.EVE),
+    TraditionIdea("Un tour de table des meilleurs moments de l'année", TraditionCategory.FAMILY, TraditionPeriod.EVE),
+    TraditionIdea("Appeler la famille éloignée", TraditionCategory.FAMILY, TraditionPeriod.DAY),
+    TraditionIdea("Ouvrir les cadeaux chacun son tour", TraditionCategory.FAMILY, TraditionPeriod.DAY),
+    TraditionIdea("Bataille de boules de neige (s'il neige !)", TraditionCategory.OUTINGS, TraditionPeriod.DAY),
+    TraditionIdea("Faire un vœu pour la nouvelle année", TraditionCategory.FAMILY, TraditionPeriod.AFTER),
+    TraditionIdea("Donner des jouets à une association", TraditionCategory.OTHER, TraditionPeriod.ADVENT),
+    TraditionIdea("Rendre visite à un voisin seul", TraditionCategory.OTHER, TraditionPeriod.ADVENT),
 )
 
 /** Idées pas encore dans le catalogue (même nom, accents et majuscules ignorés). */

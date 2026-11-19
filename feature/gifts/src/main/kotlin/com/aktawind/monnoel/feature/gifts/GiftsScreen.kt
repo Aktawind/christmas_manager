@@ -83,6 +83,7 @@ private enum class GiftsTab(@StringRes val label: Int) {
     ),
     PERSONS(R.string.tab_persons),
     IDEAS(R.string.tab_ideas),
+    LISTS(R.string.tab_lists),
 }
 
 private enum class Grouping(@StringRes val label: Int) {
@@ -106,6 +107,7 @@ fun GiftsRoute(
     onNewPerson: () -> Unit,
     onOpenIdea: (String) -> Unit,
     onNewIdea: () -> Unit,
+    requestedTab: String? = null,
     viewModel: GiftsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -119,7 +121,9 @@ fun GiftsRoute(
         onNewIdea = onNewIdea,
         onStatus = viewModel::setStatus,
         onOffer = viewModel::offer,
+        onRequestDone = viewModel::setRequestDone,
         onMessageShown = viewModel::messageShown,
+        requestedTab = requestedTab,
     )
 }
 
@@ -135,9 +139,13 @@ internal fun GiftsScreen(
     onNewIdea: () -> Unit,
     onStatus: (String, GiftStatus) -> Unit,
     onOffer: (String, String?) -> Unit,
+    onRequestDone: (String, Boolean) -> Unit,
     onMessageShown: () -> Unit,
+    requestedTab: String? = null,
 ) {
     var tab by rememberSaveable { mutableStateOf(GiftsTab.GIFTS) }
+    // Arrivée depuis l'accueil : on ouvre l'onglet demandé.
+    LaunchedEffect(requestedTab) { GiftsTab.entries.firstOrNull { it.name == requestedTab }?.let { tab = it } }
     var offering by remember { mutableStateOf<GiftIdea?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -172,8 +180,9 @@ internal fun GiftsScreen(
                 GiftsTab.GIFTS -> R.string.fab_new_gift to onNewGift
                 GiftsTab.PERSONS -> R.string.fab_new_person to onNewPerson
                 GiftsTab.IDEAS -> R.string.fab_new_idea to onNewIdea
+                GiftsTab.LISTS -> R.string.fab_new_person to onNewPerson
             }
-            if (!(tab == GiftsTab.GIFTS && state.readOnly)) {
+            if (!(tab == GiftsTab.GIFTS && state.readOnly) && tab != GiftsTab.LISTS) {
                 ExtendedFloatingActionButton(
                     onClick = action,
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
@@ -187,6 +196,7 @@ internal fun GiftsScreen(
                 GiftsTab.GIFTS -> GiftsTabContent(state, onOpenGift, onStatus)
                 GiftsTab.PERSONS -> PersonsTabContent(state, onOpenPerson)
                 GiftsTab.IDEAS -> IdeasTabContent(state, onOpenIdea, onOffer = { offering = it })
+                GiftsTab.LISTS -> ListsTabContent(state, onOpenPerson, onRequestDone)
             }
         }
     }

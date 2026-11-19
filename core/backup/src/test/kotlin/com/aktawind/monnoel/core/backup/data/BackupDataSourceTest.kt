@@ -29,6 +29,7 @@ import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
 import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
+import com.aktawind.monnoel.core.backup.format.SpecialDateDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
 import com.aktawind.monnoel.core.backup.format.TraditionDto
 import com.aktawind.monnoel.core.backup.format.TraditionPersonDto
@@ -123,6 +124,7 @@ class BackupDataSourceTest {
             traditionYears = listOf(TraditionYearDto("ty", "e", "tr", true, "photos/ty.jpg", "Magique", 1L)),
             inspirations = listOf(InspirationDto("in", "FILM", "Le Pôle Express", null, "", "", 1L, 1L)),
             inspirationsDone = listOf(InspirationDoneDto("e", "in")),
+            specialDates = listOf(SpecialDateDto("sd", 12, 13, "Sainte-Lucie", "🕯️")),
             ideaRequests = listOf(IdeaRequestDto("r", "e", "TO_SEND", "p", null, "Collègues", "t", 1L)),
             whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L, "photos/w.jpg")),
             expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),

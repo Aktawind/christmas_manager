@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
@@ -85,7 +86,7 @@ private val LinkType.groupLabel: Int
     }
 
 @Composable
-fun SearchRoute(onOpen: (LinkType, String) -> Unit, viewModel: SearchViewModel = hiltViewModel()) {
+fun SearchRoute(onOpen: (LinkType, String) -> Unit, onBack: () -> Unit, viewModel: SearchViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // Le texte saisi vit dans l'écran (réaction immédiate) ; la recherche suit avec un léger délai.
     var text by rememberSaveable { mutableStateOf("") }
@@ -98,29 +99,37 @@ fun SearchRoute(onOpen: (LinkType, String) -> Unit, viewModel: SearchViewModel =
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            OutlinedTextField(
-                value = text,
-                onValueChange = {
-                    text = it
-                    viewModel.setQuery(it)
-                },
-                placeholder = { Text(stringResource(R.string.search_hint)) },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (text.isNotEmpty()) {
-                        IconButton(onClick = {
-                            text = ""
-                            viewModel.setQuery("")
-                        }) {
-                            Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.search_clear))
+            Row(Modifier.widthIn(max = 840.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(com.aktawind.monnoel.core.ui.R.string.action_back),
+                    )
+                }
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = {
+                        text = it
+                        viewModel.setQuery(it)
+                    },
+                    placeholder = { Text(stringResource(R.string.search_hint)) },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (text.isNotEmpty()) {
+                            IconButton(onClick = {
+                                text = ""
+                                viewModel.setQuery("")
+                            }) {
+                                Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.search_clear))
+                            }
                         }
-                    }
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier.widthIn(max = 840.dp).fillMaxWidth().focusRequester(focus),
-            )
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    modifier = Modifier.weight(1f).focusRequester(focus),
+                )
+            }
         }
         if (text.isBlank()) {
             item {

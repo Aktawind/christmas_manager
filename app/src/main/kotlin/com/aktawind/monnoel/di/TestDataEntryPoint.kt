@@ -8,6 +8,7 @@ import com.aktawind.monnoel.core.domain.budget.SaveExpenseUseCase
 import com.aktawind.monnoel.core.domain.budget.SetEditionBudgetUseCase
 import com.aktawind.monnoel.core.domain.cooking.SaveProductionUseCase
 import com.aktawind.monnoel.core.domain.cooking.SaveRecipeUseCase
+import com.aktawind.monnoel.core.domain.countdown.SaveSpecialDateUseCase
 import com.aktawind.monnoel.core.domain.edition.CreateEditionUseCase
 import com.aktawind.monnoel.core.domain.edition.SelectEditionUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
@@ -75,6 +76,8 @@ interface TestDataEntryPoint {
     fun saveWhisper(): SaveWhisperUseCase
 
     fun createIdeaRequest(): CreateIdeaRequestUseCase
+
+    fun saveSpecialDate(): SaveSpecialDateUseCase
 
     fun saveTradition(): SaveTraditionUseCase
 

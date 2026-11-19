@@ -49,4 +49,22 @@ class ChristmasCountdownTest {
         assertEquals(PathStepKind.CHRISTMAS_EVE, eve.single { it.isNext }.kind)
         assertEquals(0, christmasPath(LocalDate.of(2026, 12, 26), 2026).count { it.isNext })
     }
+
+    @Test
+    fun `les dates qui comptent prennent place dans le chemin`() {
+        val specials = listOf(
+            com.aktawind.monnoel.core.model.SpecialDate("a", 12, 13, "Sainte-Lucie", "🕯️"),
+            com.aktawind.monnoel.core.model.SpecialDate("b", 1, 6, "Galette des rois", "👑"),
+            com.aktawind.monnoel.core.model.SpecialDate("c", 11, 30, "Arrivée de Mamie", "🚗"),
+        )
+        val path = christmasPath(java.time.LocalDate.of(2026, 12, 2), 2026, specials)
+        assertEquals(
+            listOf("Arrivée de Mamie", null, "Sainte-Lucie", null, null, "Galette des rois"),
+            path.map { it.label },
+        )
+        assertEquals(java.time.LocalDate.of(2027, 1, 6), path.last().date)
+        // Le 2 décembre : le 30 novembre et le 1er décembre sont passés, la prochaine étape est la Sainte-Lucie.
+        assertEquals("Sainte-Lucie", path.single { it.isNext }.label)
+        assertEquals(2, path.count { it.passed })
+    }
 }

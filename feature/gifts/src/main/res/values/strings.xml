@@ -102,6 +102,15 @@
     <string name="whisper_duplicate">Attention : cette idée est déjà prévue de la part de %1$s pour ce Noël.</string>
     <string name="field_whisper_price">Prix indicatif (facultatif)</string>
     <string name="field_whisper_url">Lien (facultatif)</string>
+    <string name="tab_lists">Listes</string>
+    <string name="lists_empty_title">Les listes au Père Noël</string>
+    <string name="lists_empty_message">Depuis la fiche d’une personne, note qui attend des idées pour elle, et de qui tu attends des idées.</string>
+    <string name="lists_to_send">📤 À envoyer · %1$d</string>
+    <string name="lists_to_receive">📥 J’attends · %1$d</string>
+    <string name="lists_line_to_send">Envoyer la liste de %1$s à %2$s</string>
+    <string name="lists_line_to_receive">La liste de %1$s (de la part de %2$s)</string>
+    <string name="lists_line_to_receive_self">La liste de %1$s</string>
+    <string name="lists_hint">Touche une ligne pour ouvrir la fiche de la personne ; c’est là qu’on ajoute ou retire une demande.</string>
     <string name="requests_title">Demandes d’idées · Noël %1$d</string>
     <string name="request_to_send">%1$s attend des idées pour %2$s</string>
     <string name="request_to_receive">J’attends de %1$s des idées pour %2$s</string>

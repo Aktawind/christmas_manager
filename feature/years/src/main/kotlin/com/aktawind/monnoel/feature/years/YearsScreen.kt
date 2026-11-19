@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
@@ -50,7 +51,7 @@ import com.aktawind.monnoel.core.ui.EmptyState
 import com.aktawind.monnoel.core.ui.resolve
 
 @Composable
-fun YearsRoute(onYearSelected: () -> Unit, viewModel: YearsViewModel = hiltViewModel()) {
+fun YearsRoute(onYearSelected: () -> Unit, onSearch: () -> Unit, viewModel: YearsViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     YearsScreen(
         state = state,
@@ -62,6 +63,7 @@ fun YearsRoute(onYearSelected: () -> Unit, viewModel: YearsViewModel = hiltViewM
         onArchive = viewModel::setArchived,
         onDelete = viewModel::delete,
         onMessageShown = viewModel::messageShown,
+        onSearch = onSearch,
     )
 }
 
@@ -74,6 +76,7 @@ internal fun YearsScreen(
     onArchive: (ChristmasEdition, Boolean) -> Unit,
     onDelete: (ChristmasEdition) -> Unit,
     onMessageShown: () -> Unit,
+    onSearch: () -> Unit = {},
 ) {
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -88,7 +91,14 @@ internal fun YearsScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.years_title)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.years_title)) },
+                actions = {
+                    IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.years_search)) }
+                },
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
             ExtendedFloatingActionButton(

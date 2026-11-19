@@ -61,6 +61,7 @@ data class BackupData(
     val traditionYears: List<TraditionYearDto> = emptyList(),
     val inspirations: List<InspirationDto> = emptyList(),
     val inspirationsDone: List<InspirationDoneDto> = emptyList(),
+    val specialDates: List<SpecialDateDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -396,6 +397,9 @@ data class InspirationDto(
 
 @Serializable
 data class InspirationDoneDto(val editionId: String, val inspirationId: String)
+
+@Serializable
+data class SpecialDateDto(val id: String, val month: Int, val day: Int, val label: String, val emoji: String = "⭐")
 
 internal val backupJson = Json {
     prettyPrint = true

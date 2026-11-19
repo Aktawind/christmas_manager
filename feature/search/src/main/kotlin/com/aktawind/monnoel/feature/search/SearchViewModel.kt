@@ -75,7 +75,7 @@ class SearchViewModel @Inject constructor(
             Kitchen(r, pr, m, d)
         },
     ) { (p, i, g), (c, b, tr, ins), (t, x, w), e, k ->
-        SearchData(p, i, g, c, b, t, e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes, x, w, tr, ins)
+        SearchData(p, i, g, c, b, emptyList(), e.associate { it.id to it.year }, k.recipes, k.productions, k.meals, k.dishes, x, w, tr, ins)
     }
 
     val uiState: StateFlow<SearchUiState> = combine(query.debounce(150), data) { q, d ->

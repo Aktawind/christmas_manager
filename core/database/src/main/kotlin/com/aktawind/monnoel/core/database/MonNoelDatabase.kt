@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.database.dao.IdeaRequestDao
 import com.aktawind.monnoel.core.database.dao.MealDao
 import com.aktawind.monnoel.core.database.dao.PersonDao
 import com.aktawind.monnoel.core.database.dao.PlannedGiftDao
+import com.aktawind.monnoel.core.database.dao.SpecialDateDao
 import com.aktawind.monnoel.core.database.dao.TaskDao
 import com.aktawind.monnoel.core.database.dao.TraditionDao
 import com.aktawind.monnoel.core.database.dao.WhisperDao
@@ -39,6 +40,7 @@ import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
 import com.aktawind.monnoel.core.database.entity.ProductionEntity
 import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
 import com.aktawind.monnoel.core.database.entity.RecipeEntity
+import com.aktawind.monnoel.core.database.entity.SpecialDateEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
 import com.aktawind.monnoel.core.database.entity.TraditionEntity
 import com.aktawind.monnoel.core.database.entity.TraditionPersonEntity
@@ -59,7 +61,8 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
  * v10 (v0.7.0 test) autres dépenses (budget) ; v11 (v0.7.0 test) idées soufflées ;
  * v12 (v0.7.0 test) photo des idées soufflées ; v13 (v0.7.0 test) demandes d'idées ;
  * v14 (v0.7.0) calendriers de l'Avent tout prêts ;
- * v15 (v0.8.0) traditions, programme annuel, inspirations.
+ * v15 (v0.8.0 test) traditions, programme annuel, inspirations ;
+ * v16 (v0.8.0) dates qui comptent (chemin vers Noël).
  */
 @Database(
     entities = [
@@ -92,8 +95,9 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         TraditionYearEntity::class,
         InspirationEntity::class,
         InspirationDoneEntity::class,
+        SpecialDateEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {
@@ -122,6 +126,8 @@ abstract class MonNoelDatabase : RoomDatabase() {
     abstract fun ideaRequestDao(): IdeaRequestDao
 
     abstract fun traditionDao(): TraditionDao
+
+    abstract fun specialDateDao(): SpecialDateDao
 
     companion object {
         const val NAME = "mon-noel.db"

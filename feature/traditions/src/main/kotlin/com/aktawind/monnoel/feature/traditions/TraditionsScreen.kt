@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -71,7 +74,8 @@ import com.aktawind.monnoel.core.ui.resolve
 @Composable
 fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Unit, viewModel: TraditionsViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var tab by rememberSaveable { mutableStateOf(if (viewModel.initialInspirationId != null) 1 else 0) }
+    // 0 : au programme ; 1 : nos traditions ; 2 : inspirations.
+    var tab by rememberSaveable { mutableStateOf(if (viewModel.initialInspirationId != null) 2 else 0) }
     var memoryFor by rememberSaveable { mutableStateOf<String?>(null) }
     var picking by rememberSaveable { mutableStateOf(false) }
     // null : fermé ; "" : nouvelle inspiration ; sinon son id.
@@ -96,36 +100,44 @@ fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Uni
                     },
                 )
                 PrimaryTabRow(selectedTabIndex = tab) {
-                    Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.tab_traditions)) })
-                    Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.tab_inspirations)) })
+                    Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.tab_program)) })
+                    Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.tab_traditions)) })
+                    Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.tab_inspirations)) })
                 }
             }
         },
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { if (tab == 0) onNewTradition() else inspirationOpen = "" },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(if (tab == 0) R.string.fab_tradition else R.string.fab_inspiration)) },
-            )
+            if (tab != 0) {
+                ExtendedFloatingActionButton(
+                    onClick = { if (tab == 1) onNewTradition() else inspirationOpen = "" },
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text(stringResource(if (tab == 1) R.string.fab_tradition else R.string.fab_inspiration)) },
+                )
+            }
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            if (tab == 0) {
-                TraditionsTab(
+            when (tab) {
+                0 -> ProgramTab(
                     state,
-                    onOpen = onOpenTradition,
-                    onFavorite = viewModel::toggleFavorite,
-                    onPlanned = { id, planned -> viewModel.setPlanned(id, planned) },
                     onDone = { id, done ->
                         val year = state.program[id]
                         viewModel.saveMemory(id, done, year?.memoryPhotoPath, year?.memoryNote.orEmpty())
                     },
                     onMemory = { memoryFor = it },
+                    onGoToCatalog = { tab = 1 },
+                )
+                1 -> TraditionsTab(
+                    state,
+                    onOpen = onOpenTradition,
+                    onFavorite = viewModel::toggleFavorite,
+                    onPlanned = { id, planned -> viewModel.setPlanned(id, planned) },
                     onPick = { picking = true },
                 )
-            } else {
-                InspirationsTab(state, onOpen = { inspirationOpen = it }, onDone = { id, done -> viewModel.setInspirationDone(id, done) })
+                else -> InspirationsTab(state, onOpen = {
+                    inspirationOpen = it
+                }, onDone = { id, done -> viewModel.setInspirationDone(id, done) })
             }
         }
     }
@@ -184,42 +196,41 @@ fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Uni
 }
 
 @Composable
-private fun TraditionsTab(
-    state: TraditionsUiState,
-    onOpen: (String) -> Unit,
-    onFavorite: (Tradition) -> Unit,
-    onPlanned: (String, Boolean) -> Unit,
-    onDone: (String, Boolean) -> Unit,
-    onMemory: (String) -> Unit,
-    onPick: () -> Unit,
-) {
+private fun ProgramTab(state: TraditionsUiState, onDone: (String, Boolean) -> Unit, onMemory: (String) -> Unit, onGoToCatalog: () -> Unit) {
     val secondary = LocalMonNoelColors.current.secondaryText
     val planned = state.traditions.filter { it.id in state.program }
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(320.dp),
-        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxSize(),
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val edition = state.edition
-        if (edition != null && planned.isNotEmpty()) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                val done = planned.count { state.program[it.id]?.done == true }
-                Column {
-                    Text(
-                        stringResource(R.string.program_title, edition.year),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.semantics { heading() },
-                    )
-                    Text(
-                        stringResource(R.string.program_progress, done, planned.size),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = secondary,
-                    )
+        if (edition == null || (planned.isEmpty() && !state.loading)) {
+            item {
+                EmptyState("🗓️", stringResource(R.string.program_empty_title), stringResource(R.string.program_empty_message)) {
+                    OutlinedButton(onClick = onGoToCatalog) { Text(stringResource(R.string.program_go_catalog)) }
                 }
             }
-            items(planned, key = { "p-${it.id}" }, span = { GridItemSpan(maxLineSpan) }) { tradition ->
+            return@LazyColumn
+        }
+        item {
+            val done = planned.count { state.program[it.id]?.done == true }
+            Column(Modifier.widthIn(max = 840.dp).fillMaxWidth()) {
+                Text(
+                    stringResource(R.string.program_title, edition.year),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.semantics { heading() },
+                )
+                Text(
+                    stringResource(R.string.program_progress, done, planned.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = secondary,
+                )
+            }
+        }
+        // Rangées par période : l'Avent, le réveillon, le jour de Noël, après Noël.
+        lazyItems(planned.sortedBy { it.period.ordinal }, key = { it.id }) { tradition ->
+            Box(Modifier.widthIn(max = 840.dp).fillMaxWidth()) {
                 ProgramRow(
                     tradition,
                     state.program.getValue(tradition.id),
@@ -229,8 +240,27 @@ private fun TraditionsTab(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TraditionsTab(
+    state: TraditionsUiState,
+    onOpen: (String) -> Unit,
+    onFavorite: (Tradition) -> Unit,
+    onPlanned: (String, Boolean) -> Unit,
+    onPick: () -> Unit,
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(320.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        val edition = state.edition
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.catalog_title),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),

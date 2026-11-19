@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object SearchDestination
 
-fun NavGraphBuilder.searchScreen(onOpen: (LinkType, String) -> Unit) {
-    composable<SearchDestination> { SearchRoute(onOpen = onOpen) }
+fun NavGraphBuilder.searchScreen(onOpen: (LinkType, String) -> Unit, onBack: () -> Unit) {
+    composable<SearchDestination> { SearchRoute(onOpen = onOpen, onBack = onBack) }
 }

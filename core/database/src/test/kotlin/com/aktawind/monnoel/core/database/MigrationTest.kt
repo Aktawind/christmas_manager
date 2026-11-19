@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 15, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 16, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -379,6 +379,27 @@ class MigrationTest {
         runBlocking {
             assertEquals("READY_MADE", db.adventDao().getAllCalendars().single().kind)
             assertEquals(0, db.traditionDao().getAllTraditions().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 15 vers 16 ajoute les dates qui comptent`() {
+        helper.createDatabase(dbName, 15).use { db ->
+            db.execSQL(
+                "INSERT INTO tradition (id, name, photo_path, category, period, notes, favorite, created_at, updated_at) " +
+                    "VALUES ('t1', 'Lutin', NULL, 'HOME', 'ADVENT', '', 1, 1, 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 16, true, Migrations.MIGRATION_15_16).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals("Lutin", db.traditionDao().getAllTraditions().single().name)
+            assertEquals(0, db.specialDateDao().getAll().size)
         }
         db.close()
     }

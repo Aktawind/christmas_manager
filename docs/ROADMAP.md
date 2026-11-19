@@ -154,6 +154,10 @@ Pas de dates ni de priorités (ADR 0006).
 | T-003 | Programme de chaque Noël : « au programme », « faite ✓ » avec photo souvenir et petit mot ; « faite en 2025, 2026 » | 🧪 |
 | T-004 | Inspirations (films, dessins animés, livres, musiques, sorties, activités) cochées pour chaque Noël | 🧪 |
 | T-005 | Recherche, accueil « Nos traditions », partage « Ranger comme : Inspiration », sauvegarde | 🧪 |
+| T-006 | Trois onglets : Au programme · Nos traditions · Inspirations ; une cinquantaine d'idées | 🧪 |
+| P-020 | Chemin vers Noël : dates qui comptent (Réglages → Le chemin vers Noël) | 🧪 |
+| P-021 | Ma liste et l'onglet Recherche supprimés ; loupe dans Mes Noëls ; Cadeaux → Listes | 🧪 |
+| P-022 | Accueil : carte Ma liste retirée, Cadeaux → onglet Cadeaux, Le fournil → Préparations ; comptes sans lignes vides | 🧪 |
 
 ## v0.9.0 — L'atelier des lutins ✂️
 

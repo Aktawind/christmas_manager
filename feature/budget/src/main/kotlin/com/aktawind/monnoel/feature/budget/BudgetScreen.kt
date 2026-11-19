@@ -183,11 +183,8 @@ private fun SummaryCard(budget: YearBudget, readOnly: Boolean, onEditBudget: () 
             Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 Figure(stringResource(R.string.budget_planned), formatEuro(budget.plannedCents), Modifier.weight(1f))
                 Figure(stringResource(R.string.budget_spent), formatEuro(budget.spentCents), Modifier.weight(1f))
-                Figure(
-                    stringResource(R.string.budget_global),
-                    budget.globalBudgetCents?.let { formatEuro(it) } ?: "—",
-                    Modifier.weight(1f),
-                )
+                // Sans budget global, on n'affiche pas de case « Budget ».
+                budget.globalBudgetCents?.let { Figure(stringResource(R.string.budget_global), formatEuro(it), Modifier.weight(1f)) }
             }
             val global = budget.globalBudgetCents
             if (global != null && global > 0) {
@@ -244,7 +241,8 @@ private fun BreakdownCard(budget: YearBudget) {
             budget.posts.map { BarSegment(it.post.chartColor(), it.plannedCents) },
             description = stringResource(R.string.breakdown_description),
         )
-        budget.posts.forEach { PostRow(it) }
+        // Seuls les postes qui ont des montants apparaissent.
+        budget.posts.filter { it.plannedCents > 0 || it.spentCents > 0 }.forEach { PostRow(it) }
     }
 }
 

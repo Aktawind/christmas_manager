@@ -1,5 +1,6 @@
 package com.aktawind.monnoel.core.domain.countdown
 
+import com.aktawind.monnoel.core.model.SpecialDate
 import java.time.LocalDate
 import java.time.Month
 import java.time.temporal.ChronoUnit
@@ -34,16 +35,35 @@ fun christmasCountdown(today: LocalDate, editionYear: Int): CountdownState {
 }
 
 /** Étapes datées « naturellement » sur le chemin vers Noël (jamais des échéances). */
-enum class PathStepKind { ADVENT_START, CHRISTMAS_EVE, CHRISTMAS }
+enum class PathStepKind { ADVENT_START, CHRISTMAS_EVE, CHRISTMAS, CUSTOM }
 
-data class PathStep(val kind: PathStepKind, val date: LocalDate, val passed: Boolean, val isNext: Boolean)
+data class PathStep(
+    val kind: PathStepKind,
+    val date: LocalDate,
+    val passed: Boolean,
+    val isNext: Boolean,
+    /** Date personnelle : son nom et son emoji. */
+    val label: String? = null,
+    val emoji: String? = null,
+)
 
-fun christmasPath(today: LocalDate, editionYear: Int): List<PathStep> {
-    val dates = listOf(
-        PathStepKind.ADVENT_START to LocalDate.of(editionYear, Month.DECEMBER, 1),
-        PathStepKind.CHRISTMAS_EVE to LocalDate.of(editionYear, Month.DECEMBER, 24),
-        PathStepKind.CHRISTMAS to LocalDate.of(editionYear, Month.DECEMBER, 25),
+/**
+ * Le chemin vers Noël : 1er décembre, 24, 25, et les dates qui comptent pour la famille
+ * (novembre et décembre de l'année du Noël, janvier de l'année suivante), dans l'ordre.
+ */
+fun christmasPath(today: LocalDate, editionYear: Int, specials: List<SpecialDate> = emptyList()): List<PathStep> {
+    val fixed = listOf(
+        PathStep(PathStepKind.ADVENT_START, LocalDate.of(editionYear, Month.DECEMBER, 1), false, false),
+        PathStep(PathStepKind.CHRISTMAS_EVE, LocalDate.of(editionYear, Month.DECEMBER, 24), false, false),
+        PathStep(PathStepKind.CHRISTMAS, LocalDate.of(editionYear, Month.DECEMBER, 25), false, false),
     )
-    val next = dates.firstOrNull { !it.second.isBefore(today) }?.first
-    return dates.map { (kind, date) -> PathStep(kind, date, passed = date.isBefore(today), isNext = kind == next) }
+    val custom = specials.mapNotNull { s ->
+        val year = if (s.month == 1) editionYear + 1 else editionYear
+        runCatching { LocalDate.of(year, s.month, s.day) }.getOrNull()?.let {
+            PathStep(PathStepKind.CUSTOM, it, false, false, s.label, s.emoji)
+        }
+    }
+    val steps = (fixed + custom).sortedBy { it.date }
+    val next = steps.firstOrNull { !it.date.isBefore(today) }
+    return steps.map { it.copy(passed = it.date.isBefore(today), isNext = it === next) }
 }

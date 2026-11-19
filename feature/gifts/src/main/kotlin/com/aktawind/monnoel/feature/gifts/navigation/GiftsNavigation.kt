@@ -3,6 +3,7 @@ package com.aktawind.monnoel.feature.gifts.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.aktawind.monnoel.feature.gifts.GiftsRoute
 import com.aktawind.monnoel.feature.gifts.edit.GiftEditRoute
 import com.aktawind.monnoel.feature.gifts.edit.IdeaEditRoute
@@ -11,7 +12,7 @@ import com.aktawind.monnoel.feature.gifts.person.PersonRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object GiftsDestination
+data class GiftsDestination(val tab: String? = null)
 
 @Serializable
 data class GiftEditDestination(val giftId: String? = null, val personId: String? = null)
@@ -26,7 +27,7 @@ data class PersonDestination(val personId: String)
 data class PersonEditDestination(val personId: String? = null)
 
 fun NavGraphBuilder.giftsGraph(navController: NavController) {
-    composable<GiftsDestination> {
+    composable<GiftsDestination> { entry ->
         GiftsRoute(
             onOpenGift = { navController.navigate(GiftEditDestination(giftId = it)) },
             onNewGift = { navController.navigate(GiftEditDestination()) },
@@ -34,6 +35,7 @@ fun NavGraphBuilder.giftsGraph(navController: NavController) {
             onNewPerson = { navController.navigate(PersonEditDestination()) },
             onOpenIdea = { navController.navigate(IdeaEditDestination(ideaId = it)) },
             onNewIdea = { navController.navigate(IdeaEditDestination()) },
+            requestedTab = entry.toRoute<GiftsDestination>().tab,
         )
     }
     composable<GiftEditDestination> { GiftEditRoute(onDone = { navController.popBackStack() }) }
@@ -54,7 +56,7 @@ fun NavGraphBuilder.giftsGraph(navController: NavController) {
                 navController.popBackStack()
                 if (isNew) navController.navigate(PersonDestination(id))
             },
-            onDeleted = { navController.popBackStack(GiftsDestination, inclusive = false) },
+            onDeleted = { navController.popBackStack<GiftsDestination>(inclusive = false) },
             onCancel = { navController.popBackStack() },
         )
     }

@@ -21,3 +21,9 @@ data class ChristmasEdition(
 }
 
 enum class EditionStatus { ACTIVE, ARCHIVED }
+
+/**
+ * Une date qui compte, ajoutée au chemin vers Noël chaque année (jour et mois seulement),
+ * entre novembre et début janvier.
+ */
+data class SpecialDate(val id: String, val month: Int, val day: Int, val label: String, val emoji: String)

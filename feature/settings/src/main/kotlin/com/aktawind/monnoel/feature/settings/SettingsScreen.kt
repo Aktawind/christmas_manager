@@ -60,7 +60,7 @@ import com.aktawind.monnoel.core.ui.toUiMessage
 fun SettingsRoute(
     onOpenCategories: () -> Unit,
     onOpenRecipeCategories: () -> Unit,
-    onOpenSuggestions: () -> Unit,
+    onOpenPath: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -99,7 +99,7 @@ fun SettingsRoute(
         ) {
             Column(Modifier.widthIn(max = 720.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-                PersonalizeSection(state.theme, viewModel::setTheme, onOpenCategories, onOpenRecipeCategories, onOpenSuggestions)
+                PersonalizeSection(state.theme, viewModel::setTheme, onOpenCategories, onOpenRecipeCategories, onOpenPath)
                 BackupSection(
                     busy = state.busy,
                     onExport = { exportLauncher.launch(viewModel.suggestedExportName()) },
@@ -150,7 +150,7 @@ private fun PersonalizeSection(
     onSelect: (ThemePreference) -> Unit,
     onOpenCategories: () -> Unit,
     onOpenRecipeCategories: () -> Unit,
-    onOpenSuggestions: () -> Unit,
+    onOpenPath: () -> Unit,
 ) {
     val labels = mapOf(
         ThemePreference.SYSTEM to R.string.settings_theme_system,
@@ -177,9 +177,9 @@ private fun PersonalizeSection(
             onClick = onOpenRecipeCategories,
         )
         SettingsLink(
-            title = stringResource(R.string.settings_suggestions),
-            subtitle = stringResource(R.string.settings_suggestions_subtitle),
-            onClick = onOpenSuggestions,
+            title = stringResource(R.string.settings_path),
+            subtitle = stringResource(R.string.settings_path_subtitle),
+            onClick = onOpenPath,
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.aktawind.monnoel.feature.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,6 +29,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,10 +75,11 @@ import java.util.Locale
 fun HomeRoute(
     onOpenGifts: () -> Unit,
     onOpenAdvent: () -> Unit,
-    onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
+    onOpenPreparations: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenTraditions: () -> Unit,
+    onEditPath: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -93,10 +98,11 @@ fun HomeRoute(
             state,
             onOpenGifts = onOpenGifts,
             onOpenAdvent = onOpenAdvent,
-            onOpenTasks = onOpenTasks,
             onOpenCooking = onOpenCooking,
+            onOpenPreparations = onOpenPreparations,
             onOpenBudget = onOpenBudget,
             onOpenTraditions = onOpenTraditions,
+            onEditPath = onEditPath,
             onQuickIdea = { quickIdea = true },
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
@@ -119,10 +125,11 @@ internal fun HomeScreen(
     state: HomeUiState,
     onOpenGifts: () -> Unit = {},
     onOpenAdvent: () -> Unit = {},
-    onOpenTasks: () -> Unit = {},
     onOpenCooking: () -> Unit = {},
+    onOpenPreparations: () -> Unit = {},
     onOpenBudget: () -> Unit = {},
     onOpenTraditions: () -> Unit = {},
+    onEditPath: () -> Unit = {},
     onQuickIdea: () -> Unit = {},
 ) {
     when (state) {
@@ -133,10 +140,11 @@ internal fun HomeScreen(
             state,
             onOpenGifts,
             onOpenAdvent,
-            onOpenTasks,
             onOpenCooking,
+            onOpenPreparations,
             onOpenBudget,
             onOpenTraditions,
+            onEditPath,
             onQuickIdea,
         )
     }
@@ -147,10 +155,11 @@ private fun HomeContent(
     state: HomeUiState.Ready,
     onOpenGifts: () -> Unit,
     onOpenAdvent: () -> Unit,
-    onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
+    onOpenPreparations: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenTraditions: () -> Unit,
+    onEditPath: () -> Unit,
     onQuickIdea: () -> Unit,
 ) {
     LazyVerticalGrid(
@@ -162,12 +171,11 @@ private fun HomeContent(
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) { CountdownCard(state) }
         item(span = { GridItemSpan(maxLineSpan) }) { DailyMessage(state.dayOfYear) }
-        item(span = { GridItemSpan(maxLineSpan) }) { ChristmasPathCard(state.path) }
-        item(span = { GridItemSpan(maxLineSpan) }) { TasksSummaryCard(state, onOpenTasks) }
+        item(span = { GridItemSpan(maxLineSpan) }) { ChristmasPathCard(state.path, onEditPath) }
         item(span = { GridItemSpan(maxLineSpan) }) { GiftsSummaryCard(state.gifts, onOpenGifts, onQuickIdea) }
         item(span = { GridItemSpan(maxLineSpan) }) { AdventSummaryCard(state.calendars, onOpenAdvent) }
         item(span = { GridItemSpan(maxLineSpan) }) { TableSummaryCard(state.table, onOpenCooking) }
-        item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenCooking) }
+        item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenPreparations) }
         state.budget?.let { b -> item(span = { GridItemSpan(maxLineSpan) }) { BudgetSummaryCard(b, onOpenBudget) } }
         item(span = { GridItemSpan(maxLineSpan) }) { TraditionsSummaryCard(state.traditions, onOpenTraditions) }
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -292,21 +300,29 @@ private fun DailyMessage(dayOfYear: Int) {
 
 /** « Le chemin vers Noël » : les étapes datées par nature, présentées comme un chemin, jamais comme des retards. */
 @Composable
-private fun ChristmasPathCard(path: List<PathStep>) {
+private fun ChristmasPathCard(path: List<PathStep>, onEdit: () -> Unit) {
     if (path.isEmpty()) return
     val gold = LocalMonNoelColors.current.gold
     val secondary = LocalMonNoelColors.current.secondaryText
     val dateFormat = remember { DateTimeFormatter.ofPattern("d MMMM", Locale.FRENCH) }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            stringResource(R.string.home_path_title),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.semantics { heading() },
-        )
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.home_path_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f).semantics { heading() },
+            )
+            TextButton(onClick = onEdit) { Text(stringResource(R.string.home_path_edit)) }
+        }
+        // Au-delà de 5 étapes, le chemin défile horizontalement pour rester lisible.
+        val scroll = path.size > 5
+        Row(
+            Modifier.fillMaxWidth().then(if (scroll) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
+            verticalAlignment = Alignment.Top,
+        ) {
             path.forEachIndexed { index, step ->
                 Column(
-                    Modifier.weight(1f),
+                    if (scroll) Modifier.width(150.dp) else Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -335,12 +351,12 @@ private fun ChristmasPathCard(path: List<PathStep>) {
                         )
                     }
                     Text(
-                        stepEmoji(step.kind) + "  " + dateFormat.format(step.date),
+                        (step.emoji ?: stepEmoji(step.kind)) + "  " + dateFormat.format(step.date),
                         style = MaterialTheme.typography.titleSmall,
                         color = if (step.isNext) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        stringResource(stepLabel(step.kind)),
+                        step.label ?: stringResource(stepLabel(step.kind)),
                         style = MaterialTheme.typography.bodySmall,
                         color = secondary,
                         textAlign = TextAlign.Center,
@@ -355,50 +371,14 @@ private fun stepEmoji(kind: PathStepKind) = when (kind) {
     PathStepKind.ADVENT_START -> "🗓️"
     PathStepKind.CHRISTMAS_EVE -> "🌟"
     PathStepKind.CHRISTMAS -> "🎄"
+    PathStepKind.CUSTOM -> "⭐"
 }
 
 private fun stepLabel(kind: PathStepKind) = when (kind) {
     PathStepKind.ADVENT_START -> R.string.home_path_advent
     PathStepKind.CHRISTMAS_EVE -> R.string.home_path_eve
     PathStepKind.CHRISTMAS -> R.string.home_path_christmas
-}
-
-@Composable
-private fun TasksSummaryCard(state: HomeUiState.Ready, onOpen: () -> Unit) {
-    val secondary = LocalMonNoelColors.current.secondaryText
-    Card(
-        onClick = onOpen,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                "📝  " + stringResource(R.string.home_tasks_title),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.semantics {
-                    heading()
-                },
-            )
-            val gifts = state.gifts
-            val readyBoxes = state.calendars.sumOf { it.ready }
-            val totalBoxes = state.calendars.sumOf { it.boxCount }
-            val progress = listOfNotNull(
-                gifts.total.takeIf { it > 0 }?.let { stringResource(R.string.home_progress_gifts, gifts.given + gifts.wrapped, it) },
-                totalBoxes.takeIf { it > 0 }?.let { stringResource(R.string.home_progress_boxes, readyBoxes, it) },
-                state.doneTasks.takeIf { it > 0 }?.let { stringResource(R.string.home_progress_tasks, it) },
-            ).joinToString(" · ")
-            if (progress.isNotBlank()) Text(progress, style = MaterialTheme.typography.bodyMedium)
-            if (state.openTasks.isEmpty()) {
-                Text(stringResource(R.string.home_tasks_none), color = secondary)
-            } else {
-                state.openTasks.take(4).forEach { Text("○  $it", style = MaterialTheme.typography.bodyLarge, maxLines = 1) }
-                if (state.openTasks.size > 4) Text(stringResource(R.string.home_tasks_more, state.openTasks.size - 4), color = secondary)
-            }
-            if (state.suggestionCount > 0) {
-                Text(stringResource(R.string.home_tasks_suggestions, state.suggestionCount), color = MaterialTheme.colorScheme.primary)
-            }
-        }
-    }
+    PathStepKind.CUSTOM -> R.string.home_path_title
 }
 
 @Composable

@@ -6,18 +6,23 @@ import com.aktawind.monnoel.core.common.AppResult
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.gifts.ChangeGiftStatusUseCase
 import com.aktawind.monnoel.core.domain.gifts.GiftBudgetSummary
+import com.aktawind.monnoel.core.domain.gifts.IdeaRequestRepository
 import com.aktawind.monnoel.core.domain.gifts.OfferIdeaUseCase
+import com.aktawind.monnoel.core.domain.gifts.SetIdeaRequestDoneUseCase
 import com.aktawind.monnoel.core.domain.gifts.computeGiftBudget
 import com.aktawind.monnoel.core.domain.repository.GiftCategoryRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.domain.tasks.TaskRepository
 import com.aktawind.monnoel.core.model.ChristmasEdition
 import com.aktawind.monnoel.core.model.GiftCategory
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.GiftStatus
+import com.aktawind.monnoel.core.model.IdeaRequest
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.PlannedGift
+import com.aktawind.monnoel.core.model.TaskStatus
 import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,6 +44,8 @@ data class GiftsUiState(
     val ideas: List<GiftIdea> = emptyList(),
     val categories: List<GiftCategory> = emptyList(),
     val budget: GiftBudgetSummary = computeGiftBudget(emptyList(), emptyList()),
+    /** Listes au Père Noël du Noël affiché, avec leur avancement. */
+    val requests: List<Pair<IdeaRequest, Boolean>> = emptyList(),
     val message: UiMessage? = null,
 ) {
     val readOnly: Boolean get() = edition?.isReadOnly == true
@@ -48,6 +55,7 @@ private data class EditionGifts(
     val edition: ChristmasEdition?,
     val gifts: List<PlannedGift>,
     val budget: GiftBudgetSummary,
+    val requests: List<Pair<IdeaRequest, Boolean>> = emptyList(),
 )
 
 @HiltViewModel
@@ -59,6 +67,9 @@ class GiftsViewModel @Inject constructor(
     private val gifts: PlannedGiftRepository,
     private val changeStatus: ChangeGiftStatusUseCase,
     private val offerIdea: OfferIdeaUseCase,
+    private val ideaRequests: IdeaRequestRepository,
+    private val tasks: TaskRepository,
+    private val setRequestDone: SetIdeaRequestDoneUseCase,
 ) : ViewModel() {
     private val message = MutableStateFlow<UiMessage?>(null)
 
@@ -68,8 +79,14 @@ class GiftsViewModel @Inject constructor(
                 ?: return@flatMapLatest flowOf(
                     EditionGifts(null, emptyList(), computeGiftBudget(emptyList(), emptyList())),
                 )
-        combine(gifts.observeGifts(edition.id), gifts.observeBudgets(edition.id)) { list, budgets ->
-            EditionGifts(edition, list, computeGiftBudget(list, budgets))
+        combine(
+            gifts.observeGifts(edition.id),
+            gifts.observeBudgets(edition.id),
+            ideaRequests.observeRequests(edition.id),
+            tasks.observeTasks(edition.id),
+        ) { list, budgets, requests, taskList ->
+            val done = taskList.associate { it.id to (it.status == TaskStatus.DONE) }
+            EditionGifts(edition, list, computeGiftBudget(list, budgets), requests.map { it to (it.taskId?.let(done::get) ?: false) })
         }
     }
 
@@ -88,6 +105,7 @@ class GiftsViewModel @Inject constructor(
             ideas = ideaList,
             categories = categoryList,
             budget = eg.budget,
+            requests = eg.requests,
             message = msg,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GiftsUiState())
@@ -102,6 +120,10 @@ class GiftsViewModel @Inject constructor(
             is AppResult.Success -> UiMessage(R.string.gifts_offered, listOf(result.value.title))
             is AppResult.Failure -> result.error.toUiMessage()
         }
+    }
+
+    fun setRequestDone(id: String, done: Boolean) = viewModelScope.launch {
+        (setRequestDone.invoke(id, done) as? AppResult.Failure)?.let { message.value = it.error.toUiMessage() }
     }
 
     fun messageShown() {

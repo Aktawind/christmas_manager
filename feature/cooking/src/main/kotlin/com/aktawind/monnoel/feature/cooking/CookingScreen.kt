@@ -90,10 +90,12 @@ fun CookingRoute(
     onNewProduction: () -> Unit,
     onOpenMeal: (String) -> Unit,
     onNewMeal: () -> Unit,
+    requestedTab: String? = null,
     viewModel: CookingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableStateOf(CookingTab.MEALS) }
+    LaunchedEffect(requestedTab) { CookingTab.entries.firstOrNull { it.name == requestedTab }?.let { tab = it } }
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     LaunchedEffect(state.message) {

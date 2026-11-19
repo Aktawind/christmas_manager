@@ -26,6 +26,7 @@ import com.aktawind.monnoel.core.backup.format.PlannedGiftDto
 import com.aktawind.monnoel.core.backup.format.ProductionDto
 import com.aktawind.monnoel.core.backup.format.RecipeCategoryDto
 import com.aktawind.monnoel.core.backup.format.RecipeDto
+import com.aktawind.monnoel.core.backup.format.SpecialDateDto
 import com.aktawind.monnoel.core.backup.format.TaskDto
 import com.aktawind.monnoel.core.backup.format.TraditionDto
 import com.aktawind.monnoel.core.backup.format.TraditionPersonDto
@@ -56,6 +57,7 @@ import com.aktawind.monnoel.core.database.entity.PlannedGiftEntity
 import com.aktawind.monnoel.core.database.entity.ProductionEntity
 import com.aktawind.monnoel.core.database.entity.RecipeCategoryEntity
 import com.aktawind.monnoel.core.database.entity.RecipeEntity
+import com.aktawind.monnoel.core.database.entity.SpecialDateEntity
 import com.aktawind.monnoel.core.database.entity.TaskEntity
 import com.aktawind.monnoel.core.database.entity.TraditionEntity
 import com.aktawind.monnoel.core.database.entity.TraditionPersonEntity
@@ -149,6 +151,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                 InspirationDto(it.id, it.kind, it.title, it.photoPath, it.url, it.notes, it.createdAt, it.updatedAt)
             },
             inspirationsDone = db.traditionDao().getAllDone().map { InspirationDoneDto(it.editionId, it.inspirationId) },
+            specialDates = db.specialDateDao().getAll().map { SpecialDateDto(it.id, it.month, it.day, it.label, it.emoji) },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -164,6 +167,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
         db.withTransaction {
             // Suppression des enfants vers les parents.
             db.expenseDao().deleteAll()
+            db.specialDateDao().deleteAll()
             db.traditionDao().deleteAllDone()
             db.traditionDao().deleteAllInspirations()
             db.traditionDao().deleteAllYears()
@@ -223,6 +227,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                 },
             )
             db.traditionDao().insertDone(data.inspirationsDone.map { InspirationDoneEntity(it.editionId, it.inspirationId) })
+            db.specialDateDao().insertAll(data.specialDates.map { SpecialDateEntity(it.id, it.month, it.day, it.label, it.emoji) })
             db.ideaRequestDao().insertAll(
                 data.ideaRequests.map {
                     IdeaRequestEntity(it.id, it.editionId, it.kind, it.personId, it.otherPersonId, it.otherName, it.taskId, it.createdAt)

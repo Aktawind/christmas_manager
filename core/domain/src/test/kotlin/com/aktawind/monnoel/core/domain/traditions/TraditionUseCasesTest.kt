@@ -104,8 +104,10 @@ class TraditionUseCasesTest {
     }
 
     @Test
-    fun `une vingtaine d'idees a piocher, sans doublon avec le catalogue`() = runTest {
-        assertTrue(traditionIdeas.size >= 20)
+    fun `une cinquantaine d'idees a piocher, sans doublon avec le catalogue`() = runTest {
+        assertTrue(traditionIdeas.size >= 50)
+        // Pas deux fois la même idée.
+        assertEquals(traditionIdeas.size, traditionIdeas.map { it.name }.toSet().size)
         save(null, TraditionDraft("le lutin FARCEUR"))
         val available = availableTraditionIdeas(repo.traditions.value)
         assertTrue(available.none { it.name == "Le lutin farceur" })

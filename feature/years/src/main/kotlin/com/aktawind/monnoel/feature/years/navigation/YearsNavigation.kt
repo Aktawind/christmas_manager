@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object YearsDestination
 
-fun NavGraphBuilder.yearsScreen(onYearSelected: () -> Unit) {
-    composable<YearsDestination> { YearsRoute(onYearSelected = onYearSelected) }
+fun NavGraphBuilder.yearsScreen(onYearSelected: () -> Unit, onSearch: () -> Unit) {
+    composable<YearsDestination> { YearsRoute(onYearSelected = onYearSelected, onSearch = onSearch) }
 }

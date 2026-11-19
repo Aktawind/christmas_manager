@@ -28,4 +28,5 @@
     <string name="welcome_message">Ton carnet de Noël : idées, cadeaux, calendriers de l’Avent, recettes, traditions et souvenirs, réunis au même endroit, année après année. Sans pression, juste la magie.</string>
     <string name="welcome_start">Commencer mon Noël %1$d</string>
     <string name="welcome_restore">Restaurer une sauvegarde</string>
+    <string name="years_search">Rechercher dans tous mes Noëls</string>
 </resources>

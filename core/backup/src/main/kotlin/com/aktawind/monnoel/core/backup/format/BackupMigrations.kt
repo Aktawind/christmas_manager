@@ -43,7 +43,7 @@ internal object BackupMigrations {
         8 to { json -> json },
         // v8 -> v9 (v0.7.0) : idées soufflées et demandes d'idées, absentes des anciennes sauvegardes.
         9 to { json -> json },
-        // v9 -> v10 (v0.8.0) : traditions et inspirations, absentes des anciennes sauvegardes.
+        // v9 -> v10 (v0.8.0) : traditions, inspirations et dates qui comptent, absentes des anciennes sauvegardes.
         10 to { json -> json },
     )
 

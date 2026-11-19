@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.aktawind.monnoel.feature.cooking.CookingRoute
 import com.aktawind.monnoel.feature.cooking.meal.DishEditRoute
 import com.aktawind.monnoel.feature.cooking.meal.MealEditRoute
@@ -12,8 +13,9 @@ import com.aktawind.monnoel.feature.cooking.production.ProductionEditRoute
 import com.aktawind.monnoel.feature.cooking.recipe.RecipeEditRoute
 import kotlinx.serialization.Serializable
 
+/** [tab] : onglet à ouvrir (MEALS, PRODUCTIONS, RECIPES), depuis l'accueil. */
 @Serializable
-data object CookingDestination
+data class CookingDestination(val tab: String? = null)
 
 @Serializable
 data class RecipeEditDestination(val recipeId: String? = null)
@@ -32,7 +34,7 @@ data class MealEditDestination(val mealId: String? = null)
 data class DishEditDestination(val mealId: String, val dishId: String? = null, val course: String? = null)
 
 fun NavGraphBuilder.cookingGraph(navController: NavController) {
-    composable<CookingDestination> {
+    composable<CookingDestination> { entry ->
         CookingRoute(
             onOpenRecipe = { navController.navigate(RecipeEditDestination(it)) },
             onNewRecipe = { navController.navigate(RecipeEditDestination()) },
@@ -40,6 +42,7 @@ fun NavGraphBuilder.cookingGraph(navController: NavController) {
             onNewProduction = { navController.navigate(ProductionEditDestination()) },
             onOpenMeal = { navController.navigate(MealDestination(it)) },
             onNewMeal = { navController.navigate(MealEditDestination()) },
+            requestedTab = entry.toRoute<CookingDestination>().tab,
         )
     }
     composable<RecipeEditDestination> {

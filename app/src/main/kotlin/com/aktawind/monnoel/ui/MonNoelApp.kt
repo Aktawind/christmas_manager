@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -63,12 +61,9 @@ import com.aktawind.monnoel.feature.home.navigation.homeScreen
 import com.aktawind.monnoel.feature.search.navigation.SearchDestination
 import com.aktawind.monnoel.feature.search.navigation.searchScreen
 import com.aktawind.monnoel.feature.settings.navigation.CategoriesDestination
+import com.aktawind.monnoel.feature.settings.navigation.PathDatesDestination
 import com.aktawind.monnoel.feature.settings.navigation.SettingsDestination
-import com.aktawind.monnoel.feature.settings.navigation.SuggestionsSettingsDestination
 import com.aktawind.monnoel.feature.settings.navigation.settingsScreen
-import com.aktawind.monnoel.feature.tasks.navigation.TaskEditDestination
-import com.aktawind.monnoel.feature.tasks.navigation.TasksDestination
-import com.aktawind.monnoel.feature.tasks.navigation.tasksGraph
 import com.aktawind.monnoel.feature.traditions.navigation.TraditionEditDestination
 import com.aktawind.monnoel.feature.traditions.navigation.TraditionsDestination
 import com.aktawind.monnoel.feature.traditions.navigation.traditionsGraph
@@ -84,9 +79,8 @@ private enum class TopLevelDestination(
     @StringRes val label: Int,
 ) {
     HOME(HomeDestination, listOf(HomeDestination::class), Icons.Filled.Home, R.string.nav_home),
-    SEARCH(SearchDestination, listOf(SearchDestination::class), Icons.Filled.Search, R.string.nav_search),
     GIFTS(
-        GiftsDestination,
+        GiftsDestination(),
         listOf(
             GiftsDestination::class,
             GiftEditDestination::class,
@@ -104,7 +98,7 @@ private enum class TopLevelDestination(
         R.string.nav_advent,
     ),
     COOKING(
-        CookingDestination,
+        CookingDestination(),
         listOf(
             CookingDestination::class,
             RecipeEditDestination::class,
@@ -116,12 +110,6 @@ private enum class TopLevelDestination(
         MonNoelIcons.Cupcake,
         R.string.nav_cooking,
     ),
-    TASKS(
-        TasksDestination,
-        listOf(TasksDestination::class, TaskEditDestination::class),
-        Icons.AutoMirrored.Filled.List,
-        R.string.nav_tasks,
-    ),
     BUDGET(BudgetDestination(), listOf(BudgetDestination::class), MonNoelIcons.Wallet, R.string.nav_budget),
     TRADITIONS(
         TraditionsDestination(),
@@ -129,10 +117,10 @@ private enum class TopLevelDestination(
         Icons.Filled.Favorite,
         R.string.nav_traditions,
     ),
-    YEARS(YearsDestination, listOf(YearsDestination::class), Icons.Filled.Star, R.string.nav_years),
+    YEARS(YearsDestination, listOf(YearsDestination::class, SearchDestination::class), Icons.Filled.Star, R.string.nav_years),
     SETTINGS(
         SettingsDestination,
-        listOf(SettingsDestination::class, CategoriesDestination::class, SuggestionsSettingsDestination::class),
+        listOf(SettingsDestination::class, CategoriesDestination::class, PathDatesDestination::class),
         Icons.Filled.Settings,
         R.string.nav_settings,
     ),
@@ -160,6 +148,14 @@ fun MonNoelApp(hasEditions: Boolean) {
         }
     }
 
+    // Depuis l'accueil : ouvre un onglet précis (ex. Cadeaux → Cadeaux, Cuisine → Préparations).
+    fun openTab(route: Any) {
+        navController.navigate(route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+        }
+    }
+
     val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
     // Marges système (barre d'état en haut, barre de navigation Android en bas) : le contenu
     // ne doit jamais passer dessous. Avec la barre du bas (téléphone), c'est elle qui gère le bas.
@@ -177,7 +173,7 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.GIFT -> GiftEditDestination(giftId = id)
             LinkType.CALENDAR -> CalendarDestination(id)
             LinkType.BOX -> BoxEditDestination(id)
-            LinkType.TASK -> TaskEditDestination(id)
+            LinkType.TASK -> HomeDestination
             LinkType.RECIPE -> RecipeEditDestination(recipeId = id)
             LinkType.PRODUCTION -> ProductionEditDestination(productionId = id)
             LinkType.MEAL -> MealDestination(id)
@@ -206,21 +202,23 @@ fun MonNoelApp(hasEditions: Boolean) {
         Surface(Modifier.windowInsetsPadding(contentInsets), color = MaterialTheme.colorScheme.background) {
             NavHost(navController = navController, startDestination = HomeDestination) {
                 homeScreen(
-                    onOpenGifts = { navigate(TopLevelDestination.GIFTS) },
+                    onOpenGifts = { openTab(GiftsDestination(tab = "GIFTS")) },
                     onOpenAdvent = { navigate(TopLevelDestination.ADVENT) },
-                    onOpenTasks = { navigate(TopLevelDestination.TASKS) },
-                    onOpenCooking = { navigate(TopLevelDestination.COOKING) },
+                    onOpenCooking = { openTab(CookingDestination(tab = "MEALS")) },
+                    onOpenPreparations = { openTab(CookingDestination(tab = "PRODUCTIONS")) },
                     onOpenBudget = { navigate(TopLevelDestination.BUDGET) },
                     onOpenTraditions = { navigate(TopLevelDestination.TRADITIONS) },
+                    onEditPath = { navController.navigate(PathDatesDestination) },
                 )
-                searchScreen(onOpen = openLink)
-                tasksGraph(navController, onOpenLink = openLink)
+                searchScreen(onOpen = openLink, onBack = { navController.popBackStack() })
                 giftsGraph(navController)
                 adventGraph(navController)
                 cookingGraph(navController)
                 budgetScreen()
                 traditionsGraph(navController)
-                yearsScreen(onYearSelected = { navigate(TopLevelDestination.HOME) })
+                yearsScreen(onYearSelected = {
+                    navigate(TopLevelDestination.HOME)
+                }, onSearch = { navController.navigate(SearchDestination) })
                 settingsScreen(navController)
             }
         }

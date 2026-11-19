@@ -11,19 +11,21 @@ data object HomeDestination
 fun NavGraphBuilder.homeScreen(
     onOpenGifts: () -> Unit,
     onOpenAdvent: () -> Unit,
-    onOpenTasks: () -> Unit,
     onOpenCooking: () -> Unit,
+    onOpenPreparations: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenTraditions: () -> Unit,
+    onEditPath: () -> Unit,
 ) {
     composable<HomeDestination> {
         HomeRoute(
             onOpenGifts = onOpenGifts,
             onOpenAdvent = onOpenAdvent,
-            onOpenTasks = onOpenTasks,
             onOpenCooking = onOpenCooking,
+            onOpenPreparations = onOpenPreparations,
             onOpenBudget = onOpenBudget,
             onOpenTraditions = onOpenTraditions,
+            onEditPath = onEditPath,
         )
     }
 }
