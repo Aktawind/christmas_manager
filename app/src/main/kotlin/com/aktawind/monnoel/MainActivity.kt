@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
                             onDismiss = viewModel::dismissSharedIdea,
                             onSaveRecipe = viewModel::saveSharedRecipe,
                             onSaveInspiration = viewModel::saveSharedInspiration,
+                            onSaveDecor = viewModel::saveSharedDecor,
                         )
                     }
                 }
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity() {
                         val text = when (it) {
                             SharedSaved.RECIPE -> R.string.share_recipe_saved
                             SharedSaved.INSPIRATION -> R.string.share_inspiration_saved
+                            SharedSaved.DECOR -> R.string.share_decor_saved
                             SharedSaved.IDEA -> R.string.share_saved
                         }
                         Toast.makeText(this@MainActivity, text, Toast.LENGTH_SHORT).show()

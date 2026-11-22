@@ -15,6 +15,7 @@ fun NavGraphBuilder.homeScreen(
     onOpenPreparations: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenTraditions: () -> Unit,
+    onOpenCrafts: () -> Unit,
     onEditPath: () -> Unit,
 ) {
     composable<HomeDestination> {
@@ -25,6 +26,7 @@ fun NavGraphBuilder.homeScreen(
             onOpenPreparations = onOpenPreparations,
             onOpenBudget = onOpenBudget,
             onOpenTraditions = onOpenTraditions,
+            onOpenCrafts = onOpenCrafts,
             onEditPath = onEditPath,
         )
     }

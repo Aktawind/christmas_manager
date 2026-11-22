@@ -26,7 +26,23 @@ enum class TaskStatus { TODO, IN_PROGRESS, DONE, CANCELLED }
 
 enum class TaskModule { GIFTS, ADVENT, COOKING, MEALS, HOME, OTHER }
 
-enum class LinkType { PERSON, IDEA, GIFT, CALENDAR, BOX, TASK, RECIPE, PRODUCTION, MEAL, EXPENSE, WHISPER, TRADITION, INSPIRATION }
+enum class LinkType {
+    PERSON,
+    IDEA,
+    GIFT,
+    CALENDAR,
+    BOX,
+    TASK,
+    RECIPE,
+    PRODUCTION,
+    MEAL,
+    EXPENSE,
+    WHISPER,
+    TRADITION,
+    INSPIRATION,
+    CRAFT,
+    DECOR,
+}
 
 /** Types de suggestions automatiques, activables un par un dans les réglages. */
 enum class SuggestionKind {

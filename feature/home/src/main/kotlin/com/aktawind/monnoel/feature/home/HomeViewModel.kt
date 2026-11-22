@@ -21,9 +21,11 @@ import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.GiftIdeaRepository
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.domain.traditions.CraftRepository
 import com.aktawind.monnoel.core.domain.traditions.TraditionRepository
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.BoxStatus
+import com.aktawind.monnoel.core.model.CraftStatus
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.Meal
 import com.aktawind.monnoel.core.model.Person
@@ -61,6 +63,7 @@ sealed interface HomeUiState {
         val table: TableSummary = TableSummary(),
         val budget: YearBudget? = null,
         val traditions: TraditionsSummary = TraditionsSummary(),
+        val crafts: CraftsSummary = CraftsSummary(),
         val path: List<PathStep> = emptyList(),
         val message: UiMessage? = null,
     ) : HomeUiState
@@ -82,6 +85,9 @@ data class CookingSummary(val total: Int = 0, val done: Int = 0, val inProgress:
 
 /** Le programme des traditions de l'année : faites, au programme, et les prochaines. */
 data class TraditionsSummary(val planned: Int = 0, val done: Int = 0, val next: List<String> = emptyList())
+
+/** L'atelier de l'année : bricolages au programme, terminés, en cours, et les prochains. */
+data class CraftsSummary(val planned: Int = 0, val done: Int = 0, val inProgress: Int = 0, val next: List<String> = emptyList())
 
 /** Les repas de l'année : le prochain, avec ses convives et son menu. */
 data class TableSummary(val total: Int = 0, val next: Meal? = null, val nextDishes: Int = 0, val toOrder: Int = 0)
@@ -105,6 +111,7 @@ private data class Kitchen(
     val table: TableSummary,
     val budget: YearBudget?,
     val traditions: TraditionsSummary,
+    val crafts: CraftsSummary,
 )
 
 @HiltViewModel
@@ -121,6 +128,7 @@ class HomeViewModel @Inject constructor(
     meals: MealRepository,
     observeBudgets: ObserveBudgetsUseCase,
     traditions: TraditionRepository,
+    crafts: CraftRepository,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
         personRepository.observePersons().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -193,14 +201,30 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private val editionCrafts = observeEditions().flatMapLatest { state ->
+        val edition = state.current ?: return@flatMapLatest flowOf(CraftsSummary())
+        combine(crafts.observeCrafts(), crafts.observeYears()) { list, years ->
+            val names = list.associate { it.id to it.title }
+            val own = years.filter { it.editionId == edition.id }
+            CraftsSummary(
+                planned = own.size,
+                done = own.count { it.status == CraftStatus.DONE },
+                inProgress = own.count { it.status == CraftStatus.IN_PROGRESS },
+                next = own.filter { it.status != CraftStatus.DONE }
+                    .sortedByDescending { it.status.ordinal }
+                    .mapNotNull { names[it.craftId] },
+            )
+        }
+    }
+
     private val editionAdventAndCooking = combine(
         editionCalendars,
         editionCooking,
         editionTable,
         observeBudgets(),
-        editionTraditions,
-    ) { calendars, summary, table, budgets, tradition ->
-        Kitchen(calendars, summary, table, budgets.current, tradition)
+        combine(editionTraditions, editionCrafts) { t, c -> t to c },
+    ) { calendars, summary, table, budgets, (tradition, craft) ->
+        Kitchen(calendars, summary, table, budgets.current, tradition, craft)
     }
 
     val uiState: StateFlow<HomeUiState> = combine(
@@ -212,7 +236,7 @@ class HomeViewModel @Inject constructor(
     ) {
             (edition, list),
             ideaList,
-            (calendars, cookingSummary, tableSummary, yearBudget, traditionSummary),
+            (calendars, cookingSummary, tableSummary, yearBudget, traditionSummary, craftSummary),
             specials,
             msg,
         ->
@@ -238,6 +262,7 @@ class HomeViewModel @Inject constructor(
             table = tableSummary,
             budget = yearBudget,
             traditions = traditionSummary,
+            crafts = craftSummary,
             path = christmasPath(today, edition.year, specials),
             message = msg,
         )

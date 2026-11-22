@@ -18,4 +18,6 @@
     <string name="search_whispers">Idées soufflées</string>
     <string name="search_traditions">Traditions</string>
     <string name="search_inspirations">Inspirations</string>
+    <string name="search_crafts">Bricolages</string>
+    <string name="search_decor">Décoration</string>
 </resources>

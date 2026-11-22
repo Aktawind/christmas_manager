@@ -33,11 +33,16 @@ import com.aktawind.monnoel.core.domain.gifts.WhisperDraft
 import com.aktawind.monnoel.core.domain.meals.DishDraft
 import com.aktawind.monnoel.core.domain.meals.MealDraft
 import com.aktawind.monnoel.core.domain.tasks.TaskDraft
+import com.aktawind.monnoel.core.domain.traditions.CraftDraft
+import com.aktawind.monnoel.core.domain.traditions.DecorDraft
 import com.aktawind.monnoel.core.domain.traditions.InspirationDraft
 import com.aktawind.monnoel.core.domain.traditions.TraditionDraft
 import com.aktawind.monnoel.core.model.BoxStatus
 import com.aktawind.monnoel.core.model.CalendarKind
 import com.aktawind.monnoel.core.model.CourseType
+import com.aktawind.monnoel.core.model.CraftCategory
+import com.aktawind.monnoel.core.model.CraftStatus
+import com.aktawind.monnoel.core.model.DecorPlace
 import com.aktawind.monnoel.core.model.ExpenseCategory
 import com.aktawind.monnoel.core.model.GiftStatus
 import com.aktawind.monnoel.core.model.IdeaRequestKind
@@ -191,9 +196,38 @@ class ScreenshotTool {
         data.saveInspiration()(null, InspirationDraft("Le Grinch", InspirationKind.CARTOON))
         data.saveInspiration()(null, InspirationDraft("Patinoire de Noël", InspirationKind.OUTING))
         data.setInspirationDone()(edition.id, film.id, true)
+        seedWorkshop(data, edition.id, past.id)
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
         data.saveTask()(null, edition.id, TaskDraft("Commander le sapin", module = TaskModule.HOME, status = TaskStatus.DONE))
+    }
+
+    private suspend fun seedWorkshop(data: TestDataEntryPoint, editionId: String, pastId: String) {
+        suspend fun craft(title: String, category: CraftCategory, vararg supplies: Pair<String, Long?>): String {
+            val craft = (data.saveCraft()(null, CraftDraft(title, category)) as AppResult.Success).value
+            supplies.forEach { (name, price) -> data.saveCraftSupply()(null, craft.id, name, price) }
+            return craft.id
+        }
+        val couronne = craft(
+            "Couronne de porte en sapin",
+            CraftCategory.DECORATION,
+            "Couronne en paille" to 690,
+            "Ruban velours" to 450,
+            "Fil de fer" to null,
+        )
+        val bougies = craft("Bougies parfumées à offrir", CraftCategory.HANDMADE_GIFT, "Cire de soja" to 1_290, "Mèches" to 390)
+        val flocons = craft("Flocons en papier", CraftCategory.KIDS, "Papier blanc" to null)
+        craft("Étiquettes cadeaux", CraftCategory.WRAPPING, "Papier kraft" to 350)
+        data.setCraftStatus()(editionId, couronne, CraftStatus.IN_PROGRESS)
+        data.setCraftStatus()(editionId, bougies, CraftStatus.PLANNED)
+        data.setCraftStatus()(editionId, flocons, CraftStatus.DONE)
+        data.setCraftStatus()(pastId, flocons, CraftStatus.DONE)
+        val firstSupply = data.saveCraftSupply()(null, couronne, "Pommes de pin", 0) as AppResult.Success
+        data.setCraftSupplyBought()(editionId, firstSupply.value.id, true)
+        data.saveDecor()(null, DecorDraft("Sapin blanc et doré", DecorPlace.TREE, favorite = true, comment = "Boules dorées, ruban crème"))
+        data.saveDecor()(null, DecorDraft("Table nature", DecorPlace.TABLE, comment = "Rondins, eucalyptus et bougies"))
+        data.saveDecor()(null, DecorDraft("Couronne d'entrée", DecorPlace.ENTRANCE))
+        data.saveDecor()(null, DecorDraft("Guirlande de fenêtre", DecorPlace.WINDOWS, favorite = true))
     }
 
     private suspend fun seedCooking(data: TestDataEntryPoint, editionId: String, family: Set<String>) {
@@ -400,6 +434,21 @@ class ScreenshotTool {
         waitText("Période")
         shot("44-tradition-edit")
         compose.onNodeWithContentDescription("Retour").performClick()
+        click("Bricolages")
+        waitText("Couronne de porte en sapin")
+        shot("45-crafts")
+        compose.onAllNodesWithText("Couronne de porte en sapin").onLast().performTouchInput {
+            click(androidx.compose.ui.geometry.Offset(width / 2f, 6f))
+        }
+        waitText("Ruban velours")
+        shot("46-craft-edit")
+        compose.onNodeWithContentDescription("Retour").performClick()
+        click("Décoration")
+        waitText("Sapin blanc et doré")
+        shot("47-decor")
+        click("Budget")
+        waitText("Répartition du prévu")
+        shot("48-budget-atelier")
         click("Réglages")
         waitText("Personnaliser")
         click("Catégories de recettes")

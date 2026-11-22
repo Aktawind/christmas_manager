@@ -166,17 +166,11 @@ fun EnvelopeProgress(budget: PersonGiftBudget?, modifier: Modifier = Modifier) {
         budget?.envelopeRatio?.let { ratio ->
             LinearProgressIndicator(
                 progress = { ratio.coerceIn(0f, 1f) },
-                color = LocalMonNoelColors.current.gold,
+                // Enveloppe dépassée : la barre devient un peu plus orangée, sans note (les cartes restent alignées).
+                color = if (budget.isOverEnvelope) LocalMonNoelColors.current.overBudget else LocalMonNoelColors.current.gold,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
             )
-            if (budget.isOverEnvelope) {
-                Text(
-                    stringResource(R.string.envelope_over),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = secondary,
-                )
-            }
         }
     }
 }

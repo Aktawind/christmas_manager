@@ -22,9 +22,14 @@ import com.aktawind.monnoel.core.domain.gifts.SetPersonBudgetUseCase
 import com.aktawind.monnoel.core.domain.meals.SaveDishUseCase
 import com.aktawind.monnoel.core.domain.meals.SaveMealUseCase
 import com.aktawind.monnoel.core.domain.tasks.SaveTaskUseCase
+import com.aktawind.monnoel.core.domain.traditions.SaveCraftSupplyUseCase
+import com.aktawind.monnoel.core.domain.traditions.SaveCraftUseCase
+import com.aktawind.monnoel.core.domain.traditions.SaveDecorUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveInspirationUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveTraditionMemoryUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveTraditionUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetCraftStatusUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetCraftSupplyBoughtUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetInspirationDoneUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetTraditionPlannedUseCase
 import dagger.hilt.EntryPoint
@@ -88,4 +93,14 @@ interface TestDataEntryPoint {
     fun saveInspiration(): SaveInspirationUseCase
 
     fun setInspirationDone(): SetInspirationDoneUseCase
+
+    fun saveCraft(): SaveCraftUseCase
+
+    fun saveCraftSupply(): SaveCraftSupplyUseCase
+
+    fun setCraftStatus(): SetCraftStatusUseCase
+
+    fun setCraftSupplyBought(): SetCraftSupplyBoughtUseCase
+
+    fun saveDecor(): SaveDecorUseCase
 }

@@ -65,6 +65,8 @@ private val LinkType.emoji: String
         LinkType.WHISPER -> "🤫"
         LinkType.TRADITION -> "❤️"
         LinkType.INSPIRATION -> "🎬"
+        LinkType.CRAFT -> "✂️"
+        LinkType.DECOR -> "🎄"
     }
 
 @get:StringRes
@@ -83,6 +85,8 @@ private val LinkType.groupLabel: Int
         LinkType.WHISPER -> R.string.search_whispers
         LinkType.TRADITION -> R.string.search_traditions
         LinkType.INSPIRATION -> R.string.search_inspirations
+        LinkType.CRAFT -> R.string.search_crafts
+        LinkType.DECOR -> R.string.search_decor
     }
 
 @Composable

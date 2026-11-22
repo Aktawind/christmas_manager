@@ -44,3 +44,48 @@ data class Inspiration(
     val createdAt: Instant,
     val updatedAt: Instant,
 )
+
+enum class CraftCategory { DECORATION, HANDMADE_GIFT, WRAPPING, CARDS, KIDS, OTHER }
+
+/** Avancement d'un bricolage pour un Noël (sans ligne = simple idée). */
+enum class CraftStatus { PLANNED, IN_PROGRESS, DONE }
+
+/** Un bricolage (DIY), gardé d'une année à l'autre ; le tutoriel reste sur son site. */
+data class Craft(
+    val id: String,
+    val title: String,
+    val photoPath: String?,
+    val category: CraftCategory,
+    val tutorialUrl: String,
+    val notes: String,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+)
+
+/** Une fourniture d'un bricolage (prix facultatif). */
+data class CraftSupply(val id: String, val craftId: String, val name: String, val priceCents: Long?, val sortOrder: Int)
+
+/** Un bricolage au programme d'un Noël : où il en est, la photo du résultat. */
+data class CraftYear(
+    val id: String,
+    val editionId: String,
+    val craftId: String,
+    val status: CraftStatus,
+    val resultPhotoPath: String?,
+    val createdAt: Instant,
+)
+
+enum class DecorPlace { TREE, TABLE, ENTRANCE, WINDOWS, OUTDOOR, OTHER }
+
+/** Une inspiration de décoration (photo, lien, commentaire). */
+data class DecorIdea(
+    val id: String,
+    val title: String,
+    val photoPath: String?,
+    val url: String,
+    val comment: String,
+    val place: DecorPlace,
+    val favorite: Boolean,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+)

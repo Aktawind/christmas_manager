@@ -14,8 +14,11 @@ import com.aktawind.monnoel.core.domain.gifts.parseSharedText
 import com.aktawind.monnoel.core.domain.repository.PersonRepository
 import com.aktawind.monnoel.core.domain.repository.PhotoRepository
 import com.aktawind.monnoel.core.domain.repository.UserPreferencesRepository
+import com.aktawind.monnoel.core.domain.traditions.DecorDraft
 import com.aktawind.monnoel.core.domain.traditions.InspirationDraft
+import com.aktawind.monnoel.core.domain.traditions.SaveDecorUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveInspirationUseCase
+import com.aktawind.monnoel.core.model.DecorPlace
 import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.Person
 import com.aktawind.monnoel.core.model.ThemePreference
@@ -32,7 +35,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class SharedSaved { IDEA, RECIPE, INSPIRATION }
+enum class SharedSaved { IDEA, RECIPE, INSPIRATION, DECOR }
 
 sealed interface MainUiState {
     data object Loading : MainUiState
@@ -50,6 +53,7 @@ class MainViewModel @Inject constructor(
     private val photos: PhotoRepository,
     private val saveRecipe: SaveRecipeUseCase,
     private val saveInspiration: SaveInspirationUseCase,
+    private val saveDecor: SaveDecorUseCase,
     @ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
     val persons: StateFlow<List<Person>> =
@@ -137,6 +141,18 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val draft = InspirationDraft(title, kind, shared.photoPath, url)
             if (saveInspiration(null, draft) is AppResult.Success) _sharedSaved.value = SharedSaved.INSPIRATION
+        }
+    }
+
+    /** Le partage rejoint le tableau de déco, avec la photo de la page. */
+    fun saveSharedDecor(title: String, url: String, place: DecorPlace) {
+        val shared = _sharedIdea.value ?: return
+        _sharedIdea.value = null
+        viewModelScope.launch {
+            if (saveDecor(null, DecorDraft(title, place, shared.photoPath, url)) is AppResult.Success) {
+                _sharedSaved.value =
+                    SharedSaved.DECOR
+            }
         }
     }
 

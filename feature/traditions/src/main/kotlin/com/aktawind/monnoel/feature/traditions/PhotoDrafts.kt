@@ -16,8 +16,8 @@ internal class PhotoDrafts(private val photos: PhotoRepository, private val appS
     }
 
     /** La saisie a été enregistrée avec [kept] : les autres photos temporaires sont supprimées. */
-    fun committed(kept: String?) {
-        pending -= setOfNotNull(kept)
+    fun committed(vararg kept: String?) {
+        pending -= kept.filterNotNull().toSet()
         discard()
     }
 

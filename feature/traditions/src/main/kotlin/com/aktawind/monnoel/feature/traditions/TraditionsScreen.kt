@@ -33,7 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,12 +73,21 @@ import com.aktawind.monnoel.core.ui.resolve
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Unit, viewModel: TraditionsViewModel = hiltViewModel()) {
+fun TraditionsRoute(
+    onOpenTradition: (String) -> Unit,
+    onNewTradition: () -> Unit,
+    onOpenCraft: (String) -> Unit,
+    onNewCraft: () -> Unit,
+    viewModel: TraditionsViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    // 0 : au programme ; 1 : nos traditions ; 2 : inspirations.
-    var tab by rememberSaveable { mutableStateOf(if (viewModel.initialInspirationId != null) 2 else 0) }
+    // 0 : au programme ; 1 : nos traditions ; 2 : inspirations ; 3 : bricolages ; 4 : décoration.
+    var tab by rememberSaveable { mutableIntStateOf(viewModel.initialTab) }
     var memoryFor by rememberSaveable { mutableStateOf<String?>(null) }
     var picking by rememberSaveable { mutableStateOf(false) }
+    var pickingCrafts by rememberSaveable { mutableStateOf(false) }
+    // null : fermé ; "" : nouvelle déco ; sinon son id.
+    var decorOpen by rememberSaveable { mutableStateOf(viewModel.initialDecorId) }
     // null : fermé ; "" : nouvelle inspiration ; sinon son id.
     var inspirationOpen by rememberSaveable { mutableStateOf(viewModel.initialInspirationId) }
     val snackbar = remember { SnackbarHostState() }
@@ -99,20 +109,42 @@ fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Uni
                         )
                     },
                 )
-                PrimaryTabRow(selectedTabIndex = tab) {
-                    Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.tab_program)) })
-                    Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.tab_traditions)) })
-                    Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.tab_inspirations)) })
+                PrimaryScrollableTabRow(selectedTabIndex = tab, edgePadding = 16.dp) {
+                    listOf(
+                        R.string.tab_program,
+                        R.string.tab_traditions,
+                        R.string.tab_inspirations,
+                        R.string.tab_crafts,
+                        R.string.tab_decor,
+                    )
+                        .forEachIndexed { index, title ->
+                            Tab(selected = tab == index, onClick = { tab = index }, text = { Text(stringResource(title)) })
+                        }
                 }
             }
         },
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
-            if (tab != 0) {
+            if (tab != TAB_PROGRAM) {
                 ExtendedFloatingActionButton(
-                    onClick = { if (tab == 1) onNewTradition() else inspirationOpen = "" },
+                    onClick = {
+                        when (tab) {
+                            TAB_TRADITIONS -> onNewTradition()
+                            TAB_INSPIRATIONS -> inspirationOpen = ""
+                            TAB_CRAFTS -> onNewCraft()
+                            else -> decorOpen = ""
+                        }
+                    },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text(stringResource(if (tab == 1) R.string.fab_tradition else R.string.fab_inspiration)) },
+                    text = {
+                        val label = when (tab) {
+                            TAB_TRADITIONS -> R.string.fab_tradition
+                            TAB_INSPIRATIONS -> R.string.fab_inspiration
+                            TAB_CRAFTS -> R.string.fab_craft
+                            else -> R.string.fab_decor
+                        }
+                        Text(stringResource(label))
+                    },
                 )
             }
         },
@@ -135,9 +167,16 @@ fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Uni
                     onPlanned = { id, planned -> viewModel.setPlanned(id, planned) },
                     onPick = { picking = true },
                 )
-                else -> InspirationsTab(state, onOpen = {
+                TAB_INSPIRATIONS -> InspirationsTab(state, onOpen = {
                     inspirationOpen = it
                 }, onDone = { id, done -> viewModel.setInspirationDone(id, done) })
+                TAB_CRAFTS -> CraftsTab(
+                    state,
+                    onOpen = onOpenCraft,
+                    onStatus = { id, status -> viewModel.setCraftStatus(id, status) },
+                    onPick = { pickingCrafts = true },
+                )
+                else -> DecorTab(state, onOpen = { decorOpen = it }, onFavorite = viewModel::toggleDecorFavorite)
             }
         }
     }
@@ -169,6 +208,39 @@ fun TraditionsRoute(onOpenTradition: (String) -> Unit, onNewTradition: () -> Uni
             },
             onDismiss = { picking = false },
         )
+    }
+    if (pickingCrafts) {
+        CraftIdeasDialog(
+            ideas = state.craftIdeas,
+            onAdd = {
+                viewModel.addCraftIdeas(it)
+                pickingCrafts = false
+            },
+            onDismiss = { pickingCrafts = false },
+        )
+    }
+    decorOpen?.let { id ->
+        val decor = state.decor.firstOrNull { it.id == id }
+        if (id.isEmpty() || decor != null) {
+            DecorDialog(
+                decor = decor,
+                onImportPhoto = viewModel::importPhoto,
+                onSave = { draft ->
+                    viewModel.saveDecor(decor?.id, draft)
+                    decorOpen = null
+                },
+                onDelete = decor?.let { d ->
+                    {
+                        viewModel.deleteDecor(d.id)
+                        decorOpen = null
+                    }
+                },
+                onDismiss = {
+                    viewModel.discardPhotos()
+                    decorOpen = null
+                },
+            )
+        }
     }
     inspirationOpen?.let { id ->
         val inspiration = state.inspirations.firstOrNull { it.id == id }

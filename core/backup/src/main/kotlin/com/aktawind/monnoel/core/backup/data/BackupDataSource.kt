@@ -8,6 +8,11 @@ import com.aktawind.monnoel.core.backup.format.AdventSupplyDto
 import com.aktawind.monnoel.core.backup.format.AdventTemplateBoxDto
 import com.aktawind.monnoel.core.backup.format.AdventTemplateDto
 import com.aktawind.monnoel.core.backup.format.BackupData
+import com.aktawind.monnoel.core.backup.format.CraftDto
+import com.aktawind.monnoel.core.backup.format.CraftSupplyBoughtDto
+import com.aktawind.monnoel.core.backup.format.CraftSupplyDto
+import com.aktawind.monnoel.core.backup.format.CraftYearDto
+import com.aktawind.monnoel.core.backup.format.DecorIdeaDto
 import com.aktawind.monnoel.core.backup.format.DismissedSuggestionDto
 import com.aktawind.monnoel.core.backup.format.EditionDto
 import com.aktawind.monnoel.core.backup.format.ExpenseDto
@@ -39,6 +44,11 @@ import com.aktawind.monnoel.core.database.entity.AdventCalendarPersonEntity
 import com.aktawind.monnoel.core.database.entity.AdventSupplyEntity
 import com.aktawind.monnoel.core.database.entity.AdventTemplateBoxEntity
 import com.aktawind.monnoel.core.database.entity.AdventTemplateEntity
+import com.aktawind.monnoel.core.database.entity.CraftEntity
+import com.aktawind.monnoel.core.database.entity.CraftSupplyBoughtEntity
+import com.aktawind.monnoel.core.database.entity.CraftSupplyEntity
+import com.aktawind.monnoel.core.database.entity.CraftYearEntity
+import com.aktawind.monnoel.core.database.entity.DecorIdeaEntity
 import com.aktawind.monnoel.core.database.entity.DismissedSuggestionEntity
 import com.aktawind.monnoel.core.database.entity.EditionEntity
 import com.aktawind.monnoel.core.database.entity.ExpenseEntity
@@ -152,6 +162,17 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             },
             inspirationsDone = db.traditionDao().getAllDone().map { InspirationDoneDto(it.editionId, it.inspirationId) },
             specialDates = db.specialDateDao().getAll().map { SpecialDateDto(it.id, it.month, it.day, it.label, it.emoji) },
+            crafts = db.craftDao().getAllCrafts().map {
+                CraftDto(it.id, it.title, it.photoPath, it.category, it.tutorialUrl, it.notes, it.createdAt, it.updatedAt)
+            },
+            craftSupplies = db.craftDao().getAllSupplies().map { CraftSupplyDto(it.id, it.craftId, it.name, it.priceCents, it.sortOrder) },
+            craftYears = db.craftDao().getAllYears().map {
+                CraftYearDto(it.id, it.editionId, it.craftId, it.status, it.resultPhotoPath, it.createdAt)
+            },
+            craftSuppliesBought = db.craftDao().getAllBought().map { CraftSupplyBoughtDto(it.editionId, it.supplyId) },
+            decorIdeas = db.craftDao().getAllDecor().map {
+                DecorIdeaDto(it.id, it.title, it.photoPath, it.url, it.comment, it.place, it.favorite, it.createdAt, it.updatedAt)
+            },
             dismissedSuggestions = db.taskDao().getAllDismissed().map { DismissedSuggestionDto(it.editionId, it.suggestionKey) },
             adventTemplates = db.adventDao().getAllTemplates().map {
                 AdventTemplateDto(it.id, it.name, it.theme, it.description, it.boxCount, it.createdAt)
@@ -168,6 +189,8 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             // Suppression des enfants vers les parents.
             db.expenseDao().deleteAll()
             db.specialDateDao().deleteAll()
+            db.craftDao().deleteAllDecor()
+            db.craftDao().deleteAllCrafts()
             db.traditionDao().deleteAllDone()
             db.traditionDao().deleteAllInspirations()
             db.traditionDao().deleteAllYears()
@@ -228,6 +251,25 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             )
             db.traditionDao().insertDone(data.inspirationsDone.map { InspirationDoneEntity(it.editionId, it.inspirationId) })
             db.specialDateDao().insertAll(data.specialDates.map { SpecialDateEntity(it.id, it.month, it.day, it.label, it.emoji) })
+            db.craftDao().insertCrafts(
+                data.crafts.map {
+                    CraftEntity(it.id, it.title, it.photoPath, it.category, it.tutorialUrl, it.notes, it.createdAt, it.updatedAt)
+                },
+            )
+            db.craftDao().insertSupplies(
+                data.craftSupplies.map {
+                    CraftSupplyEntity(it.id, it.craftId, it.name, it.priceCents, it.sortOrder)
+                },
+            )
+            db.craftDao().insertYears(
+                data.craftYears.map { CraftYearEntity(it.id, it.editionId, it.craftId, it.status, it.resultPhotoPath, it.createdAt) },
+            )
+            db.craftDao().insertBought(data.craftSuppliesBought.map { CraftSupplyBoughtEntity(it.editionId, it.supplyId) })
+            db.craftDao().insertDecor(
+                data.decorIdeas.map {
+                    DecorIdeaEntity(it.id, it.title, it.photoPath, it.url, it.comment, it.place, it.favorite, it.createdAt, it.updatedAt)
+                },
+            )
             db.ideaRequestDao().insertAll(
                 data.ideaRequests.map {
                     IdeaRequestEntity(it.id, it.editionId, it.kind, it.personId, it.otherPersonId, it.otherName, it.taskId, it.createdAt)

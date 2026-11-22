@@ -44,3 +44,4 @@
 | 8 | v0.7.0 | Autres dépenses (budget). Conversion 7 → 8 : rien à ajouter. |
 | 9 | v0.7.0 | Idées soufflées (pour qui, à qui, Noël). Conversion 8 → 9 : rien à ajouter. |
 | 10 | v0.8.0 | Traditions (+ personnes), programme de chaque Noël, inspirations et « fait cette année ». Conversion 9 → 10 : rien à ajouter. |
+| 11 | v0.9.0 | Bricolages, fournitures, avancement de chaque Noël, fournitures achetées, idées déco. Conversion 10 → 11 : rien à ajouter. |

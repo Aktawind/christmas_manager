@@ -20,7 +20,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.6.0  | La table de fête            | Repas, convives, menus par moments, plats à commander                 | ✅ |
 | v0.7.0  | Les comptes du Père Noël    | Onglet Budget, autres dépenses, répartition, comparaison des années   | ✅ |
 | v0.8.0  | Les traditions              | Catalogue de traditions, programme annuel, inspirations               | ✅ |
-| v0.9.0  | L'atelier des lutins        | Activités & DIY, projets créatifs, décoration                         | ⬜ |
+| v0.9.0  | L'atelier des lutins        | Bricolages avec fournitures, tableau d'inspiration déco, poste Atelier | 🧪 |
 | v0.10.0 | La boîte à souvenirs        | Journal, archives, bilans annuels, duplication d'une année, export PDF | ⬜ |
 | v1.0.0  | Noël magique                | Finitions, animations, accessibilité, performances, robustesse        | ⬜ |
 
@@ -163,11 +163,14 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| D-001 | Bibliothèque d'activités : titre, description, catégorie, photo, tutoriel, coût | ⬜ |
-| D-002 | Projets créatifs avec fournitures                                              | ⬜ |
-| D-003 | Suivi : idées, sélectionnés, en cours, terminés, photos, coûts                  | ⬜ |
-| D-004 | Décoration : inspirations (photos, liens, commentaires)                         | ⬜ |
-| D-005 | Recherche étendue                                                               | ⬜ |
+| D-001 | Bricolages (dans Traditions) : titre, photo, catégorie, lien du tutoriel, notes | 🧪 |
+| D-002 | Fournitures avec prix facultatif, cochées « acheté » pour chaque Noël           | 🧪 |
+| D-003 | Avancement de l'année : Idée → Au programme → En cours → Terminé, photo du résultat, « fait en 2025, 2026 » | 🧪 |
+| D-004 | Décoration : tableau d'inspiration (photo, lien, commentaire, endroit, ❤️), partage « Ranger comme : Déco » | 🧪 |
+| D-005 | Budget : poste « Atelier » (fournitures des bricolages au programme ; cochées = dépensé) | 🧪 |
+| D-006 | Une quinzaine d'idées de bricolages à piocher, avec leurs fournitures            | 🧪 |
+| D-007 | Recherche (bricolages, fournitures, déco), accueil « L'atelier », sauvegarde     | 🧪 |
+| B-010 | Dépassement de budget : barre d'un orange un peu plus foncé, sans note sous la carte | 🧪 |
 
 ## v0.10.0 — La boîte à souvenirs 📖
 

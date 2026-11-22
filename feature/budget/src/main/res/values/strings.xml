@@ -8,7 +8,6 @@
     <string name="budget_spent">Dépensé</string>
     <string name="budget_global">Budget</string>
     <string name="budget_margin">Encore %1$s de marge par rapport au prévu</string>
-    <string name="budget_over">%1$s au-dessus du budget</string>
     <string name="budget_none">Pas de budget global fixé : les montants viennent tout seuls des cadeaux, calendriers, repas et autres dépenses.</string>
     <string name="budget_set">Fixer un budget</string>
     <string name="budget_change">Modifier le budget</string>
@@ -16,15 +15,15 @@
     <string name="budget_dialog_title">Budget de Noël %1$d</string>
     <string name="budget_dialog_hint">Un montant global pour l’année, facultatif. Rien ne bloque si on le dépasse.</string>
     <string name="breakdown_title">Répartition du prévu</string>
-    <string name="breakdown_description">Répartition du prévu entre cadeaux, calendriers, repas et autres dépenses (détail dessous).</string>
+    <string name="breakdown_description">Répartition du prévu entre cadeaux, calendriers, repas, atelier et autres dépenses (détail dessous).</string>
     <string name="post_gifts">Cadeaux</string>
     <string name="post_advent">Calendriers</string>
     <string name="post_meals">Repas</string>
+    <string name="post_crafts">Atelier</string>
     <string name="post_other">Autres dépenses</string>
     <string name="post_amounts">Prévu %1$s · dépensé %2$s</string>
     <string name="post_envelopes">Enveloppes : %1$s</string>
     <string name="post_budgets">Budgets : %1$s</string>
-    <string name="post_over">%1$s au-dessus</string>
     <string name="post_meals_hint">Un repas compte comme dépensé à partir de sa date.</string>
     <string name="expenses_title">Autres dépenses</string>
     <string name="expenses_empty">Sapin, guirlandes, papier cadeau… tout ce qui n’est ni un cadeau, ni un calendrier, ni un repas.</string>

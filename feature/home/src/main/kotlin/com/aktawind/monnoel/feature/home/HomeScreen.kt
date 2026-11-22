@@ -79,6 +79,7 @@ fun HomeRoute(
     onOpenPreparations: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenTraditions: () -> Unit,
+    onOpenCrafts: () -> Unit,
     onEditPath: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -102,6 +103,7 @@ fun HomeRoute(
             onOpenPreparations = onOpenPreparations,
             onOpenBudget = onOpenBudget,
             onOpenTraditions = onOpenTraditions,
+            onOpenCrafts = onOpenCrafts,
             onEditPath = onEditPath,
             onQuickIdea = { quickIdea = true },
         )
@@ -129,6 +131,7 @@ internal fun HomeScreen(
     onOpenPreparations: () -> Unit = {},
     onOpenBudget: () -> Unit = {},
     onOpenTraditions: () -> Unit = {},
+    onOpenCrafts: () -> Unit = {},
     onEditPath: () -> Unit = {},
     onQuickIdea: () -> Unit = {},
 ) {
@@ -144,6 +147,7 @@ internal fun HomeScreen(
             onOpenPreparations,
             onOpenBudget,
             onOpenTraditions,
+            onOpenCrafts,
             onEditPath,
             onQuickIdea,
         )
@@ -159,6 +163,7 @@ private fun HomeContent(
     onOpenPreparations: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenTraditions: () -> Unit,
+    onOpenCrafts: () -> Unit,
     onEditPath: () -> Unit,
     onQuickIdea: () -> Unit,
 ) {
@@ -178,6 +183,7 @@ private fun HomeContent(
         item(span = { GridItemSpan(maxLineSpan) }) { CookingSummaryCard(state.cooking, onOpenPreparations) }
         state.budget?.let { b -> item(span = { GridItemSpan(maxLineSpan) }) { BudgetSummaryCard(b, onOpenBudget) } }
         item(span = { GridItemSpan(maxLineSpan) }) { TraditionsSummaryCard(state.traditions, onOpenTraditions) }
+        item(span = { GridItemSpan(maxLineSpan) }) { CraftsSummaryCard(state.crafts, onOpenCrafts) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -416,6 +422,40 @@ private fun TraditionsSummaryCard(summary: TraditionsSummary, onOpen: () -> Unit
 }
 
 @Composable
+private fun CraftsSummaryCard(summary: CraftsSummary, onOpen: () -> Unit) {
+    val secondary = LocalMonNoelColors.current.secondaryText
+    Card(
+        onClick = onOpen,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "✂️  " + stringResource(R.string.home_crafts_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (summary.planned == 0) {
+                Text(stringResource(R.string.home_crafts_empty), color = secondary)
+            } else {
+                Text(
+                    stringResource(R.string.home_crafts_progress, summary.done, summary.planned),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                if (summary.next.isNotEmpty()) {
+                    Text(
+                        summary.next.take(3).joinToString(" · "),
+                        color = secondary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun BudgetSummaryCard(budget: YearBudget, onOpen: () -> Unit) {
     val colors = LocalMonNoelColors.current
     Card(
@@ -438,7 +478,7 @@ private fun BudgetSummaryCard(budget: YearBudget, onOpen: () -> Unit) {
             if (global != null && margin != null) {
                 LinearProgressIndicator(
                     progress = { if (global > 0) (budget.plannedCents.toFloat() / global).coerceIn(0f, 1f) else 1f },
-                    color = colors.gold,
+                    color = if (margin < 0) colors.overBudget else colors.gold,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -446,9 +486,9 @@ private fun BudgetSummaryCard(budget: YearBudget, onOpen: () -> Unit) {
                     if (margin >= 0) {
                         stringResource(R.string.home_budget_margin, formatEuro(global), formatEuro(margin))
                     } else {
-                        stringResource(R.string.home_budget_over, formatEuro(global), formatEuro(-margin))
+                        stringResource(R.string.home_budget_only, formatEuro(global))
                     },
-                    color = if (margin >= 0) colors.secondaryText else colors.burgundy,
+                    color = colors.secondaryText,
                 )
             }
         }

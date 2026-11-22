@@ -227,8 +227,41 @@ object Migrations {
         }
     }
 
+    /** v0.9.0 : l'atelier (bricolages, fournitures, avancement de chaque Noël) et la décoration. */
+    val MIGRATION_16_17 = object : Migration(16, 17) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "CREATE TABLE IF NOT EXISTS `craft` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `photo_path` TEXT, " +
+                    "`category` TEXT NOT NULL, `tutorial_url` TEXT NOT NULL, `notes` TEXT NOT NULL, `created_at` INTEGER " +
+                    "NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                "CREATE TABLE IF NOT EXISTS `craft_supply` (`id` TEXT NOT NULL, `craft_id` TEXT NOT NULL, `name` TEXT " +
+                    "NOT NULL, `price_cents` INTEGER, `sort_order` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN " +
+                    "KEY(`craft_id`) REFERENCES `craft`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_craft_supply_craft_id` ON `craft_supply` (`craft_id`)",
+                "CREATE TABLE IF NOT EXISTS `craft_year` (`id` TEXT NOT NULL, `edition_id` TEXT NOT NULL, `craft_id` " +
+                    "TEXT NOT NULL, `status` TEXT NOT NULL, `result_photo_path` TEXT, `created_at` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`id`), FOREIGN KEY(`edition_id`) REFERENCES `christmas_edition`(`id`) ON UPDATE NO " +
+                    "ACTION ON DELETE CASCADE , FOREIGN KEY(`craft_id`) REFERENCES `craft`(`id`) ON UPDATE NO ACTION ON " +
+                    "DELETE CASCADE )",
+                "CREATE UNIQUE INDEX IF NOT EXISTS `index_craft_year_edition_id_craft_id` ON `craft_year` " +
+                    "(`edition_id`, `craft_id`)",
+                "CREATE INDEX IF NOT EXISTS `index_craft_year_craft_id` ON `craft_year` (`craft_id`)",
+                "CREATE TABLE IF NOT EXISTS `craft_supply_bought` (`edition_id` TEXT NOT NULL, `supply_id` TEXT NOT " +
+                    "NULL, PRIMARY KEY(`edition_id`, `supply_id`), FOREIGN KEY(`edition_id`) REFERENCES " +
+                    "`christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`supply_id`) " +
+                    "REFERENCES `craft_supply`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                "CREATE INDEX IF NOT EXISTS `index_craft_supply_bought_supply_id` ON `craft_supply_bought` " +
+                    "(`supply_id`)",
+                "CREATE TABLE IF NOT EXISTS `decor_idea` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `photo_path` " +
+                    "TEXT, `url` TEXT NOT NULL, `comment` TEXT NOT NULL, `place` TEXT NOT NULL, `favorite` INTEGER NOT " +
+                    "NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+            ).forEach(db::execSQL)
+        }
+    }
+
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
         MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
+        MIGRATION_16_17,
     )
 }

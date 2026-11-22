@@ -15,6 +15,7 @@ internal val BudgetPost.label: Int
         BudgetPost.GIFTS -> R.string.post_gifts
         BudgetPost.ADVENT -> R.string.post_advent
         BudgetPost.MEALS -> R.string.post_meals
+        BudgetPost.CRAFTS -> R.string.post_crafts
         BudgetPost.OTHER -> R.string.post_other
     }
 
@@ -23,6 +24,7 @@ internal val BudgetPost.emoji: String
         BudgetPost.GIFTS -> "🎁"
         BudgetPost.ADVENT -> "🗓️"
         BudgetPost.MEALS -> "🍽️"
+        BudgetPost.CRAFTS -> "✂️"
         BudgetPost.OTHER -> "✨"
     }
 
@@ -38,6 +40,7 @@ internal fun BudgetPost.chartColor(): Color {
         BudgetPost.GIFTS -> if (dark) Color(0xFF3A9E6F) else Color(0xFF1E8A5C)
         BudgetPost.ADVENT -> if (dark) Color(0xFF5B93D3) else Color(0xFF3F7FC0)
         BudgetPost.MEALS -> if (dark) Color(0xFFB58C2A) else Color(0xFFC99A2E)
+        BudgetPost.CRAFTS -> if (dark) Color(0xFF9C7BD0) else Color(0xFF8A5AB5)
         BudgetPost.OTHER -> if (dark) Color(0xFFD0566C) else Color(0xFFB8384E)
     }
 }

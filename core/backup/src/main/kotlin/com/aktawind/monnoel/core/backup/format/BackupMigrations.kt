@@ -45,6 +45,8 @@ internal object BackupMigrations {
         9 to { json -> json },
         // v9 -> v10 (v0.8.0) : traditions, inspirations et dates qui comptent, absentes des anciennes sauvegardes.
         10 to { json -> json },
+        // v10 -> v11 (v0.9.0) : bricolages et décoration, absents des anciennes sauvegardes.
+        11 to { json -> json },
     )
 
     fun upgrade(data: JsonObject, fromVersion: Int): JsonObject {

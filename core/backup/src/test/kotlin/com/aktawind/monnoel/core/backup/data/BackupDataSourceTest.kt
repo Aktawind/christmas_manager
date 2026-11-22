@@ -11,6 +11,11 @@ import com.aktawind.monnoel.core.backup.format.AdventTemplateBoxDto
 import com.aktawind.monnoel.core.backup.format.AdventTemplateDto
 import com.aktawind.monnoel.core.backup.format.BackupArchive
 import com.aktawind.monnoel.core.backup.format.BackupData
+import com.aktawind.monnoel.core.backup.format.CraftDto
+import com.aktawind.monnoel.core.backup.format.CraftSupplyBoughtDto
+import com.aktawind.monnoel.core.backup.format.CraftSupplyDto
+import com.aktawind.monnoel.core.backup.format.CraftYearDto
+import com.aktawind.monnoel.core.backup.format.DecorIdeaDto
 import com.aktawind.monnoel.core.backup.format.DismissedSuggestionDto
 import com.aktawind.monnoel.core.backup.format.EditionDto
 import com.aktawind.monnoel.core.backup.format.ExpenseDto
@@ -125,6 +130,11 @@ class BackupDataSourceTest {
             inspirations = listOf(InspirationDto("in", "FILM", "Le Pôle Express", null, "", "", 1L, 1L)),
             inspirationsDone = listOf(InspirationDoneDto("e", "in")),
             specialDates = listOf(SpecialDateDto("sd", 12, 13, "Sainte-Lucie", "🕯️")),
+            crafts = listOf(CraftDto("cr", "Couronne", "photos/cr.jpg", "DECORATION", "https://tuto", "", 1L, 1L)),
+            craftSupplies = listOf(CraftSupplyDto("cs", "cr", "Ruban", 450, 0), CraftSupplyDto("cs2", "cr", "Colle", null, 1)),
+            craftYears = listOf(CraftYearDto("cy", "e", "cr", "DONE", "photos/cy.jpg", 1L)),
+            craftSuppliesBought = listOf(CraftSupplyBoughtDto("e", "cs")),
+            decorIdeas = listOf(DecorIdeaDto("de", "Table dorée", "photos/de.jpg", "", "Joli", "TABLE", true, 1L, 1L)),
             ideaRequests = listOf(IdeaRequestDto("r", "e", "TO_SEND", "p", null, "Collègues", "t", 1L)),
             whispers = listOf(WhisperDto("w", "e", "p", "Montre", 8_000, "", "p", "Léa Martin", false, "", 1L, 1L, "photos/w.jpg")),
             expenses = listOf(ExpenseDto("x", "e", "Sapin", 4_500, "TREE", true, "", 1L, 1L)),

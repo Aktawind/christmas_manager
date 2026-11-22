@@ -5,6 +5,7 @@ import com.aktawind.monnoel.core.domain.advent.AdventRepository
 import com.aktawind.monnoel.core.domain.edition.ObserveEditionsUseCase
 import com.aktawind.monnoel.core.domain.meals.MealRepository
 import com.aktawind.monnoel.core.domain.repository.PlannedGiftRepository
+import com.aktawind.monnoel.core.domain.traditions.CraftRepository
 import com.aktawind.monnoel.core.model.ChristmasEdition
 import com.aktawind.monnoel.core.model.Expense
 import com.aktawind.monnoel.core.model.PersonBudget
@@ -29,6 +30,7 @@ class ObserveBudgetsUseCase @Inject constructor(
     private val advent: AdventRepository,
     private val meals: MealRepository,
     private val expenses: ExpenseRepository,
+    private val crafts: CraftRepository,
     private val time: TimeProvider,
 ) {
     operator fun invoke(): Flow<BudgetOverview> {
@@ -37,7 +39,13 @@ class ObserveBudgetsUseCase @Inject constructor(
             combine(advent.observeAllCalendars(), advent.observeAllBoxes(), advent.observeAllSupplies()) { c, b, s -> Triple(c, b, s) },
             meals.observeAllMeals(),
             expenses.observeAllExpenses(),
-        ) { g, (c, b, s), m, e -> BudgetSource(gifts = g, calendars = c, boxes = b, supplies = s, meals = m, expenses = e) }
+            combine(crafts.observeYears(), crafts.observeSupplies(), crafts.observeBought()) { y, s, b -> Triple(y, s, b) },
+        ) { g, (c, b, s), m, e, (cy, cs, cb) ->
+            BudgetSource(
+                gifts = g, calendars = c, boxes = b, supplies = s, meals = m, expenses = e,
+                craftYears = cy, craftSupplies = cs, craftBought = cb,
+            )
+        }
         return observeEditions().flatMapLatest { editions ->
             val current = editions.current
             val envelopes = current?.let { gifts.observeBudgets(it.id) } ?: flowOf(emptyList<PersonBudget>())

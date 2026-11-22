@@ -8,6 +8,7 @@ import com.aktawind.monnoel.core.database.DefaultData
 import com.aktawind.monnoel.core.database.MonNoelDatabase
 import com.aktawind.monnoel.core.database.dao.AdventDao
 import com.aktawind.monnoel.core.database.dao.CookingDao
+import com.aktawind.monnoel.core.database.dao.CraftDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.ExpenseDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
@@ -78,6 +79,9 @@ object DatabaseModule {
 
     @Provides
     fun provideSpecialDateDao(db: MonNoelDatabase): SpecialDateDao = db.specialDateDao()
+
+    @Provides
+    fun provideCraftDao(db: MonNoelDatabase): CraftDao = db.craftDao()
 
     @Provides
     fun provideTaskDao(db: MonNoelDatabase): TaskDao = db.taskDao()

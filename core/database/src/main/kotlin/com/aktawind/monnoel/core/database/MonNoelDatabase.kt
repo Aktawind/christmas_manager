@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.aktawind.monnoel.core.database.dao.AdventDao
 import com.aktawind.monnoel.core.database.dao.CookingDao
+import com.aktawind.monnoel.core.database.dao.CraftDao
 import com.aktawind.monnoel.core.database.dao.EditionDao
 import com.aktawind.monnoel.core.database.dao.ExpenseDao
 import com.aktawind.monnoel.core.database.dao.GiftCategoryDao
@@ -22,6 +23,11 @@ import com.aktawind.monnoel.core.database.entity.AdventCalendarPersonEntity
 import com.aktawind.monnoel.core.database.entity.AdventSupplyEntity
 import com.aktawind.monnoel.core.database.entity.AdventTemplateBoxEntity
 import com.aktawind.monnoel.core.database.entity.AdventTemplateEntity
+import com.aktawind.monnoel.core.database.entity.CraftEntity
+import com.aktawind.monnoel.core.database.entity.CraftSupplyBoughtEntity
+import com.aktawind.monnoel.core.database.entity.CraftSupplyEntity
+import com.aktawind.monnoel.core.database.entity.CraftYearEntity
+import com.aktawind.monnoel.core.database.entity.DecorIdeaEntity
 import com.aktawind.monnoel.core.database.entity.DismissedSuggestionEntity
 import com.aktawind.monnoel.core.database.entity.EditionEntity
 import com.aktawind.monnoel.core.database.entity.ExpenseEntity
@@ -62,7 +68,8 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
  * v12 (v0.7.0 test) photo des idées soufflées ; v13 (v0.7.0 test) demandes d'idées ;
  * v14 (v0.7.0) calendriers de l'Avent tout prêts ;
  * v15 (v0.8.0 test) traditions, programme annuel, inspirations ;
- * v16 (v0.8.0) dates qui comptent (chemin vers Noël).
+ * v16 (v0.8.0) dates qui comptent (chemin vers Noël) ;
+ * v17 (v0.9.0) bricolages, fournitures, avancement annuel, décoration.
  */
 @Database(
     entities = [
@@ -96,8 +103,13 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         InspirationEntity::class,
         InspirationDoneEntity::class,
         SpecialDateEntity::class,
+        CraftEntity::class,
+        CraftSupplyEntity::class,
+        CraftYearEntity::class,
+        CraftSupplyBoughtEntity::class,
+        DecorIdeaEntity::class,
     ],
-    version = 16,
+    version = 17,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {
@@ -128,6 +140,8 @@ abstract class MonNoelDatabase : RoomDatabase() {
     abstract fun traditionDao(): TraditionDao
 
     abstract fun specialDateDao(): SpecialDateDao
+
+    abstract fun craftDao(): CraftDao
 
     companion object {
         const val NAME = "mon-noel.db"

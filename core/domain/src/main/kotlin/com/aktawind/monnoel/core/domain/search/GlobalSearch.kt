@@ -2,6 +2,9 @@ package com.aktawind.monnoel.core.domain.search
 
 import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventCalendar
+import com.aktawind.monnoel.core.model.Craft
+import com.aktawind.monnoel.core.model.CraftSupply
+import com.aktawind.monnoel.core.model.DecorIdea
 import com.aktawind.monnoel.core.model.Expense
 import com.aktawind.monnoel.core.model.GiftIdea
 import com.aktawind.monnoel.core.model.Inspiration
@@ -43,6 +46,9 @@ data class SearchData(
     val whispers: List<WhisperedIdea> = emptyList(),
     val traditions: List<Tradition> = emptyList(),
     val inspirations: List<Inspiration> = emptyList(),
+    val crafts: List<Craft> = emptyList(),
+    val craftSupplies: List<CraftSupply> = emptyList(),
+    val decor: List<DecorIdea> = emptyList(),
 )
 
 /** Minuscules, sans accents : « Noël » et « noel » se valent. */
@@ -171,6 +177,18 @@ fun searchAll(query: String, data: SearchData, limitPerType: Int = 30): Map<Link
         .map { SearchResult(LinkType.TRADITION, it.id, it.name, "", it.photoPath) }
     results[LinkType.INSPIRATION] = data.inspirations.filter { matches(it.title, it.notes) }
         .map { SearchResult(LinkType.INSPIRATION, it.id, it.title, "", it.photoPath) }
+    // Un bricolage est aussi trouvé par l'une de ses fournitures.
+    val suppliesByCraft = data.craftSupplies.groupBy { it.craftId }
+    results[LinkType.CRAFT] = data.crafts.mapNotNull { craft ->
+        val supplies = suppliesByCraft[craft.id].orEmpty().filter { matches(it.name) }
+        if (!matches(craft.title, craft.notes) && supplies.isEmpty()) return@mapNotNull null
+        SearchResult(LinkType.CRAFT, craft.id, craft.title, supplies.joinToString(", ") { it.name }, craft.photoPath)
+    }
+    results[LinkType.DECOR] = data.decor.filter { matches(it.title, it.comment) }
+        .map {
+            val title = it.title.ifBlank { it.comment.take(40) }
+            SearchResult(LinkType.DECOR, it.id, title, if (it.title.isBlank()) "" else it.comment, it.photoPath)
+        }
     results[LinkType.EXPENSE] = data.expenses.filter { matches(it.title, it.notes) }
         .sortedByDescending { data.years[it.editionId] ?: 0 }
         .map { SearchResult(LinkType.EXPENSE, it.id, it.title, year(it.editionId).orEmpty(), null) }

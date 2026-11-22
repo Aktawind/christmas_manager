@@ -130,4 +130,14 @@
     <string name="quick_inspiration_kind">Type</string>
     <string name="quick_inspiration_hint">Elle rejoint l’onglet Traditions → Inspirations, à cocher chaque année.</string>
     <string name="quick_recipe_name_generic">Nom</string>
+    <string name="place_tree">Sapin</string>
+    <string name="place_table">Table de fête</string>
+    <string name="place_entrance">Entrée</string>
+    <string name="place_windows">Fenêtres</string>
+    <string name="place_outdoor">Extérieur</string>
+    <string name="place_other">Autre</string>
+    <string name="quick_share_decor">Déco (sapin, table, entrée…)</string>
+    <string name="quick_decor_title">Garder une idée déco</string>
+    <string name="quick_decor_place">Pour</string>
+    <string name="quick_decor_hint">Elle rejoint l’onglet Traditions → Décoration, votre tableau d’inspiration.</string>
 </resources>

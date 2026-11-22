@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
 import com.aktawind.monnoel.core.domain.gifts.centsToInput
 import com.aktawind.monnoel.core.domain.gifts.parseEuroToCents
+import com.aktawind.monnoel.core.model.DecorPlace
 import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.Person
 
@@ -50,14 +51,17 @@ fun QuickIdeaDialog(
     onSaveRecipe: ((title: String, url: String) -> Unit)? = null,
     /** Si renseigné, on peut aussi ranger le partage comme inspiration (film, livre, sortie…). */
     onSaveInspiration: ((title: String, url: String, kind: InspirationKind) -> Unit)? = null,
+    /** Si renseigné, on peut aussi ranger le partage dans le tableau de déco. */
+    onSaveDecor: ((title: String, url: String, place: DecorPlace) -> Unit)? = null,
 ) {
     var title by rememberSaveable { mutableStateOf(initialTitle) }
     var url by rememberSaveable { mutableStateOf(initialUrl) }
     var price by rememberSaveable { mutableStateOf(centsToInput(initialPriceCents)) }
     var selected by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    // 0 : idée cadeau ; 1 : recette ; 2 : inspiration.
+    // 0 : idée cadeau ; 1 : recette ; 2 : inspiration ; 3 : déco.
     var target by rememberSaveable { mutableStateOf(0) }
     var kind by rememberSaveable { mutableStateOf(InspirationKind.FILM) }
+    var place by rememberSaveable { mutableStateOf(DecorPlace.TREE) }
     val asRecipe = target == 1
     val asIdea = target == 0
     AlertDialog(
@@ -68,6 +72,7 @@ fun QuickIdeaDialog(
                     when (target) {
                         1 -> R.string.quick_recipe_title
                         2 -> R.string.quick_inspiration_title
+                        3 -> R.string.quick_decor_title
                         else -> R.string.quick_idea_title
                     },
                 ),
@@ -85,7 +90,12 @@ fun QuickIdeaDialog(
                         color = LocalMonNoelColors.current.secondaryText,
                     )
                 }
-                val targets = listOfNotNull(0, 1.takeIf { onSaveRecipe != null }, 2.takeIf { onSaveInspiration != null })
+                val targets = listOfNotNull(
+                    0,
+                    1.takeIf { onSaveRecipe != null },
+                    2.takeIf { onSaveInspiration != null },
+                    3.takeIf { onSaveDecor != null },
+                )
                 if (targets.size > 1) {
                     DropdownField(
                         label = stringResource(R.string.quick_share_kind),
@@ -96,11 +106,22 @@ fun QuickIdeaDialog(
                                 when (it) {
                                     1 -> R.string.quick_share_recipe
                                     2 -> R.string.quick_share_inspiration
+                                    3 -> R.string.quick_share_decor
                                     else -> R.string.quick_share_idea
                                 },
                             )
                         },
                         onSelect = { target = it },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                if (target == 3) {
+                    DropdownField(
+                        label = stringResource(R.string.quick_decor_place),
+                        selected = place,
+                        options = DecorPlace.entries,
+                        optionLabel = { "${it.emoji}  ${stringResource(it.label)}" },
+                        onSelect = { place = it },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -120,7 +141,7 @@ fun QuickIdeaDialog(
                     stringResource(
                         when (target) {
                             1 -> R.string.quick_recipe_name
-                            2 -> R.string.quick_recipe_name_generic
+                            2, 3 -> R.string.quick_recipe_name_generic
                             else -> R.string.quick_idea_name
                         },
                     ),
@@ -154,6 +175,7 @@ fun QuickIdeaDialog(
                         when (target) {
                             1 -> R.string.quick_recipe_hint
                             2 -> R.string.quick_inspiration_hint
+                            3 -> R.string.quick_decor_hint
                             else -> R.string.quick_idea_hint
                         },
                     ),
@@ -170,6 +192,8 @@ fun QuickIdeaDialog(
                         onSaveRecipe(title, url)
                     } else if (target == 2 && onSaveInspiration != null) {
                         onSaveInspiration(title, url, kind)
+                    } else if (target == 3 && onSaveDecor != null) {
+                        onSaveDecor(title, url, place)
                     } else {
                         onSave(QuickIdeaInput(title, url, parseEuroToCents(price), selected.toSet()))
                     }

@@ -77,7 +77,13 @@ private val DarkColors: ColorScheme = darkColorScheme(
 
 /** Couleurs « magiques » hors du schéma Material. */
 @Immutable
-data class MonNoelExtraColors(val gold: Color, val burgundy: Color, val secondaryText: Color)
+data class MonNoelExtraColors(
+    val gold: Color,
+    val burgundy: Color,
+    val secondaryText: Color,
+    /** Barre d'un budget dépassé : un or plus orangé, sans autre message (aucune pression). */
+    val overBudget: Color = Color(0xFFC0691E),
+)
 
 val LocalMonNoelColors = staticCompositionLocalOf {
     MonNoelExtraColors(gold = Champagne, burgundy = Burgundy, secondaryText = Hazelnut)
@@ -86,7 +92,7 @@ val LocalMonNoelColors = staticCompositionLocalOf {
 @Composable
 fun MonNoelTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val extra = if (darkTheme) {
-        MonNoelExtraColors(gold = ChampagneNight, burgundy = BurgundyNight, secondaryText = HazelnutNight)
+        MonNoelExtraColors(gold = ChampagneNight, burgundy = BurgundyNight, secondaryText = HazelnutNight, overBudget = Color(0xFFE59A50))
     } else {
         MonNoelExtraColors(gold = Champagne, burgundy = Burgundy, secondaryText = Hazelnut)
     }

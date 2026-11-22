@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 16, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 17, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -400,6 +400,24 @@ class MigrationTest {
         runBlocking {
             assertEquals("Lutin", db.traditionDao().getAllTraditions().single().name)
             assertEquals(0, db.specialDateDao().getAll().size)
+        }
+        db.close()
+    }
+
+    @Test
+    fun `migration 16 vers 17 ajoute l'atelier et garde les dates du chemin`() {
+        helper.createDatabase(dbName, 16).use { db ->
+            db.execSQL("INSERT INTO special_date (id, month, day, label, emoji) VALUES ('d1', 12, 13, 'Sainte-Lucie', '🕯️')")
+        }
+        helper.runMigrationsAndValidate(dbName, 17, true, Migrations.MIGRATION_16_17).close()
+        val db = Room.databaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            MonNoelDatabase::class.java,
+            dbName,
+        ).addMigrations(*Migrations.ALL).allowMainThreadQueries().build()
+        runBlocking {
+            assertEquals("Sainte-Lucie", db.specialDateDao().getAll().single().label)
+            assertEquals(0, db.craftDao().getAllCrafts().size)
         }
         db.close()
     }

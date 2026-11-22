@@ -64,6 +64,7 @@ import com.aktawind.monnoel.feature.settings.navigation.CategoriesDestination
 import com.aktawind.monnoel.feature.settings.navigation.PathDatesDestination
 import com.aktawind.monnoel.feature.settings.navigation.SettingsDestination
 import com.aktawind.monnoel.feature.settings.navigation.settingsScreen
+import com.aktawind.monnoel.feature.traditions.navigation.CraftEditDestination
 import com.aktawind.monnoel.feature.traditions.navigation.TraditionEditDestination
 import com.aktawind.monnoel.feature.traditions.navigation.TraditionsDestination
 import com.aktawind.monnoel.feature.traditions.navigation.traditionsGraph
@@ -113,7 +114,7 @@ private enum class TopLevelDestination(
     BUDGET(BudgetDestination(), listOf(BudgetDestination::class), MonNoelIcons.Wallet, R.string.nav_budget),
     TRADITIONS(
         TraditionsDestination(),
-        listOf(TraditionsDestination::class, TraditionEditDestination::class),
+        listOf(TraditionsDestination::class, TraditionEditDestination::class, CraftEditDestination::class),
         Icons.Filled.Favorite,
         R.string.nav_traditions,
     ),
@@ -181,6 +182,8 @@ fun MonNoelApp(hasEditions: Boolean) {
             LinkType.WHISPER -> PersonDestination(id)
             LinkType.TRADITION -> TraditionEditDestination(id)
             LinkType.INSPIRATION -> TraditionsDestination(inspirationId = id)
+            LinkType.CRAFT -> CraftEditDestination(id)
+            LinkType.DECOR -> TraditionsDestination(decorId = id)
         }
         navController.navigate(destination)
     }
@@ -208,6 +211,7 @@ fun MonNoelApp(hasEditions: Boolean) {
                     onOpenPreparations = { openTab(CookingDestination(tab = "PRODUCTIONS")) },
                     onOpenBudget = { navigate(TopLevelDestination.BUDGET) },
                     onOpenTraditions = { navigate(TopLevelDestination.TRADITIONS) },
+                    onOpenCrafts = { openTab(TraditionsDestination(tab = 3)) },
                     onEditPath = { navController.navigate(PathDatesDestination) },
                 )
                 searchScreen(onOpen = openLink, onBack = { navController.popBackStack() })

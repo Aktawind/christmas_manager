@@ -188,22 +188,21 @@ private fun SummaryCard(budget: YearBudget, readOnly: Boolean, onEditBudget: () 
             }
             val global = budget.globalBudgetCents
             if (global != null && global > 0) {
+                val margin = budget.marginCents ?: 0
+                // Dépassement : seule la couleur de la barre change, sans message.
                 LinearProgressIndicator(
                     progress = { (budget.plannedCents.toFloat() / global).coerceIn(0f, 1f) },
-                    color = colors.gold,
+                    color = if (margin < 0) colors.overBudget else colors.gold,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                val margin = budget.marginCents ?: 0
-                Text(
-                    if (margin >= 0) {
-                        stringResource(R.string.budget_margin, formatEuro(margin))
-                    } else {
-                        stringResource(R.string.budget_over, formatEuro(-margin))
-                    },
-                    color = if (margin >= 0) colors.secondaryText else colors.burgundy,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                if (margin >= 0) {
+                    Text(
+                        stringResource(R.string.budget_margin, formatEuro(margin)),
+                        color = colors.secondaryText,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             } else {
                 Text(stringResource(R.string.budget_none), color = colors.secondaryText, style = MaterialTheme.typography.bodyMedium)
             }
@@ -266,14 +265,23 @@ private fun PostRow(post: PostBudget) {
         val budgetLine = post.budgetCents?.let {
             stringResource(if (post.post == BudgetPost.GIFTS) R.string.post_envelopes else R.string.post_budgets, formatEuro(it))
         }
-        val over = post.overCents
         if (budgetLine != null) {
             Text(
-                budgetLine + over?.let { " · " + stringResource(R.string.post_over, formatEuro(it)) }.orEmpty(),
+                budgetLine,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (over != null) colors.burgundy else colors.secondaryText,
+                color = colors.secondaryText,
                 modifier = Modifier.padding(start = 22.dp),
             )
+            // Une fine barre : prévu / budget du poste, plus orangée s'il est dépassé.
+            val budgetCents = post.budgetCents ?: 0
+            if (budgetCents > 0) {
+                LinearProgressIndicator(
+                    progress = { (post.plannedCents.toFloat() / budgetCents).coerceIn(0f, 1f) },
+                    color = if (post.overCents != null) colors.overBudget else colors.gold,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.fillMaxWidth().padding(start = 22.dp, top = 4.dp),
+                )
+            }
         }
         if (post.post == BudgetPost.MEALS && post.plannedCents > post.spentCents) {
             Text(

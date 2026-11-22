@@ -6,6 +6,8 @@ import com.aktawind.monnoel.core.model.AdventBox
 import com.aktawind.monnoel.core.model.AdventCalendar
 import com.aktawind.monnoel.core.model.AdventSupply
 import com.aktawind.monnoel.core.model.ChristmasEdition
+import com.aktawind.monnoel.core.model.CraftSupply
+import com.aktawind.monnoel.core.model.CraftYear
 import com.aktawind.monnoel.core.model.Expense
 import com.aktawind.monnoel.core.model.Meal
 import com.aktawind.monnoel.core.model.PersonBudget
@@ -13,7 +15,7 @@ import com.aktawind.monnoel.core.model.PlannedGift
 import java.time.LocalDate
 
 /** Les grands postes du budget de Noël. */
-enum class BudgetPost { GIFTS, ADVENT, MEALS, OTHER }
+enum class BudgetPost { GIFTS, ADVENT, MEALS, CRAFTS, OTHER }
 
 /** Un poste : prévu, déjà dépensé, et le budget qu'on s'est fixé (s'il y en a un). */
 data class PostBudget(val post: BudgetPost, val plannedCents: Long, val spentCents: Long, val budgetCents: Long?) {
@@ -41,6 +43,10 @@ data class BudgetSource(
     val supplies: List<AdventSupply> = emptyList(),
     val meals: List<Meal> = emptyList(),
     val expenses: List<Expense> = emptyList(),
+    val craftYears: List<CraftYear> = emptyList(),
+    val craftSupplies: List<CraftSupply> = emptyList(),
+    /** Fournitures d'atelier achetées : paires (édition, fourniture). */
+    val craftBought: Set<Pair<String, String>> = emptySet(),
 )
 
 /**
@@ -48,6 +54,7 @@ data class BudgetSource(
  * - cadeaux : prévu = prix ; dépensé = cadeaux commandés ou achetés ; budget = enveloppes ;
  * - calendriers : cases et fournitures (comme sur l'écran du calendrier) ; budget = budgets des calendriers ;
  * - repas : coût estimé ; dépensé une fois la date du repas arrivée ;
+ * - atelier : fournitures des bricolages au programme de l'année ; dépensé = fournitures cochées ;
  * - autres dépenses : montant ; dépensé quand c'est payé.
  */
 fun computeYearBudget(edition: ChristmasEdition, source: BudgetSource, today: LocalDate): YearBudget {
@@ -76,6 +83,8 @@ fun computeYearBudget(edition: ChristmasEdition, source: BudgetSource, today: Lo
     val calendarBudgets = calendars.mapNotNull { it.budgetCents }
     val meals = source.meals.filter { it.editionId == edition.id }
     val expenses = source.expenses.filter { it.editionId == edition.id }
+    val craftIds = source.craftYears.filter { it.editionId == edition.id }.map { it.craftId }.toSet()
+    val craftSupplies = source.craftSupplies.filter { it.craftId in craftIds && it.priceCents != null }
     return YearBudget(
         editionId = edition.id,
         year = edition.year,
@@ -92,6 +101,12 @@ fun computeYearBudget(edition: ChristmasEdition, source: BudgetSource, today: Lo
                 BudgetPost.MEALS,
                 meals.sumOf { it.estimatedCostCents ?: 0 },
                 meals.filter { meal -> meal.date?.let { !it.isAfter(today) } == true }.sumOf { it.estimatedCostCents ?: 0 },
+                null,
+            ),
+            PostBudget(
+                BudgetPost.CRAFTS,
+                craftSupplies.sumOf { it.priceCents ?: 0 },
+                craftSupplies.filter { (edition.id to it.id) in source.craftBought }.sumOf { it.priceCents ?: 0 },
                 null,
             ),
             PostBudget(BudgetPost.OTHER, expenses.sumOf { it.amountCents }, expenses.filter { it.paid }.sumOf { it.amountCents }, null),

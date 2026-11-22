@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
  * Version du format de sauvegarde (ADR 0004). À incrémenter à chaque changement de
  * structure de `data.json`, en ajoutant la conversion dans [BackupMigrations].
  */
-const val BACKUP_FORMAT_VERSION = 10
+const val BACKUP_FORMAT_VERSION = 11
 
 const val MANIFEST_ENTRY = "manifest.json"
 const val DATA_ENTRY = "data.json"
@@ -62,6 +62,11 @@ data class BackupData(
     val inspirations: List<InspirationDto> = emptyList(),
     val inspirationsDone: List<InspirationDoneDto> = emptyList(),
     val specialDates: List<SpecialDateDto> = emptyList(),
+    val crafts: List<CraftDto> = emptyList(),
+    val craftSupplies: List<CraftSupplyDto> = emptyList(),
+    val craftYears: List<CraftYearDto> = emptyList(),
+    val craftSuppliesBought: List<CraftSupplyBoughtDto> = emptyList(),
+    val decorIdeas: List<DecorIdeaDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -82,6 +87,8 @@ data class BackupData(
         "whispers" to whispers.size,
         "traditions" to traditions.size,
         "inspirations" to inspirations.size,
+        "crafts" to crafts.size,
+        "decorIdeas" to decorIdeas.size,
     )
 }
 
@@ -400,6 +407,47 @@ data class InspirationDoneDto(val editionId: String, val inspirationId: String)
 
 @Serializable
 data class SpecialDateDto(val id: String, val month: Int, val day: Int, val label: String, val emoji: String = "⭐")
+
+@Serializable
+data class CraftDto(
+    val id: String,
+    val title: String,
+    val photoPath: String? = null,
+    val category: String,
+    val tutorialUrl: String = "",
+    val notes: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+@Serializable
+data class CraftSupplyDto(val id: String, val craftId: String, val name: String, val priceCents: Long? = null, val sortOrder: Int = 0)
+
+@Serializable
+data class CraftYearDto(
+    val id: String,
+    val editionId: String,
+    val craftId: String,
+    val status: String,
+    val resultPhotoPath: String? = null,
+    val createdAt: Long,
+)
+
+@Serializable
+data class CraftSupplyBoughtDto(val editionId: String, val supplyId: String)
+
+@Serializable
+data class DecorIdeaDto(
+    val id: String,
+    val title: String,
+    val photoPath: String? = null,
+    val url: String = "",
+    val comment: String = "",
+    val place: String,
+    val favorite: Boolean = false,
+    val createdAt: Long,
+    val updatedAt: Long,
+)
 
 internal val backupJson = Json {
     prettyPrint = true
