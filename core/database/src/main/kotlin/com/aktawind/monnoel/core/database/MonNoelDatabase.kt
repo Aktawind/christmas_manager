@@ -109,7 +109,7 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         CraftSupplyBoughtEntity::class,
         DecorIdeaEntity::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {

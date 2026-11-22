@@ -41,7 +41,6 @@ data class GiftIdea(
 enum class GiftStatus {
     TO_BUY,
     ORDERED,
-    RECEIVED,
     TO_WRAP,
     WRAPPED,
     GIVEN,

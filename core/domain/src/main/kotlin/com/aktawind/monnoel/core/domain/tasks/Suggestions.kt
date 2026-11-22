@@ -46,7 +46,7 @@ fun suggestionStates(source: SuggestionSource): Map<String, Boolean> {
     val states = mutableMapOf<String, Boolean>()
     source.gifts.forEach { gift ->
         val step = gift.status.ordinal
-        states["${SuggestionKind.GIFT_DELIVERY.name}:${gift.id}"] = step >= GiftStatus.RECEIVED.ordinal
+        states["${SuggestionKind.GIFT_DELIVERY.name}:${gift.id}"] = step >= GiftStatus.TO_WRAP.ordinal
         states["${SuggestionKind.GIFT_WRAP.name}:${gift.id}"] = step >= GiftStatus.WRAPPED.ordinal
     }
     source.supplies.forEach { states["${SuggestionKind.SUPPLY_BUY.name}:${it.id}"] = it.bought }

@@ -251,7 +251,7 @@ class HomeViewModel @Inject constructor(
                 total = list.size,
                 toBuy = list.count { it.status == GiftStatus.TO_BUY },
                 awaiting = list.count { it.status.isAwaitingDelivery },
-                toWrap = list.count { it.status == GiftStatus.TO_WRAP || it.status == GiftStatus.RECEIVED },
+                toWrap = list.count { it.status == GiftStatus.TO_WRAP },
                 given = list.count { it.status == GiftStatus.GIVEN },
                 wrapped = list.count { it.status == GiftStatus.WRAPPED },
                 plannedCents = list.sumOf { it.priceCents ?: 0 },

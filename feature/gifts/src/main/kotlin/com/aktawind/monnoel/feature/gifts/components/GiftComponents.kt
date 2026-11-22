@@ -45,7 +45,6 @@ val GiftStatus.label: Int
     get() = when (this) {
         GiftStatus.TO_BUY -> R.string.status_to_buy
         GiftStatus.ORDERED -> R.string.status_ordered
-        GiftStatus.RECEIVED -> R.string.status_received
         GiftStatus.TO_WRAP -> R.string.status_to_wrap
         GiftStatus.WRAPPED -> R.string.status_wrapped
         GiftStatus.GIVEN -> R.string.status_given
@@ -55,7 +54,6 @@ val GiftStatus.emoji: String
     get() = when (this) {
         GiftStatus.TO_BUY -> "🛒"
         GiftStatus.ORDERED -> "📦"
-        GiftStatus.RECEIVED -> "📬"
         GiftStatus.TO_WRAP -> "✂️"
         GiftStatus.WRAPPED -> "🎀"
         GiftStatus.GIVEN -> "🎁"

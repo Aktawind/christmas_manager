@@ -73,6 +73,7 @@ import com.aktawind.monnoel.core.database.entity.TraditionEntity
 import com.aktawind.monnoel.core.database.entity.TraditionPersonEntity
 import com.aktawind.monnoel.core.database.entity.TraditionYearEntity
 import com.aktawind.monnoel.core.database.entity.WhisperEntity
+import com.aktawind.monnoel.core.database.entity.legacyGiftStatus
 import javax.inject.Inject
 
 /** Lit toute la base pour l'export, et la remplace intégralement lors d'un import. */
@@ -378,7 +379,7 @@ private fun GiftIdeaDto.toEntity() = GiftIdeaEntity(
 
 private fun PlannedGiftEntity.toDto() = PlannedGiftDto(
     id, editionId, personId, recipientName, ideaId, title, description, photoPath, priceCents, purchaseDate, shop,
-    orderUrl, trackingNumber, notes, categoryId, status, createdAt, updatedAt,
+    orderUrl, trackingNumber, notes, categoryId, legacyGiftStatus(status), createdAt, updatedAt,
 )
 
 private fun PlannedGiftDto.toEntity() = PlannedGiftEntity(

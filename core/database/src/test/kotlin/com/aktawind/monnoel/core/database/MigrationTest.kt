@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 17, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 18, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -420,5 +420,25 @@ class MigrationTest {
             assertEquals(0, db.craftDao().getAllCrafts().size)
         }
         db.close()
+    }
+
+    @Test
+    fun `migration 17 vers 18 transforme les cadeaux recus en a emballer`() {
+        helper.createDatabase(dbName, 17).use { db ->
+            listOf("RECEIVED" to "g1", "ORDERED" to "g2").forEach { (status, id) ->
+                db.execSQL(
+                    "INSERT INTO planned_gift (id, edition_id, person_id, recipient_name, idea_id, title, description, photo_path, " +
+                        "price_cents, purchase_date, shop, order_url, tracking_number, notes, category_id, status, " +
+                        "created_at, updated_at) " +
+                        "VALUES ('$id', 'e', NULL, 'Léa', NULL, 'Livre', '', NULL, NULL, NULL, '', '', '', '', NULL, '$status', 1, 1)",
+                )
+            }
+        }
+        helper.runMigrationsAndValidate(dbName, 18, true, Migrations.MIGRATION_17_18).use { db ->
+            db.query("SELECT id, status FROM planned_gift ORDER BY id").use { c ->
+                val rows = buildList { while (c.moveToNext()) add(c.getString(0) to c.getString(1)) }
+                assertEquals(listOf("g1" to "TO_WRAP", "g2" to "ORDERED"), rows)
+            }
+        }
     }
 }

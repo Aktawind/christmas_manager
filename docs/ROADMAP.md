@@ -57,7 +57,7 @@ des notes de version `docs/release-notes/vX.Y.Z.md`.
 | G-003 | Catalogue d'idées indépendant des années (titre, description, photo, prix, lien, boutique, notes, catégorie) | ✅ |
 | G-004 | Une idée liée à plusieurs personnes / plusieurs années (« Offrir cette idée à… ») | ✅ |
 | G-005 | Cadeaux prévus : instance d'une idée pour une personne et une année (snapshot)    | ✅ |
-| G-006 | Statuts À acheter → Commandé → Reçu → À emballer → Emballé → Offert, choisis dans un **menu déroulant** | ✅ |
+| G-006 | Statuts À acheter → Commandé → À emballer → Emballé → Offert, choisis dans un **menu déroulant** | ✅ |
 | G-007 | Vues : par destinataire, par statut, par catégorie ; filtres achetés, à emballer, non reçus | ✅ |
 | G-008 | Budget cadeaux : prévu / dépensé, total et par personne, **enveloppe par personne et par année** (affichage doux, jamais en rouge) | ✅ |
 | G-009 | Photos : galerie, appareil photo, redimensionnement, incluses dans les sauvegardes | ✅ |
@@ -170,6 +170,7 @@ Pas de dates ni de priorités (ADR 0006).
 | D-005 | Budget : poste « Atelier » (fournitures des bricolages au programme ; cochées = dépensé) | 🧪 |
 | D-006 | Une quinzaine d'idées de bricolages à piocher, avec leurs fournitures            | 🧪 |
 | D-007 | Recherche (bricolages, fournitures, déco), accueil « L'atelier », sauvegarde     | 🧪 |
+| G-030 | Cadeaux : le statut « Reçu » disparaît (doublon de « À emballer ») ; les cadeaux reçus passent « À emballer » | 🧪 |
 | B-010 | Dépassement de budget : barre d'un orange un peu plus foncé, sans note sous la carte | 🧪 |
 
 ## v0.10.0 — La boîte à souvenirs 📖

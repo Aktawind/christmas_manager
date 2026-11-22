@@ -30,4 +30,7 @@ s'en tenir à un simple tableau d'inspiration pour la décoration.
 - **Dépassements de budget** (retour utilisatrice) : plus aucune note sous les cartes (elles
   gardent la même hauteur) ; la barre passe simplement d'or à un orange un peu plus foncé
   (`overBudget`), partout où il y a un budget.
-- Base Room v17, format de sauvegarde v11.
+- **Statut « Reçu » retiré** (retour utilisatrice : identique à « À emballer ») : un cadeau
+  commandé passe directement « À emballer ». Les cadeaux « Reçu » deviennent « À emballer »
+  (migration Room 17 → 18, et à l'import des anciennes sauvegardes).
+- Base Room v18, format de sauvegarde v11.

@@ -109,7 +109,7 @@ class SuggestionsTest {
 
         val sync = SyncSuggestedTasksUseCase(repo, FixedTime())
         assertEquals(0, sync("e", suggestionStates(source(gift("a", GiftStatus.ORDERED)))))
-        assertEquals(1, sync("e", suggestionStates(source(gift("a", GiftStatus.RECEIVED)))))
+        assertEquals(1, sync("e", suggestionStates(source(gift("a", GiftStatus.TO_WRAP)))))
         assertEquals(TaskStatus.DONE, repo.getTask(task.id)?.status)
         // Le cadeau revient à « Commandé » : la tâche redevient à faire.
         sync("e", suggestionStates(source(gift("a", GiftStatus.ORDERED))))

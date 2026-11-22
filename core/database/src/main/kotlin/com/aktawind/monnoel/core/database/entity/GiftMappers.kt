@@ -61,7 +61,7 @@ fun PlannedGiftEntity.asModel() = PlannedGift(
     trackingNumber = trackingNumber,
     notes = notes,
     categoryId = categoryId,
-    status = runCatching { GiftStatus.valueOf(status) }.getOrDefault(GiftStatus.TO_BUY),
+    status = runCatching { GiftStatus.valueOf(legacyGiftStatus(status)) }.getOrDefault(GiftStatus.TO_BUY),
     createdAt = Instant.ofEpochMilli(createdAt),
     updatedAt = Instant.ofEpochMilli(updatedAt),
 )
@@ -73,3 +73,6 @@ fun PlannedGift.asEntity() = PlannedGiftEntity(
 )
 
 fun PersonBudgetEntity.asModel() = PersonBudget(editionId, personId, amountCents)
+
+/** « Reçu » (retiré en v0.9.0) est devenu « À emballer ». */
+fun legacyGiftStatus(status: String): String = if (status == "RECEIVED") "TO_WRAP" else status
