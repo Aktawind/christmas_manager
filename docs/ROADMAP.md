@@ -19,7 +19,7 @@ Légende des statuts : ⬜ À faire · 🚧 En cours · 🧪 À tester · ✅ Va
 | v0.5.0  | Le fournil                  | Bibliothèque de recettes (nom + photo), préparations de l'année       | ✅ |
 | v0.6.0  | La table de fête            | Repas, convives, menus par moments, plats à commander                 | ✅ |
 | v0.7.0  | Les comptes du Père Noël    | Onglet Budget, autres dépenses, répartition, comparaison des années   | ✅ |
-| v0.8.0  | Les traditions              | Catalogue de traditions, programme annuel, inspirations               | 🧪 |
+| v0.8.0  | Les traditions              | Catalogue de traditions, programme annuel, inspirations               | ✅ |
 | v0.9.0  | L'atelier des lutins        | Activités & DIY, projets créatifs, décoration                         | ⬜ |
 | v0.10.0 | La boîte à souvenirs        | Journal, archives, bilans annuels, duplication d'une année, export PDF | ⬜ |
 | v1.0.0  | Noël magique                | Finitions, animations, accessibilité, performances, robustesse        | ⬜ |
@@ -149,15 +149,15 @@ Pas de dates ni de priorités (ADR 0006).
 
 | ID    | Fonctionnalité                                                                 | Statut |
 | ----- | ------------------------------------------------------------------------------ | ------ |
-| T-001 | Catalogue : nom, photo, catégorie, période (listes déroulantes), avec qui, notes, ❤️ favorites | 🧪 |
-| T-002 | Une vingtaine d'idées de traditions à piocher (ajoutées seulement si on les choisit) | 🧪 |
-| T-003 | Programme de chaque Noël : « au programme », « faite ✓ » avec photo souvenir et petit mot ; « faite en 2025, 2026 » | 🧪 |
-| T-004 | Inspirations (films, dessins animés, livres, musiques, sorties, activités) cochées pour chaque Noël | 🧪 |
-| T-005 | Recherche, accueil « Nos traditions », partage « Ranger comme : Inspiration », sauvegarde | 🧪 |
-| T-006 | Trois onglets : Au programme · Nos traditions · Inspirations ; une cinquantaine d'idées | 🧪 |
-| P-020 | Chemin vers Noël : dates qui comptent (Réglages → Le chemin vers Noël) | 🧪 |
-| P-021 | Ma liste et l'onglet Recherche supprimés ; loupe dans Mes Noëls ; Cadeaux → Listes | 🧪 |
-| P-022 | Accueil : carte Ma liste retirée, Cadeaux → onglet Cadeaux, Le fournil → Préparations ; comptes sans lignes vides | 🧪 |
+| T-001 | Catalogue : nom, photo, catégorie, période (listes déroulantes), avec qui, notes, ❤️ favorites | ✅ |
+| T-002 | Une vingtaine d'idées de traditions à piocher (ajoutées seulement si on les choisit) | ✅ |
+| T-003 | Programme de chaque Noël : « au programme », « faite ✓ » avec photo souvenir et petit mot ; « faite en 2025, 2026 » | ✅ |
+| T-004 | Inspirations (films, dessins animés, livres, musiques, sorties, activités) cochées pour chaque Noël | ✅ |
+| T-005 | Recherche, accueil « Nos traditions », partage « Ranger comme : Inspiration », sauvegarde | ✅ |
+| T-006 | Trois onglets : Au programme · Nos traditions · Inspirations ; une cinquantaine d'idées | ✅ |
+| P-020 | Chemin vers Noël : dates qui comptent (Réglages → Le chemin vers Noël) | ✅ |
+| P-021 | Ma liste et l'onglet Recherche supprimés ; loupe dans Mes Noëls ; Cadeaux → Listes | ✅ |
+| P-022 | Accueil : carte Ma liste retirée, Cadeaux → onglet Cadeaux, Le fournil → Préparations ; comptes sans lignes vides | ✅ |
 
 ## v0.9.0 — L'atelier des lutins ✂️
 
