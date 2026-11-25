@@ -1,6 +1,7 @@
 package com.aktawind.monnoel.core.model
 
 import java.time.Instant
+import java.time.LocalDate
 
 enum class TraditionCategory { HOME, OUTINGS, COOKING, FILMS_BOOKS, FAMILY, OTHER }
 
@@ -29,6 +30,8 @@ data class TraditionYear(
     val memoryPhotoPath: String?,
     val memoryNote: String,
     val createdAt: Instant,
+    /** Date prévue cette année (facultative). */
+    val date: LocalDate? = null,
 )
 
 enum class InspirationKind { FILM, CARTOON, BOOK, MUSIC, OUTING, ACTIVITY }

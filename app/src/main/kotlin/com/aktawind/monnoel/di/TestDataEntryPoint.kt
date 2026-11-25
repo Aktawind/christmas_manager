@@ -30,7 +30,9 @@ import com.aktawind.monnoel.core.domain.traditions.SaveTraditionMemoryUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveTraditionUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetCraftStatusUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetCraftSupplyBoughtUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetInspirationDateUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetInspirationDoneUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetTraditionDateUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetTraditionPlannedUseCase
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -103,4 +105,8 @@ interface TestDataEntryPoint {
     fun setCraftSupplyBought(): SetCraftSupplyBoughtUseCase
 
     fun saveDecor(): SaveDecorUseCase
+
+    fun setTraditionDate(): SetTraditionDateUseCase
+
+    fun setInspirationDate(): SetInspirationDateUseCase
 }

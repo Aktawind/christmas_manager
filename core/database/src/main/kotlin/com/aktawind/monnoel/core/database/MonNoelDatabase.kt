@@ -35,6 +35,7 @@ import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
 import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.IdeaRequestEntity
+import com.aktawind.monnoel.core.database.entity.InspirationDateEntity
 import com.aktawind.monnoel.core.database.entity.InspirationDoneEntity
 import com.aktawind.monnoel.core.database.entity.InspirationEntity
 import com.aktawind.monnoel.core.database.entity.MealDishEntity
@@ -102,6 +103,7 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         TraditionYearEntity::class,
         InspirationEntity::class,
         InspirationDoneEntity::class,
+        InspirationDateEntity::class,
         SpecialDateEntity::class,
         CraftEntity::class,
         CraftSupplyEntity::class,
@@ -109,7 +111,7 @@ import com.aktawind.monnoel.core.database.entity.WhisperEntity
         CraftSupplyBoughtEntity::class,
         DecorIdeaEntity::class,
     ],
-    version = 18,
+    version = 19,
     exportSchema = true,
 )
 abstract class MonNoelDatabase : RoomDatabase() {

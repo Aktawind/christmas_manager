@@ -283,8 +283,13 @@ internal sealed interface DecorFilter {
 }
 
 @Composable
-internal fun DecorTab(state: TraditionsUiState, onOpen: (String) -> Unit, onFavorite: (DecorIdea) -> Unit) {
-    var filter by remember { mutableStateOf<DecorFilter>(DecorFilter.All) }
+internal fun DecorTab(
+    state: TraditionsUiState,
+    filter: DecorFilter,
+    onFilter: (DecorFilter) -> Unit,
+    onOpen: (String) -> Unit,
+    onFavorite: (DecorIdea) -> Unit,
+) {
     val visible = state.decor.filter {
         when (val f = filter) {
             DecorFilter.All -> true
@@ -304,18 +309,18 @@ internal fun DecorTab(state: TraditionsUiState, onOpen: (String) -> Unit, onFavo
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = filter == DecorFilter.All,
-                        onClick = { filter = DecorFilter.All },
+                        onClick = { onFilter(DecorFilter.All) },
                         label = { Text(stringResource(R.string.filter_everything)) },
                     )
                     FilterChip(
                         selected = filter == DecorFilter.Favorites,
-                        onClick = { filter = DecorFilter.Favorites },
+                        onClick = { onFilter(DecorFilter.Favorites) },
                         label = { Text(stringResource(R.string.decor_favorites)) },
                     )
                     DecorPlace.entries.forEach { p ->
                         FilterChip(
                             selected = filter == DecorFilter.Place(p),
-                            onClick = { filter = DecorFilter.Place(p) },
+                            onClick = { onFilter(DecorFilter.Place(p)) },
                             label = { Text("${p.emoji} ${stringResource(p.label)}") },
                         )
                     }
@@ -378,17 +383,20 @@ private fun DecorCard(decor: DecorIdea, onClick: () -> Unit, onFavorite: () -> U
 @Composable
 internal fun DecorDialog(
     decor: DecorIdea?,
+    initialPlace: DecorPlace,
+    initialFavorite: Boolean,
+    onDuplicate: (() -> Unit)?,
     onImportPhoto: (String, (String) -> Unit) -> Unit,
     onSave: (DecorDraft) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     var title by rememberSaveable { mutableStateOf(decor?.title.orEmpty()) }
-    var place by rememberSaveable { mutableStateOf(decor?.place ?: DecorPlace.TREE) }
+    var place by rememberSaveable { mutableStateOf(decor?.place ?: initialPlace) }
     var photo by rememberSaveable { mutableStateOf(decor?.photoPath) }
     var url by rememberSaveable { mutableStateOf(decor?.url.orEmpty()) }
     var comment by rememberSaveable { mutableStateOf(decor?.comment.orEmpty()) }
-    var favorite by rememberSaveable { mutableStateOf(decor?.favorite ?: false) }
+    var favorite by rememberSaveable { mutableStateOf(decor?.favorite ?: initialFavorite) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (decor == null) R.string.decor_new else R.string.decor_edit)) },
@@ -419,6 +427,9 @@ internal fun DecorDialog(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.decor_favorites), modifier = Modifier.weight(1f))
                     Switch(checked = favorite, onCheckedChange = { favorite = it })
+                }
+                if (onDuplicate != null) {
+                    OutlinedButton(onClick = onDuplicate) { Text(stringResource(UiR.string.action_duplicate)) }
                 }
             }
         },

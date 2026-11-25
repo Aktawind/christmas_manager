@@ -3,6 +3,7 @@ package com.aktawind.monnoel.core.domain.traditions
 import com.aktawind.monnoel.core.model.Inspiration
 import com.aktawind.monnoel.core.model.Tradition
 import com.aktawind.monnoel.core.model.TraditionYear
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 
 interface TraditionRepository {
@@ -39,4 +40,9 @@ interface TraditionRepository {
     fun observeDone(editionId: String): Flow<Set<String>>
 
     suspend fun setDone(editionId: String, inspirationId: String, done: Boolean)
+
+    /** Dates prévues des inspirations pour un Noël, par inspiration. */
+    fun observeInspirationDates(editionId: String): Flow<Map<String, LocalDate>>
+
+    suspend fun setInspirationDate(editionId: String, inspirationId: String, date: LocalDate?)
 }

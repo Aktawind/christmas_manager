@@ -13,6 +13,7 @@ import com.aktawind.monnoel.core.model.Tradition
 import com.aktawind.monnoel.core.model.TraditionCategory
 import com.aktawind.monnoel.core.model.TraditionPeriod
 import com.aktawind.monnoel.core.model.TraditionYear
+import java.time.LocalDate
 import javax.inject.Inject
 
 data class TraditionDraft(
@@ -235,5 +236,74 @@ class SetInspirationDoneUseCase @Inject constructor(private val traditions: Trad
         guard.check(editionId)?.let { return AppResult.Failure(it) }
         traditions.setDone(editionId, inspirationId, done)
         return AppResult.Success(Unit)
+    }
+}
+
+/** Date prévue d'une tradition pour un Noël ; elle passe au programme si besoin. */
+class SetTraditionDateUseCase @Inject constructor(
+    private val traditions: TraditionRepository,
+    private val guard: EditionGuard,
+    private val time: TimeProvider,
+    private val ids: IdGenerator,
+) {
+    suspend operator fun invoke(editionId: String, traditionId: String, date: LocalDate?): AppResult<Unit> {
+        guard.check(editionId)?.let { return AppResult.Failure(it) }
+        val existing = traditions.getYear(editionId, traditionId)
+        if (existing == null && date == null) return AppResult.Success(Unit)
+        val year = existing ?: TraditionYear(ids.newId(), editionId, traditionId, false, null, "", time.now())
+        traditions.saveYear(year.copy(date = date))
+        return AppResult.Success(Unit)
+    }
+}
+
+class SetInspirationDateUseCase @Inject constructor(private val traditions: TraditionRepository, private val guard: EditionGuard) {
+    suspend operator fun invoke(editionId: String, inspirationId: String, date: LocalDate?): AppResult<Unit> {
+        guard.check(editionId)?.let { return AppResult.Failure(it) }
+        traditions.setInspirationDate(editionId, inspirationId, date)
+        return AppResult.Success(Unit)
+    }
+}
+
+/** Copie d'une tradition (photo comprise), sans son programme ni ses souvenirs. */
+class DuplicateTraditionUseCase @Inject constructor(
+    private val traditions: TraditionRepository,
+    private val photos: PhotoRepository,
+    private val time: TimeProvider,
+    private val ids: IdGenerator,
+) {
+    suspend operator fun invoke(id: String, newName: String): AppResult<Tradition> {
+        val source = traditions.getTradition(id) ?: return AppResult.Failure(AppError.NotFound)
+        val now = time.now()
+        val copy = source.copy(
+            id = ids.newId(),
+            name = newName.trim().ifBlank { source.name },
+            photoPath = source.photoPath?.let { photos.copyPhoto(it) },
+            createdAt = now,
+            updatedAt = now,
+        )
+        traditions.saveTradition(copy)
+        return AppResult.Success(copy)
+    }
+}
+
+/** Copie d'une inspiration (photo comprise), sans « fait cette année » ni date. */
+class DuplicateInspirationUseCase @Inject constructor(
+    private val traditions: TraditionRepository,
+    private val photos: PhotoRepository,
+    private val time: TimeProvider,
+    private val ids: IdGenerator,
+) {
+    suspend operator fun invoke(id: String, newTitle: String): AppResult<Inspiration> {
+        val source = traditions.getInspiration(id) ?: return AppResult.Failure(AppError.NotFound)
+        val now = time.now()
+        val copy = source.copy(
+            id = ids.newId(),
+            title = newTitle.trim().ifBlank { source.title },
+            photoPath = source.photoPath?.let { photos.copyPhoto(it) },
+            createdAt = now,
+            updatedAt = now,
+        )
+        traditions.saveInspiration(copy)
+        return AppResult.Success(copy)
     }
 }

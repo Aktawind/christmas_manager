@@ -266,9 +266,23 @@ object Migrations {
         }
     }
 
+    /** v0.9.0 : date prévue d'une tradition et d'une inspiration pour un Noël. */
+    val MIGRATION_18_19 = object : Migration(18, 19) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE tradition_year ADD COLUMN `date` TEXT")
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `inspiration_date` (`edition_id` TEXT NOT NULL, `inspiration_id` TEXT NOT NULL, " +
+                    "`date` TEXT NOT NULL, PRIMARY KEY(`edition_id`, `inspiration_id`), FOREIGN KEY(`edition_id`) REFERENCES " +
+                    "`christmas_edition`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`inspiration_id`) REFERENCES " +
+                    "`inspiration`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_inspiration_date_inspiration_id` ON `inspiration_date` (`inspiration_id`)")
+        }
+    }
+
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
         MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
-        MIGRATION_16_17, MIGRATION_17_18,
+        MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
     )
 }

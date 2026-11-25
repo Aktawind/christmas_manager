@@ -15,12 +15,16 @@ import com.aktawind.monnoel.core.domain.traditions.CraftRepository
 import com.aktawind.monnoel.core.domain.traditions.DecorDraft
 import com.aktawind.monnoel.core.domain.traditions.DeleteDecorUseCase
 import com.aktawind.monnoel.core.domain.traditions.DeleteInspirationUseCase
+import com.aktawind.monnoel.core.domain.traditions.DuplicateDecorUseCase
+import com.aktawind.monnoel.core.domain.traditions.DuplicateInspirationUseCase
 import com.aktawind.monnoel.core.domain.traditions.InspirationDraft
 import com.aktawind.monnoel.core.domain.traditions.SaveDecorUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveInspirationUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveTraditionMemoryUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetCraftStatusUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetInspirationDateUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetInspirationDoneUseCase
+import com.aktawind.monnoel.core.domain.traditions.SetTraditionDateUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetTraditionFavoriteUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetTraditionPlannedUseCase
 import com.aktawind.monnoel.core.domain.traditions.TraditionIdea
@@ -40,6 +44,7 @@ import com.aktawind.monnoel.core.ui.UiMessage
 import com.aktawind.monnoel.core.ui.toUiMessage
 import com.aktawind.monnoel.feature.traditions.navigation.TraditionsDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +69,8 @@ data class TraditionsUiState(
     val inspirations: List<Inspiration> = emptyList(),
     /** Inspirations vues / faites ce Noël. */
     val inspirationsDone: Set<String> = emptySet(),
+    /** Dates prévues des inspirations pour ce Noël. */
+    val inspirationDates: Map<String, LocalDate> = emptyMap(),
     val crafts: List<Craft> = emptyList(),
     val craftSupplies: Map<String, List<CraftSupply>> = emptyMap(),
     /** Avancement de chaque bricolage pour le Noël affiché (absent = simple idée). */
@@ -86,7 +93,12 @@ private data class Workshop(
     val decor: List<DecorIdea>,
 )
 
-private data class YearData(val edition: ChristmasEdition?, val program: List<TraditionYear>, val done: Set<String>)
+private data class YearData(
+    val edition: ChristmasEdition?,
+    val program: List<TraditionYear>,
+    val done: Set<String>,
+    val inspirationDates: Map<String, LocalDate> = emptyMap(),
+)
 
 @HiltViewModel
 class TraditionsViewModel @Inject constructor(
@@ -101,6 +113,10 @@ class TraditionsViewModel @Inject constructor(
     private val saveInspiration: SaveInspirationUseCase,
     private val deleteInspiration: DeleteInspirationUseCase,
     private val setInspirationDone: SetInspirationDoneUseCase,
+    private val setTraditionDate: SetTraditionDateUseCase,
+    private val setInspirationDate: SetInspirationDateUseCase,
+    private val duplicateInspiration: DuplicateInspirationUseCase,
+    private val duplicateDecor: DuplicateDecorUseCase,
     crafts: CraftRepository,
     private val setCraftStatus: SetCraftStatusUseCase,
     private val addCraftIdeas: AddCraftIdeasUseCase,
@@ -125,7 +141,11 @@ class TraditionsViewModel @Inject constructor(
         if (edition == null) {
             flowOf(YearData(null, emptyList(), emptySet()))
         } else {
-            combine(traditions.observeYears(edition.id), traditions.observeDone(edition.id)) { p, d -> YearData(edition, p, d) }
+            combine(
+                traditions.observeYears(edition.id),
+                traditions.observeDone(edition.id),
+                traditions.observeInspirationDates(edition.id),
+            ) { p, d, dates -> YearData(edition, p, d, dates) }
         }
     }
 
@@ -160,6 +180,7 @@ class TraditionsViewModel @Inject constructor(
             ideas = availableTraditionIdeas(list),
             inspirations = inspirations,
             inspirationsDone = year.done,
+            inspirationDates = year.inspirationDates,
             crafts = shop.crafts,
             craftSupplies = shop.supplies.groupBy { it.craftId }.mapValues { (_, l) -> l.sortedBy { it.sortOrder } },
             craftProgram = shop.years.filter { it.editionId == editionId }.associateBy { it.craftId },
@@ -183,10 +204,13 @@ class TraditionsViewModel @Inject constructor(
         report(setPlanned.invoke(edition.id, traditionId, planned))
     }
 
-    fun saveMemory(traditionId: String, done: Boolean, photoPath: String?, note: String) = viewModelScope.launch {
+    fun saveMemory(traditionId: String, done: Boolean, photoPath: String?, note: String, date: LocalDate?) = viewModelScope.launch {
         val edition = uiState.value.edition ?: return@launch
         val result = saveMemory.invoke(edition.id, traditionId, done, photoPath, note)
-        if (result is AppResult.Success) drafts.committed(photoPath)
+        if (result is AppResult.Success) {
+            drafts.committed(photoPath)
+            report(setTraditionDate(edition.id, traditionId, date))
+        }
         report(result)
     }
 
@@ -195,9 +219,16 @@ class TraditionsViewModel @Inject constructor(
         if (count > 0) message.value = UiMessage(R.string.ideas_added, listOf(count))
     }
 
-    fun saveInspiration(id: String?, draft: InspirationDraft) = viewModelScope.launch {
+    fun saveInspiration(id: String?, draft: InspirationDraft, date: LocalDate?) = viewModelScope.launch {
         val result = saveInspiration.invoke(id, draft)
-        if (result is AppResult.Success) drafts.committed(draft.photoPath)
+        if (result is AppResult.Success) {
+            drafts.committed(draft.photoPath)
+            val state = uiState.value
+            val edition = state.edition
+            if (edition != null && !state.readOnly && date != state.inspirationDates[result.value.id]) {
+                report(setInspirationDate(edition.id, result.value.id, date))
+            }
+        }
         report(result)
     }
 
@@ -229,6 +260,21 @@ class TraditionsViewModel @Inject constructor(
     }
 
     fun deleteDecor(id: String) = viewModelScope.launch { report(deleteDecor.invoke(id)) }
+
+    /** Copie de l'inspiration ; [onCopied] reçoit l'identifiant de la copie, à ouvrir. */
+    fun duplicateInspiration(id: String, title: String, onCopied: (String) -> Unit) = viewModelScope.launch {
+        when (val result = duplicateInspiration.invoke(id, title)) {
+            is AppResult.Success -> onCopied(result.value.id)
+            is AppResult.Failure -> report(result)
+        }
+    }
+
+    fun duplicateDecor(id: String, title: String, onCopied: (String) -> Unit) = viewModelScope.launch {
+        when (val result = duplicateDecor.invoke(id, title)) {
+            is AppResult.Success -> onCopied(result.value.id)
+            is AppResult.Failure -> report(result)
+        }
+    }
 
     fun importPhoto(uri: String, onImported: (String) -> Unit) = viewModelScope.launch {
         when (val result = photos.importPhoto(uri)) {

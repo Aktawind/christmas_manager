@@ -67,6 +67,7 @@ data class BackupData(
     val craftYears: List<CraftYearDto> = emptyList(),
     val craftSuppliesBought: List<CraftSupplyBoughtDto> = emptyList(),
     val decorIdeas: List<DecorIdeaDto> = emptyList(),
+    val inspirationDates: List<InspirationDateDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "editions" to editions.size,
@@ -388,6 +389,7 @@ data class TraditionYearDto(
     val memoryPhotoPath: String? = null,
     val memoryNote: String = "",
     val createdAt: Long,
+    val date: String? = null,
 )
 
 @Serializable
@@ -401,6 +403,9 @@ data class InspirationDto(
     val createdAt: Long,
     val updatedAt: Long,
 )
+
+@Serializable
+data class InspirationDateDto(val editionId: String, val inspirationId: String, val date: String)
 
 @Serializable
 data class InspirationDoneDto(val editionId: String, val inspirationId: String)

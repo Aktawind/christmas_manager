@@ -85,15 +85,11 @@
         <item quantity="many">%1$d plats à commander</item>
         <item quantity="other">%1$d plats à commander</item>
     </plurals>
-    <string name="home_advent_ready_bought">%1$s · tout prêt, acheté ✓</string>
-    <string name="home_advent_ready_to_buy">%1$s · tout prêt, à acheter</string>
     <string name="home_cooking_title">Le fournil</string>
     <string name="home_cooking_empty">Rien de prévu pour l’instant : sablés, bûche, truffes… ?</string>
     <string name="home_cooking_progress">%1$d sur %2$d préparés</string>
     <string name="home_cooking_all_done">Tout est prêt : %1$d gourmandises ✨</string>
     <string name="home_advent_empty">Aucun calendrier pour l’instant.</string>
-    <string name="home_advent_line">%1$s · %2$d / %3$d cases prêtes</string>
-    <string name="home_advent_today">Aujourd’hui, case n°%1$d : %2$s</string>
     <string name="home_advent_today_empty">encore vide</string>
     <string name="home_path_title">Le chemin vers Noël</string>
     <string name="home_path_advent">Ouverture des calendriers</string>
@@ -106,4 +102,17 @@
     <string name="home_progress_gifts">%1$d / %2$d cadeaux emballés ou offerts</string>
     <string name="home_progress_boxes">%1$d / %2$d cases prêtes</string>
     <string name="home_progress_tasks">%1$d chose(s) faite(s)</string>
+    <plurals name="home_advent_count">
+        <item quantity="one">%1$d calendrier de l’Avent</item>
+        <item quantity="many">%1$d calendriers de l’Avent</item>
+        <item quantity="other">%1$d calendriers de l’Avent</item>
+    </plurals>
+    <plurals name="home_advent_ready">
+        <item quantity="one">%1$d prêt</item>
+        <item quantity="many">%1$d prêts</item>
+        <item quantity="other">%1$d prêts</item>
+    </plurals>
+    <string name="home_advent_in_progress">%1$d en préparation</string>
+    <string name="home_advent_to_buy">%1$d à acheter</string>
+    <string name="home_advent_today_named">%1$s · aujourd’hui, case n°%2$d : %3$s</string>
 </resources>

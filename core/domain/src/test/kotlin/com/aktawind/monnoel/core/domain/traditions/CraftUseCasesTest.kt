@@ -190,4 +190,21 @@ class CraftUseCasesTest {
         assertTrue(repo.decor.value.isEmpty())
         assertTrue("photos/t.jpg" in photos.deleted)
     }
+
+    @Test
+    fun `dupliquer un bricolage avec ses fournitures et une deco`() = runTest {
+        seedEditions()
+        val craft = (save(null, CraftDraft("Couronne", photoPath = "photos/c.jpg")) as AppResult.Success).value
+        saveSupply(null, craft.id, "Ruban", 450)
+        saveSupply(null, craft.id, "Mousse", null)
+        setStatus("e", craft.id, CraftStatus.PLANNED)
+        val copy = (DuplicateCraftUseCase(repo, photos, time, ids)(craft.id, "Couronne (copie)") as AppResult.Success).value
+        assertEquals(listOf("Ruban", "Mousse"), repo.getSupplies(copy.id).map { it.name })
+        assertEquals(2, repo.getSupplies(craft.id).size)
+        // L'avancement de l'année n'est pas copié.
+        assertNull(repo.getYear("e", copy.id))
+        val decor = (SaveDecorUseCase(repo, photos, time, ids)(null, DecorDraft("Table", DecorPlace.TABLE)) as AppResult.Success).value
+        val decorCopy = (DuplicateDecorUseCase(repo, photos, time, ids)(decor.id, "Table (copie)") as AppResult.Success).value
+        assertEquals(DecorPlace.TABLE, decorCopy.place)
+    }
 }

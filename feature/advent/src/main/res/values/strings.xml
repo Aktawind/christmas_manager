@@ -31,8 +31,8 @@
     <string name="calendar_delete_message">Le calendrier, ses cases et ses fournitures seront effacés.</string>
     <string name="calendar_read_only">Ce Noël est archivé : le calendrier se consulte mais ne se modifie plus.</string>
     <string name="calendar_status_line">%1$d / %2$d prêtes · %3$d à préparer · %4$d à trouver</string>
-    <string name="calendar_budget_line">Prévu %1$s · Dépensé %2$s</string>
-    <string name="calendar_budget_of"> · Budget %1$s</string>
+    <string name="calendar_spent_line">Dépensé %1$s</string>
+    <string name="calendar_spent_budget_line">Dépensé %1$s · Budget %2$s</string>
     <string name="calendar_filter_to_prepare">Seulement ce qui reste à faire</string>
     <string name="box_cell_description">Case %1$d : %2$s, %3$s</string>
     <string name="supplies_title">Fournitures et achats groupés</string>

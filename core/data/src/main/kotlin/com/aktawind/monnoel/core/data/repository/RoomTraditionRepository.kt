@@ -1,6 +1,7 @@
 package com.aktawind.monnoel.core.data.repository
 
 import com.aktawind.monnoel.core.database.dao.TraditionDao
+import com.aktawind.monnoel.core.database.entity.InspirationDateEntity
 import com.aktawind.monnoel.core.database.entity.InspirationDoneEntity
 import com.aktawind.monnoel.core.database.entity.asEntity
 import com.aktawind.monnoel.core.database.entity.asModel
@@ -8,6 +9,7 @@ import com.aktawind.monnoel.core.domain.traditions.TraditionRepository
 import com.aktawind.monnoel.core.model.Inspiration
 import com.aktawind.monnoel.core.model.Tradition
 import com.aktawind.monnoel.core.model.TraditionYear
+import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -52,5 +54,17 @@ class RoomTraditionRepository @Inject constructor(private val dao: TraditionDao)
 
     override suspend fun setDone(editionId: String, inspirationId: String, done: Boolean) {
         if (done) dao.insertDone(listOf(InspirationDoneEntity(editionId, inspirationId))) else dao.deleteDone(editionId, inspirationId)
+    }
+
+    override fun observeInspirationDates(editionId: String) = dao.observeInspirationDates(editionId).map { list ->
+        list.mapNotNull { e -> runCatching { LocalDate.parse(e.date) }.getOrNull()?.let { e.inspirationId to it } }.toMap()
+    }
+
+    override suspend fun setInspirationDate(editionId: String, inspirationId: String, date: LocalDate?) {
+        if (date == null) {
+            dao.deleteInspirationDate(editionId, inspirationId)
+        } else {
+            dao.insertInspirationDates(listOf(InspirationDateEntity(editionId, inspirationId, date.toString())))
+        }
     }
 }

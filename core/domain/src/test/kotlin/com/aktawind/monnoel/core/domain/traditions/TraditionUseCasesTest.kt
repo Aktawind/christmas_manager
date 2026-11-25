@@ -74,6 +74,15 @@ class FakeTraditionRepository : TraditionRepository {
     override suspend fun setDone(editionId: String, inspirationId: String, done: Boolean) {
         this.done.value = if (done) this.done.value + (editionId to inspirationId) else this.done.value - (editionId to inspirationId)
     }
+
+    val dates = MutableStateFlow<Map<Pair<String, String>, java.time.LocalDate>>(emptyMap())
+
+    override fun observeInspirationDates(editionId: String) =
+        dates.map { m -> m.filterKeys { it.first == editionId }.mapKeys { it.key.second } }
+
+    override suspend fun setInspirationDate(editionId: String, inspirationId: String, date: java.time.LocalDate?) {
+        dates.value = if (date == null) dates.value - (editionId to inspirationId) else dates.value + ((editionId to inspirationId) to date)
+    }
 }
 
 private class Photos : PhotoRepository {
@@ -153,5 +162,44 @@ class TraditionUseCasesTest {
         assertTrue(repo.done.value.none { it.first == "next" })
         setDone("e", film.id, false)
         assertTrue(repo.done.value.isEmpty())
+    }
+
+    @Test
+    fun `date prevue d'une tradition et d'une inspiration`() = runTest {
+        setUp()
+        val lutin = (save(null, TraditionDraft("Le lutin")) as AppResult.Success).value
+        val setDate = SetTraditionDateUseCase(repo, guard, time, ids)
+        val date = java.time.LocalDate.of(2026, 12, 6)
+        setDate("e", lutin.id, date)
+        // La tradition passe au programme avec sa date ; le souvenir la garde.
+        assertEquals(date, repo.getYear("e", lutin.id)?.date)
+        SaveTraditionMemoryUseCase(repo, photos, guard, time, ids)("e", lutin.id, true, null, "Magique")
+        assertEquals(date, repo.getYear("e", lutin.id)?.date)
+        setDate("e", lutin.id, null)
+        assertEquals(null, repo.getYear("e", lutin.id)?.date)
+        assertEquals(AppResult.Failure(AppError.ReadOnly), setDate("old", lutin.id, date))
+
+        val film = (SaveInspirationUseCase(repo, photos, time, ids)(null, InspirationDraft("Le Grinch"))).let {
+            (it as AppResult.Success).value
+        }
+        val setInspirationDate = SetInspirationDateUseCase(repo, guard)
+        setInspirationDate("e", film.id, date)
+        assertEquals(mapOf(film.id to date), repo.dates.value.filterKeys { it.first == "e" }.mapKeys { it.key.second })
+        setInspirationDate("e", film.id, null)
+        assertTrue(repo.dates.value.isEmpty())
+    }
+
+    @Test
+    fun `dupliquer une tradition et une inspiration`() = runTest {
+        val lutin = (save(null, TraditionDraft("Le lutin", photoPath = "photos/l.jpg", favorite = true)) as AppResult.Success).value
+        val copy = (DuplicateTraditionUseCase(repo, photos, time, ids)(lutin.id, "Le lutin (copie)") as AppResult.Success).value
+        assertEquals("Le lutin (copie)", copy.name)
+        assertTrue(copy.id != lutin.id && copy.photoPath != null && copy.photoPath != lutin.photoPath)
+        assertEquals(true, copy.favorite)
+        assertEquals(2, repo.traditions.value.size)
+        val film = (SaveInspirationUseCase(repo, photos, time, ids)(null, InspirationDraft("Le Grinch")) as AppResult.Success).value
+        val filmCopy = (DuplicateInspirationUseCase(repo, photos, time, ids)(film.id, "Le Grinch (copie)") as AppResult.Success).value
+        assertEquals(film.kind, filmCopy.kind)
+        assertEquals(2, repo.inspirations.value.size)
     }
 }

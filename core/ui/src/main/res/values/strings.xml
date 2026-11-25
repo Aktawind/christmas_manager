@@ -105,8 +105,8 @@
     <string name="suggestion_kind_calendar_buy">Acheter les calendriers tout prêts</string>
     <string name="suggestion_kind_menu">Préparer le menu des repas</string>
     <string name="suggestion_kind_order">Commander les plats à commander</string>
-    <string name="meal_type_eve">Réveillon du 24</string>
-    <string name="meal_type_day">Déjeuner du 25</string>
+    <string name="meal_type_eve">Réveillon</string>
+    <string name="meal_type_day">Déjeuner de Noël</string>
     <string name="meal_type_brunch">Brunch</string>
     <string name="meal_type_snack">Goûter</string>
     <string name="meal_type_friends">Repas entre amis</string>
@@ -140,4 +140,9 @@
     <string name="quick_decor_title">Garder une idée déco</string>
     <string name="quick_decor_place">Pour</string>
     <string name="quick_decor_hint">Elle rejoint l’onglet Traditions → Décoration, votre tableau d’inspiration.</string>
+    <string name="date_choose">📅 Choisir une date (facultatif)</string>
+    <string name="date_clear">Retirer la date</string>
+    <string name="date_ok">OK</string>
+    <string name="action_duplicate">Dupliquer</string>
+    <string name="copy_title">%1$s (copie)</string>
 </resources>

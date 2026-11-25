@@ -78,7 +78,10 @@ data class CalendarProgress(
     val todayBox: AdventBox?,
     /** Calendrier acheté tout prêt : null pour un calendrier fait maison, sinon acheté ou non. */
     val readyMadeBought: Boolean? = null,
-)
+) {
+    /** Terminé : toutes les cases prêtes, ou calendrier tout prêt acheté. */
+    val isReady: Boolean get() = readyMadeBought ?: (boxCount > 0 && ready >= boxCount)
+}
 
 /** Avancement des pâtisseries et gourmandises de l'année. */
 data class CookingSummary(val total: Int = 0, val done: Int = 0, val inProgress: Int = 0, val next: List<String> = emptyList())

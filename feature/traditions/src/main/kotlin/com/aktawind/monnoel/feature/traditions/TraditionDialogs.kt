@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,23 +31,27 @@ import com.aktawind.monnoel.core.model.Inspiration
 import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.Tradition
 import com.aktawind.monnoel.core.model.TraditionYear
+import com.aktawind.monnoel.core.ui.DateField
 import com.aktawind.monnoel.core.ui.DropdownField
 import com.aktawind.monnoel.core.ui.PhotoField
 import com.aktawind.monnoel.core.ui.R as UiR
 import com.aktawind.monnoel.core.ui.TextInput
 import com.aktawind.monnoel.core.ui.emoji
 import com.aktawind.monnoel.core.ui.label
+import java.time.LocalDate
 
 /** Faite cette année ? Avec une photo souvenir et un petit mot. */
 @Composable
 internal fun MemoryDialog(
     tradition: Tradition,
     year: TraditionYear?,
+    defaultDate: LocalDate,
     onImportPhoto: (String, (String) -> Unit) -> Unit,
-    onSave: (Boolean, String?, String) -> Unit,
+    onSave: (Boolean, String?, String, LocalDate?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var done by rememberSaveable { mutableStateOf(year?.done ?: true) }
+    var date by rememberSaveable { mutableStateOf(year?.date) }
     var photo by rememberSaveable { mutableStateOf(year?.memoryPhotoPath) }
     var note by rememberSaveable { mutableStateOf(year?.memoryNote.orEmpty()) }
     AlertDialog(
@@ -54,6 +59,8 @@ internal fun MemoryDialog(
         title = { Text(tradition.name) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.memory_date), style = MaterialTheme.typography.titleSmall)
+                DateField(date, { date = it }, defaultDate)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = done, onCheckedChange = { done = it })
                     Text(stringResource(R.string.memory_done))
@@ -66,7 +73,7 @@ internal fun MemoryDialog(
                 }, stringResource(R.string.memory_note), Modifier.fillMaxWidth(), singleLine = false, minLines = 2)
             }
         },
-        confirmButton = { TextButton(onClick = { onSave(done, photo, note) }) { Text(stringResource(UiR.string.action_save)) } },
+        confirmButton = { TextButton(onClick = { onSave(done, photo, note, date) }) { Text(stringResource(UiR.string.action_save)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(UiR.string.action_cancel)) } },
     )
 }
@@ -121,13 +128,19 @@ internal fun IdeasDialog(ideas: List<TraditionIdea>, onAdd: (List<TraditionIdea>
 @Composable
 internal fun InspirationDialog(
     inspiration: Inspiration?,
+    initialKind: InspirationKind,
+    date: LocalDate?,
+    canDate: Boolean,
+    defaultDate: LocalDate,
+    onDuplicate: (() -> Unit)?,
     onImportPhoto: (String, (String) -> Unit) -> Unit,
-    onSave: (InspirationDraft) -> Unit,
+    onSave: (InspirationDraft, LocalDate?) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     var title by rememberSaveable { mutableStateOf(inspiration?.title.orEmpty()) }
-    var kind by rememberSaveable { mutableStateOf(inspiration?.kind ?: InspirationKind.FILM) }
+    var kind by rememberSaveable { mutableStateOf(inspiration?.kind ?: initialKind) }
+    var plannedDate by rememberSaveable { mutableStateOf(date) }
     var photo by rememberSaveable { mutableStateOf(inspiration?.photoPath) }
     var url by rememberSaveable { mutableStateOf(inspiration?.url.orEmpty()) }
     var notes by rememberSaveable { mutableStateOf(inspiration?.notes.orEmpty()) }
@@ -152,10 +165,17 @@ internal fun InspirationDialog(
                     onImportPhoto(uri) { photo = it }
                 }, onRemove = { photo = null }, placeholder = kind.emoji)
                 TextInput(notes, { notes = it }, stringResource(R.string.field_notes), Modifier.fillMaxWidth(), singleLine = false)
+                if (canDate) {
+                    Text(stringResource(R.string.inspiration_date), style = MaterialTheme.typography.titleSmall)
+                    DateField(plannedDate, { plannedDate = it }, defaultDate)
+                }
+                if (onDuplicate != null) {
+                    OutlinedButton(onClick = onDuplicate) { Text(stringResource(UiR.string.action_duplicate)) }
+                }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(InspirationDraft(title, kind, photo, url, notes)) }, enabled = title.isNotBlank()) {
+            TextButton(onClick = { onSave(InspirationDraft(title, kind, photo, url, notes), plannedDate) }, enabled = title.isNotBlank()) {
                 Text(stringResource(UiR.string.action_save))
             }
         },

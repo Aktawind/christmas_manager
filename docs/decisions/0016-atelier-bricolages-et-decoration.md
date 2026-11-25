@@ -33,4 +33,10 @@ s'en tenir à un simple tableau d'inspiration pour la décoration.
 - **Statut « Reçu » retiré** (retour utilisatrice : identique à « À emballer ») : un cadeau
   commandé passe directement « À emballer ». Les cadeaux « Reçu » deviennent « À emballer »
   (migration Room 17 → 18, et à l'import des anciennes sauvegardes).
-- Base Room v18, format de sauvegarde v11.
+- **Dates de l'année** (retour utilisatrice) : une tradition au programme et une inspiration
+  peuvent avoir une date facultative pour ce Noël (`tradition_year.date`, table
+  `inspiration_date`). Ce ne sont pas des échéances : aucun rappel, rien en rouge (ADR 0006).
+  Le programme range les traditions à faire par date, puis les faites en bas, barrées.
+- **Dupliquer** une tradition, une inspiration, un bricolage (avec ses fournitures) ou une idée
+  déco : copie « (copie) » avec sa photo, sans l'historique de l'année.
+- Base Room v19, format de sauvegarde v11.

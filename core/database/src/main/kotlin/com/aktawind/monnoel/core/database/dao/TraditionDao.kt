@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
+import com.aktawind.monnoel.core.database.entity.InspirationDateEntity
 import com.aktawind.monnoel.core.database.entity.InspirationDoneEntity
 import com.aktawind.monnoel.core.database.entity.InspirationEntity
 import com.aktawind.monnoel.core.database.entity.TraditionEntity
@@ -120,4 +121,19 @@ interface TraditionDao {
 
     @Query("DELETE FROM inspiration_done")
     suspend fun deleteAllDone()
+
+    @Query("SELECT * FROM inspiration_date WHERE edition_id = :editionId")
+    fun observeInspirationDates(editionId: String): Flow<List<InspirationDateEntity>>
+
+    @Query("SELECT * FROM inspiration_date")
+    suspend fun getAllInspirationDates(): List<InspirationDateEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertInspirationDates(entities: List<InspirationDateEntity>)
+
+    @Query("DELETE FROM inspiration_date WHERE edition_id = :editionId AND inspiration_id = :inspirationId")
+    suspend fun deleteInspirationDate(editionId: String, inspirationId: String)
+
+    @Query("DELETE FROM inspiration_date")
+    suspend fun deleteAllInspirationDates()
 }

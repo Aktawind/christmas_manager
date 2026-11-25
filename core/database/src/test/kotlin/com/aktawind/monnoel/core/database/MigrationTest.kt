@@ -104,7 +104,7 @@ class MigrationTest {
     @Test
     fun `toutes les migrations depuis la v0_1_0`() {
         helper.createDatabase(dbName, 1).close()
-        helper.runMigrationsAndValidate(dbName, 18, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(dbName, 19, true, *Migrations.ALL).close()
     }
 
     @Test
@@ -438,6 +438,27 @@ class MigrationTest {
             db.query("SELECT id, status FROM planned_gift ORDER BY id").use { c ->
                 val rows = buildList { while (c.moveToNext()) add(c.getString(0) to c.getString(1)) }
                 assertEquals(listOf("g1" to "TO_WRAP", "g2" to "ORDERED"), rows)
+            }
+        }
+    }
+
+    @Test
+    fun `migration 18 vers 19 ajoute les dates des traditions et des inspirations`() {
+        helper.createDatabase(dbName, 18).use { db ->
+            db.execSQL(
+                "INSERT INTO tradition_year (id, edition_id, tradition_id, done, memory_photo_path, memory_note, created_at) " +
+                    "VALUES ('ty', 'e', 't', 1, NULL, 'Magique', 1)",
+            )
+        }
+        helper.runMigrationsAndValidate(dbName, 19, true, Migrations.MIGRATION_18_19).use { db ->
+            db.query("SELECT memory_note, date FROM tradition_year").use { c ->
+                c.moveToFirst()
+                assertEquals("Magique", c.getString(0))
+                assertEquals(true, c.isNull(1))
+            }
+            db.query("SELECT COUNT(*) FROM inspiration_date").use { c ->
+                c.moveToFirst()
+                assertEquals(0, c.getInt(0))
             }
         }
     }

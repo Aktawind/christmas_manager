@@ -30,6 +30,18 @@ fun NavGraphBuilder.traditionsGraph(navController: NavController) {
             onNewCraft = { navController.navigate(CraftEditDestination()) },
         )
     }
-    composable<CraftEditDestination> { CraftEditRoute(onDone = { navController.popBackStack() }) }
-    composable<TraditionEditDestination> { TraditionEditRoute(onDone = { navController.popBackStack() }) }
+    composable<CraftEditDestination> {
+        CraftEditRoute(
+            onDone = { navController.popBackStack() },
+            onOpenCopy = { id -> navController.navigate(CraftEditDestination(id)) { popUpTo<CraftEditDestination> { inclusive = true } } },
+        )
+    }
+    composable<TraditionEditDestination> {
+        TraditionEditRoute(
+            onDone = { navController.popBackStack() },
+            onOpenCopy = { id ->
+                navController.navigate(TraditionEditDestination(id)) { popUpTo<TraditionEditDestination> { inclusive = true } }
+            },
+        )
+    }
 }

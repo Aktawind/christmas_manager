@@ -12,6 +12,7 @@ import com.aktawind.monnoel.core.model.TraditionCategory
 import com.aktawind.monnoel.core.model.TraditionPeriod
 import com.aktawind.monnoel.core.model.TraditionYear
 import java.time.Instant
+import java.time.LocalDate
 
 @Entity(tableName = "tradition")
 data class TraditionEntity(
@@ -56,6 +57,8 @@ data class TraditionYearEntity(
     @ColumnInfo(name = "memory_photo_path") val memoryPhotoPath: String?,
     @ColumnInfo(name = "memory_note") val memoryNote: String,
     @ColumnInfo(name = "created_at") val createdAt: Long,
+    /** Date prévue cette année (ISO-8601), facultative. */
+    val date: String? = null,
 )
 
 @Entity(tableName = "inspiration")
@@ -90,6 +93,27 @@ data class InspirationDoneEntity(
     @ColumnInfo(name = "inspiration_id") val inspirationId: String,
 )
 
+/** Date prévue d'une inspiration pour un Noël. */
+@Entity(
+    tableName = "inspiration_date",
+    primaryKeys = ["edition_id", "inspiration_id"],
+    foreignKeys = [
+        ForeignKey(entity = EditionEntity::class, parentColumns = ["id"], childColumns = ["edition_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(
+            entity = InspirationEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["inspiration_id"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("inspiration_id")],
+)
+data class InspirationDateEntity(
+    @ColumnInfo(name = "edition_id") val editionId: String,
+    @ColumnInfo(name = "inspiration_id") val inspirationId: String,
+    val date: String,
+)
+
 fun TraditionEntity.asModel(personIds: Set<String>) = Tradition(
     id, name, photoPath,
     runCatching { TraditionCategory.valueOf(category) }.getOrDefault(TraditionCategory.OTHER),
@@ -108,9 +132,11 @@ fun TraditionYearEntity.asModel() = TraditionYear(
     memoryPhotoPath,
     memoryNote,
     Instant.ofEpochMilli(createdAt),
+    date?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
 )
 
-fun TraditionYear.asEntity() = TraditionYearEntity(id, editionId, traditionId, done, memoryPhotoPath, memoryNote, createdAt.toEpochMilli())
+fun TraditionYear.asEntity() =
+    TraditionYearEntity(id, editionId, traditionId, done, memoryPhotoPath, memoryNote, createdAt.toEpochMilli(), date?.toString())
 
 fun InspirationEntity.asModel() = Inspiration(
     id,

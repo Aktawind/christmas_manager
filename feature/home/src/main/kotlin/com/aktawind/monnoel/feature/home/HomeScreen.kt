@@ -589,27 +589,33 @@ private fun AdventSummaryCard(calendars: List<CalendarProgress>, onOpen: () -> U
             )
             if (calendars.isEmpty()) {
                 Text(stringResource(R.string.home_advent_empty), color = secondary)
+            } else {
+                // Résumé, comme pour les cadeaux : combien sont prêts, en préparation, à acheter.
+                val ready = calendars.count { it.isReady }
+                val toBuy = calendars.count { it.readyMadeBought == false }
+                val inProgress = calendars.size - ready - toBuy
+                Text(
+                    pluralStringResource(R.plurals.home_advent_count, calendars.size, calendars.size),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                val details = listOfNotNull(
+                    ready.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.home_advent_ready, it, it) },
+                    inProgress.takeIf { it > 0 }?.let { stringResource(R.string.home_advent_in_progress, it) },
+                    toBuy.takeIf { it > 0 }?.let { stringResource(R.string.home_advent_to_buy, it) },
+                )
+                if (details.isNotEmpty()) Text(details.joinToString(" · "), color = secondary)
             }
-            calendars.forEach { c ->
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    val bought = c.readyMadeBought
-                    Text(
-                        if (bought == null) {
-                            stringResource(R.string.home_advent_line, c.name, c.ready, c.boxCount)
-                        } else {
-                            stringResource(if (bought) R.string.home_advent_ready_bought else R.string.home_advent_ready_to_buy, c.name)
-                        },
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    if (c.todayNumber != null && bought == null) {
-                        val content = c.todayBox?.let { box ->
-                            listOfNotNull(box.type?.emoji, box.title.takeIf { it.isNotBlank() }).joinToString(" ")
-                        }
-                            .orEmpty()
-                            .ifBlank { stringResource(R.string.home_advent_today_empty) }
-                        Text(stringResource(R.string.home_advent_today, c.todayNumber, content), color = MaterialTheme.colorScheme.primary)
-                    }
+            // En décembre : la case du jour de chaque calendrier fait maison.
+            calendars.filter { it.todayNumber != null && it.readyMadeBought == null }.forEach { c ->
+                val content = c.todayBox?.let { box ->
+                    listOfNotNull(box.type?.emoji, box.title.takeIf { it.isNotBlank() }).joinToString(" ")
                 }
+                    .orEmpty()
+                    .ifBlank { stringResource(R.string.home_advent_today_empty) }
+                Text(
+                    stringResource(R.string.home_advent_today_named, c.name, c.todayNumber ?: 0, content),
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
         }
     }

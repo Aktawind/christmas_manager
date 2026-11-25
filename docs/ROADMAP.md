@@ -171,6 +171,13 @@ Pas de dates ni de priorités (ADR 0006).
 | D-006 | Une quinzaine d'idées de bricolages à piocher, avec leurs fournitures            | 🧪 |
 | D-007 | Recherche (bricolages, fournitures, déco), accueil « L'atelier », sauvegarde     | 🧪 |
 | G-030 | Cadeaux : le statut « Reçu » disparaît (doublon de « À emballer ») ; les cadeaux reçus passent « À emballer » | 🧪 |
+| T-010 | Tradition au programme : date facultative (fiche, souvenir), affichée sur la ligne et la carte | 🧪 |
+| T-011 | Programme : traditions faites en bas, barrées, dans « Faites cette année » | 🧪 |
+| T-012 | Inspirations : date facultative pour ce Noël, affichée sur la carte ; « + Inspiration » reprend l'étiquette choisie (idem déco) | 🧪 |
+| T-013 | Dupliquer une tradition, une inspiration, un bricolage (avec ses fournitures), une idée déco | 🧪 |
+| A-030 | Accueil : résumé des calendriers (x prêts · y en préparation · z à acheter) | 🧪 |
+| A-031 | Calendrier : « Dépensé · Budget » (le prévu, en doublon, est retiré) | 🧪 |
+| M-010 | Types de repas : « Réveillon » et « Déjeuner de Noël » | 🧪 |
 | B-010 | Dépassement de budget : barre d'un orange un peu plus foncé, sans note sous la carte | 🧪 |
 
 ## v0.10.0 — La boîte à souvenirs 📖

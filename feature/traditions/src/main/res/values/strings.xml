@@ -112,4 +112,9 @@
     <string name="decor_favorites">❤️ Favorites</string>
     <string name="decor_favorite">Mettre en favori</string>
     <string name="decor_unfavorite">Retirer des favoris</string>
+    <string name="program_done_group">Faites cette année (%1$d)</string>
+    <string name="memory_date">Date prévue cette année</string>
+    <string name="inspiration_date">Date cette année (facultatif)</string>
+    <string name="tradition_this_year">Noël %1$d</string>
+    <string name="tradition_in_program">Au programme cette année</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,9 +52,10 @@ import com.aktawind.monnoel.feature.traditions.emoji
 import com.aktawind.monnoel.feature.traditions.label
 
 @Composable
-fun CraftEditRoute(onDone: () -> Unit, viewModel: CraftEditViewModel = hiltViewModel()) {
+fun CraftEditRoute(onDone: () -> Unit, onOpenCopy: (String) -> Unit, viewModel: CraftEditViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(state.done) { if (state.done) onDone() }
+    LaunchedEffect(state.copyId) { state.copyId?.let(onOpenCopy) }
     val form = state.form
     val context = LocalContext.current
     val secondary = LocalMonNoelColors.current.secondaryText
@@ -161,6 +163,12 @@ fun CraftEditRoute(onDone: () -> Unit, viewModel: CraftEditViewModel = hiltViewM
             singleLine = false,
             minLines = 3,
         )
+        if (!state.isNew) {
+            val copyName = stringResource(com.aktawind.monnoel.core.ui.R.string.copy_title, form.title)
+            OutlinedButton(onClick = { viewModel.duplicate(copyName) }) {
+                Text(stringResource(com.aktawind.monnoel.core.ui.R.string.action_duplicate))
+            }
+        }
         if (state.history.isNotEmpty()) {
             SectionTitle(stringResource(R.string.craft_history))
             Text(stringResource(R.string.craft_done_years, state.history.sorted().joinToString(", ")), color = secondary)

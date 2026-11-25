@@ -196,6 +196,8 @@ class ScreenshotTool {
         data.saveInspiration()(null, InspirationDraft("Le Grinch", InspirationKind.CARTOON))
         data.saveInspiration()(null, InspirationDraft("Patinoire de Noël", InspirationKind.OUTING))
         data.setInspirationDone()(edition.id, film.id, true)
+        data.setTraditionDate()(edition.id, marche.id, java.time.LocalDate.of(2026, 12, 6))
+        data.setInspirationDate()(edition.id, film.id, java.time.LocalDate.of(2026, 12, 19))
         seedWorkshop(data, edition.id, past.id)
         data.saveTask()(null, edition.id, TaskDraft("Acheter du papier cadeau", module = TaskModule.GIFTS))
         data.saveTask()(null, edition.id, TaskDraft("Sortir la crèche", module = TaskModule.HOME, status = TaskStatus.IN_PROGRESS))
@@ -431,7 +433,7 @@ class ScreenshotTool {
         compose.onAllNodesWithText("Le lutin farceur").onLast().performTouchInput {
             click(androidx.compose.ui.geometry.Offset(width / 2f, 6f))
         }
-        waitText("Période")
+        waitText("Au programme cette année")
         shot("44-tradition-edit")
         compose.onNodeWithContentDescription("Retour").performClick()
         click("Bricolages")

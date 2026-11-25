@@ -56,20 +56,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aktawind.monnoel.core.designsystem.theme.LocalMonNoelColors
+import com.aktawind.monnoel.core.model.DecorPlace
 import com.aktawind.monnoel.core.model.Inspiration
 import com.aktawind.monnoel.core.model.InspirationKind
 import com.aktawind.monnoel.core.model.Tradition
 import com.aktawind.monnoel.core.model.TraditionYear
 import com.aktawind.monnoel.core.ui.EmptyState
 import com.aktawind.monnoel.core.ui.PhotoImage
+import com.aktawind.monnoel.core.ui.R as UiR
 import com.aktawind.monnoel.core.ui.emoji
 import com.aktawind.monnoel.core.ui.label
+import com.aktawind.monnoel.core.ui.longDateFormat
 import com.aktawind.monnoel.core.ui.resolve
+import com.aktawind.monnoel.core.ui.shortDateFormat
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,6 +94,11 @@ fun TraditionsRoute(
     var pickingCrafts by rememberSaveable { mutableStateOf(false) }
     // null : fermé ; "" : nouvelle déco ; sinon son id.
     var decorOpen by rememberSaveable { mutableStateOf(viewModel.initialDecorId) }
+    // Filtres remontés ici : « + Inspiration » / « + Déco » reprennent l'étiquette choisie.
+    var kindFilter by rememberSaveable { mutableStateOf<InspirationKind?>(null) }
+    var decorFilter by remember { mutableStateOf<DecorFilter>(DecorFilter.All) }
+    val defaultDate = state.edition?.year?.let { defaultDateFor(it) } ?: LocalDate.now()
+    val copyTitle = stringResource(UiR.string.copy_title, "%s")
     // null : fermé ; "" : nouvelle inspiration ; sinon son id.
     var inspirationOpen by rememberSaveable { mutableStateOf(viewModel.initialInspirationId) }
     val snackbar = remember { SnackbarHostState() }
@@ -155,7 +166,7 @@ fun TraditionsRoute(
                     state,
                     onDone = { id, done ->
                         val year = state.program[id]
-                        viewModel.saveMemory(id, done, year?.memoryPhotoPath, year?.memoryNote.orEmpty())
+                        viewModel.saveMemory(id, done, year?.memoryPhotoPath, year?.memoryNote.orEmpty(), year?.date)
                     },
                     onMemory = { memoryFor = it },
                     onGoToCatalog = { tab = 1 },
@@ -167,16 +178,26 @@ fun TraditionsRoute(
                     onPlanned = { id, planned -> viewModel.setPlanned(id, planned) },
                     onPick = { picking = true },
                 )
-                TAB_INSPIRATIONS -> InspirationsTab(state, onOpen = {
-                    inspirationOpen = it
-                }, onDone = { id, done -> viewModel.setInspirationDone(id, done) })
+                TAB_INSPIRATIONS -> InspirationsTab(
+                    state,
+                    kindFilter = kindFilter,
+                    onFilter = { kindFilter = it },
+                    onOpen = { inspirationOpen = it },
+                    onDone = { id, done -> viewModel.setInspirationDone(id, done) },
+                )
                 TAB_CRAFTS -> CraftsTab(
                     state,
                     onOpen = onOpenCraft,
                     onStatus = { id, status -> viewModel.setCraftStatus(id, status) },
                     onPick = { pickingCrafts = true },
                 )
-                else -> DecorTab(state, onOpen = { decorOpen = it }, onFavorite = viewModel::toggleDecorFavorite)
+                else -> DecorTab(
+                    state,
+                    filter = decorFilter,
+                    onFilter = { decorFilter = it },
+                    onOpen = { decorOpen = it },
+                    onFavorite = viewModel::toggleDecorFavorite,
+                )
             }
         }
     }
@@ -187,9 +208,10 @@ fun TraditionsRoute(
             MemoryDialog(
                 tradition = tradition,
                 year = state.program[id],
+                defaultDate = defaultDate,
                 onImportPhoto = viewModel::importPhoto,
-                onSave = { done, photo, note ->
-                    viewModel.saveMemory(id, done, photo, note)
+                onSave = { done, photo, note, date ->
+                    viewModel.saveMemory(id, done, photo, note, date)
                     memoryFor = null
                 },
                 onDismiss = {
@@ -224,6 +246,11 @@ fun TraditionsRoute(
         if (id.isEmpty() || decor != null) {
             DecorDialog(
                 decor = decor,
+                initialPlace = (decorFilter as? DecorFilter.Place)?.place ?: DecorPlace.TREE,
+                initialFavorite = decorFilter == DecorFilter.Favorites,
+                onDuplicate = decor?.let { d ->
+                    { viewModel.duplicateDecor(d.id, if (d.title.isBlank()) "" else copyTitle.format(d.title)) { decorOpen = it } }
+                },
                 onImportPhoto = viewModel::importPhoto,
                 onSave = { draft ->
                     viewModel.saveDecor(decor?.id, draft)
@@ -247,9 +274,16 @@ fun TraditionsRoute(
         if (id.isEmpty() || inspiration != null) {
             InspirationDialog(
                 inspiration = inspiration,
+                initialKind = kindFilter ?: InspirationKind.FILM,
+                date = inspiration?.let { state.inspirationDates[it.id] },
+                canDate = state.edition != null && !state.readOnly,
+                defaultDate = defaultDate,
+                onDuplicate = inspiration?.let { i ->
+                    { viewModel.duplicateInspiration(i.id, copyTitle.format(i.title)) { inspirationOpen = it } }
+                },
                 onImportPhoto = viewModel::importPhoto,
-                onSave = { draft ->
-                    viewModel.saveInspiration(inspiration?.id, draft)
+                onSave = { draft, date ->
+                    viewModel.saveInspiration(inspiration?.id, draft, date)
                     inspirationOpen = null
                 },
                 onDelete = inspiration?.let { i ->
@@ -300,8 +334,11 @@ private fun ProgramTab(state: TraditionsUiState, onDone: (String, Boolean) -> Un
                 )
             }
         }
-        // Rangées par période : l'Avent, le réveillon, le jour de Noël, après Noël.
-        lazyItems(planned.sortedBy { it.period.ordinal }, key = { it.id }) { tradition ->
+        // À faire : d'abord celles qui ont une date (dans l'ordre), puis par période.
+        // Les traditions faites descendent dans « Faites cette année ».
+        val (doneList, todo) = planned.partition { state.program[it.id]?.done == true }
+        val order = compareBy<Tradition>({ state.program[it.id]?.date ?: LocalDate.MAX }, { it.period.ordinal })
+        lazyItems(todo.sortedWith(order), key = { it.id }) { tradition ->
             Box(Modifier.widthIn(max = 840.dp).fillMaxWidth()) {
                 ProgramRow(
                     tradition,
@@ -310,6 +347,27 @@ private fun ProgramTab(state: TraditionsUiState, onDone: (String, Boolean) -> Un
                     onDone = { onDone(tradition.id, it) },
                     onClick = { onMemory(tradition.id) },
                 )
+            }
+        }
+        if (doneList.isNotEmpty()) {
+            item(key = "done-title") {
+                Text(
+                    stringResource(R.string.program_done_group, doneList.size),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = secondary,
+                    modifier = Modifier.widthIn(max = 840.dp).fillMaxWidth().padding(top = 20.dp, bottom = 4.dp).semantics { heading() },
+                )
+            }
+            lazyItems(doneList.sortedWith(order), key = { it.id }) { tradition ->
+                Box(Modifier.widthIn(max = 840.dp).fillMaxWidth()) {
+                    ProgramRow(
+                        tradition,
+                        state.program.getValue(tradition.id),
+                        state.readOnly,
+                        onDone = { onDone(tradition.id, it) },
+                        onClick = { onMemory(tradition.id) },
+                    )
+                }
             }
         }
     }
@@ -352,6 +410,7 @@ private fun TraditionsTab(
             TraditionCard(
                 tradition,
                 planned = tradition.id in state.program,
+                date = state.program[tradition.id]?.date,
                 years = state.doneYears[tradition.id].orEmpty(),
                 canPlan = edition != null && !state.readOnly,
                 onClick = { onOpen(tradition.id) },
@@ -380,8 +439,17 @@ private fun ProgramRow(tradition: Tradition, year: TraditionYear, readOnly: Bool
                 placeholder = tradition.category.emoji,
             )
             Column(Modifier.weight(1f)) {
-                Text(tradition.name, style = MaterialTheme.typography.bodyLarge)
-                val detail = year.memoryNote.ifBlank { stringResource(tradition.period.label) }
+                Text(
+                    tradition.name,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        textDecoration = if (year.done) TextDecoration.LineThrough else TextDecoration.None,
+                    ),
+                    color = if (year.done) secondary else MaterialTheme.colorScheme.onSurface,
+                )
+                val detail = listOfNotNull(
+                    year.date?.let { "📅 " + it.format(longDateFormat) },
+                    year.memoryNote.ifBlank { null } ?: stringResource(tradition.period.label),
+                ).joinToString(" · ")
                 Text(detail, style = MaterialTheme.typography.bodySmall, color = secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -393,6 +461,7 @@ private fun ProgramRow(tradition: Tradition, year: TraditionYear, readOnly: Bool
 private fun TraditionCard(
     tradition: Tradition,
     planned: Boolean,
+    date: LocalDate?,
     years: List<Int>,
     canPlan: Boolean,
     onClick: () -> Unit,
@@ -426,7 +495,10 @@ private fun TraditionCard(
                     FilterChip(
                         selected = planned,
                         onClick = { onPlanned(!planned) },
-                        label = { Text(stringResource(if (planned) R.string.tradition_planned else R.string.tradition_plan)) },
+                        label = {
+                            val label = stringResource(if (planned) R.string.tradition_planned else R.string.tradition_plan)
+                            Text(date?.let { "$label · 📅 ${it.format(shortDateFormat)}" } ?: label)
+                        },
                     )
                 }
             }
@@ -444,8 +516,13 @@ private fun TraditionCard(
 }
 
 @Composable
-private fun InspirationsTab(state: TraditionsUiState, onOpen: (String) -> Unit, onDone: (String, Boolean) -> Unit) {
-    var kindFilter by rememberSaveable { mutableStateOf<InspirationKind?>(null) }
+private fun InspirationsTab(
+    state: TraditionsUiState,
+    kindFilter: InspirationKind?,
+    onFilter: (InspirationKind?) -> Unit,
+    onOpen: (String) -> Unit,
+    onDone: (String, Boolean) -> Unit,
+) {
     val visible = state.inspirations.filter { kindFilter == null || it.kind == kindFilter }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(300.dp),
@@ -457,11 +534,11 @@ private fun InspirationsTab(state: TraditionsUiState, onOpen: (String) -> Unit, 
         item(span = { GridItemSpan(maxLineSpan) }) {
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(selected = kindFilter == null, onClick = {
-                    kindFilter = null
+                    onFilter(null)
                 }, label = { Text(stringResource(R.string.filter_everything)) })
                 InspirationKind.entries.forEach { k ->
                     FilterChip(selected = kindFilter == k, onClick = {
-                        kindFilter = k
+                        onFilter(k)
                     }, label = { Text("${k.emoji} ${stringResource(k.label)}") })
                 }
             }
@@ -475,6 +552,7 @@ private fun InspirationsTab(state: TraditionsUiState, onOpen: (String) -> Unit, 
             InspirationCard(
                 inspiration,
                 done = inspiration.id in state.inspirationsDone,
+                date = state.inspirationDates[inspiration.id],
                 canCheck = state.edition != null && !state.readOnly,
                 onClick = { onOpen(inspiration.id) },
                 onDone = { onDone(inspiration.id, it) },
@@ -484,14 +562,26 @@ private fun InspirationsTab(state: TraditionsUiState, onOpen: (String) -> Unit, 
 }
 
 @Composable
-private fun InspirationCard(inspiration: Inspiration, done: Boolean, canCheck: Boolean, onClick: () -> Unit, onDone: (Boolean) -> Unit) {
+private fun InspirationCard(
+    inspiration: Inspiration,
+    done: Boolean,
+    date: LocalDate?,
+    canCheck: Boolean,
+    onClick: () -> Unit,
+    onDone: (Boolean) -> Unit,
+) {
     Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             PhotoImage(inspiration.photoPath, null, size = 84.dp, shape = RectangleShape, placeholder = inspiration.kind.emoji)
             Column(Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(inspiration.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text(
-                    stringResource(inspiration.kind.label),
+                    listOfNotNull(
+                        stringResource(inspiration.kind.label),
+                        date?.let {
+                            "📅 " + it.format(shortDateFormat)
+                        },
+                    ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = LocalMonNoelColors.current.secondaryText,
                 )
@@ -505,4 +595,11 @@ private fun InspirationCard(inspiration: Inspiration, done: Boolean, canCheck: B
             }
         }
     }
+}
+
+/** Date proposée à l'ouverture du calendrier : aujourd'hui pendant la saison, sinon le 1er décembre. */
+internal fun defaultDateFor(year: Int): LocalDate {
+    val today = LocalDate.now()
+    val start = LocalDate.of(year, 12, 1)
+    return if (today.year == year && today.isAfter(start)) today else start
 }

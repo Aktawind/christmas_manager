@@ -363,10 +363,11 @@ private fun CalendarHeader(
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    val budget = summary.budgetCents?.let { stringResource(R.string.calendar_budget_of, formatEuro(it)) }.orEmpty()
+                    // Dépensé, et le budget renseigné s'il y en a un (le « prévu » faisait doublon).
+                    val spent = formatEuro(summary.spentCents)
                     Text(
-                        stringResource(R.string.calendar_budget_line, formatEuro(summary.plannedCents), formatEuro(summary.spentCents)) +
-                            budget,
+                        summary.budgetCents?.let { stringResource(R.string.calendar_spent_budget_line, spent, formatEuro(it)) }
+                            ?: stringResource(R.string.calendar_spent_line, spent),
                         style = MaterialTheme.typography.bodySmall,
                         color = secondary,
                     )

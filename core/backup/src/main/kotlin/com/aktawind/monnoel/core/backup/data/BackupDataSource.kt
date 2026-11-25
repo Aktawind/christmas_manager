@@ -20,6 +20,7 @@ import com.aktawind.monnoel.core.backup.format.GiftCategoryDto
 import com.aktawind.monnoel.core.backup.format.GiftIdeaDto
 import com.aktawind.monnoel.core.backup.format.IdeaPersonDto
 import com.aktawind.monnoel.core.backup.format.IdeaRequestDto
+import com.aktawind.monnoel.core.backup.format.InspirationDateDto
 import com.aktawind.monnoel.core.backup.format.InspirationDoneDto
 import com.aktawind.monnoel.core.backup.format.InspirationDto
 import com.aktawind.monnoel.core.backup.format.MealDishDto
@@ -56,6 +57,7 @@ import com.aktawind.monnoel.core.database.entity.GiftCategoryEntity
 import com.aktawind.monnoel.core.database.entity.GiftIdeaEntity
 import com.aktawind.monnoel.core.database.entity.IdeaPersonEntity
 import com.aktawind.monnoel.core.database.entity.IdeaRequestEntity
+import com.aktawind.monnoel.core.database.entity.InspirationDateEntity
 import com.aktawind.monnoel.core.database.entity.InspirationDoneEntity
 import com.aktawind.monnoel.core.database.entity.InspirationEntity
 import com.aktawind.monnoel.core.database.entity.MealDishEntity
@@ -156,12 +158,15 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             },
             traditionPersons = db.traditionDao().getAllTraditionPersons().map { TraditionPersonDto(it.traditionId, it.personId) },
             traditionYears = db.traditionDao().getAllYears().map {
-                TraditionYearDto(it.id, it.editionId, it.traditionId, it.done, it.memoryPhotoPath, it.memoryNote, it.createdAt)
+                TraditionYearDto(it.id, it.editionId, it.traditionId, it.done, it.memoryPhotoPath, it.memoryNote, it.createdAt, it.date)
             },
             inspirations = db.traditionDao().getAllInspirations().map {
                 InspirationDto(it.id, it.kind, it.title, it.photoPath, it.url, it.notes, it.createdAt, it.updatedAt)
             },
             inspirationsDone = db.traditionDao().getAllDone().map { InspirationDoneDto(it.editionId, it.inspirationId) },
+            inspirationDates = db.traditionDao().getAllInspirationDates().map {
+                InspirationDateDto(it.editionId, it.inspirationId, it.date)
+            },
             specialDates = db.specialDateDao().getAll().map { SpecialDateDto(it.id, it.month, it.day, it.label, it.emoji) },
             crafts = db.craftDao().getAllCrafts().map {
                 CraftDto(it.id, it.title, it.photoPath, it.category, it.tutorialUrl, it.notes, it.createdAt, it.updatedAt)
@@ -193,6 +198,7 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             db.craftDao().deleteAllDecor()
             db.craftDao().deleteAllCrafts()
             db.traditionDao().deleteAllDone()
+            db.traditionDao().deleteAllInspirationDates()
             db.traditionDao().deleteAllInspirations()
             db.traditionDao().deleteAllYears()
             db.traditionDao().deleteAllTraditions()
@@ -242,7 +248,16 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
             db.traditionDao().insertTraditionPersons(data.traditionPersons.map { TraditionPersonEntity(it.traditionId, it.personId) })
             db.traditionDao().insertYears(
                 data.traditionYears.map {
-                    TraditionYearEntity(it.id, it.editionId, it.traditionId, it.done, it.memoryPhotoPath, it.memoryNote, it.createdAt)
+                    TraditionYearEntity(
+                        it.id,
+                        it.editionId,
+                        it.traditionId,
+                        it.done,
+                        it.memoryPhotoPath,
+                        it.memoryNote,
+                        it.createdAt,
+                        it.date,
+                    )
                 },
             )
             db.traditionDao().insertInspirations(
@@ -251,6 +266,9 @@ class BackupDataSource @Inject constructor(private val db: MonNoelDatabase) {
                 },
             )
             db.traditionDao().insertDone(data.inspirationsDone.map { InspirationDoneEntity(it.editionId, it.inspirationId) })
+            db.traditionDao().insertInspirationDates(
+                data.inspirationDates.map { InspirationDateEntity(it.editionId, it.inspirationId, it.date) },
+            )
             db.specialDateDao().insertAll(data.specialDates.map { SpecialDateEntity(it.id, it.month, it.day, it.label, it.emoji) })
             db.craftDao().insertCrafts(
                 data.crafts.map {

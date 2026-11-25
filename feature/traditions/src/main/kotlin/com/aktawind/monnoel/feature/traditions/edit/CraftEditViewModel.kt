@@ -13,6 +13,7 @@ import com.aktawind.monnoel.core.domain.traditions.CraftDraft
 import com.aktawind.monnoel.core.domain.traditions.CraftRepository
 import com.aktawind.monnoel.core.domain.traditions.DeleteCraftSupplyUseCase
 import com.aktawind.monnoel.core.domain.traditions.DeleteCraftUseCase
+import com.aktawind.monnoel.core.domain.traditions.DuplicateCraftUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveCraftSupplyUseCase
 import com.aktawind.monnoel.core.domain.traditions.SaveCraftUseCase
 import com.aktawind.monnoel.core.domain.traditions.SetCraftResultPhotoUseCase
@@ -49,6 +50,8 @@ data class CraftEditUiState(
     val bought: Set<String> = emptySet(),
     /** Années où il a été terminé. */
     val history: List<Int> = emptyList(),
+    /** Copie créée : l'écran l'ouvre à la place de celle-ci. */
+    val copyId: String? = null,
     val busy: Boolean = false,
     val message: UiMessage? = null,
     val done: Boolean = false,
@@ -70,6 +73,7 @@ class CraftEditViewModel @Inject constructor(
     private val setStatus: SetCraftStatusUseCase,
     private val setResultPhoto: SetCraftResultPhotoUseCase,
     private val setBought: SetCraftSupplyBoughtUseCase,
+    private val duplicateCraft: DuplicateCraftUseCase,
     @ApplicationScope appScope: CoroutineScope,
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<CraftEditDestination>()
@@ -163,6 +167,14 @@ class CraftEditViewModel @Inject constructor(
         }
         drafts.committed(current.form.photoPath, current.resultPhotoPath.takeIf { current.status != null && current.canEditYear })
         state.update { it.copy(busy = false, done = true) }
+    }
+
+    fun duplicate(newTitle: String) = viewModelScope.launch {
+        val id = route.craftId ?: return@launch
+        when (val result = duplicateCraft(id, newTitle)) {
+            is AppResult.Success -> state.update { it.copy(copyId = result.value.id) }
+            is AppResult.Failure -> state.update { it.copy(message = result.error.toUiMessage()) }
+        }
     }
 
     fun delete() = viewModelScope.launch {

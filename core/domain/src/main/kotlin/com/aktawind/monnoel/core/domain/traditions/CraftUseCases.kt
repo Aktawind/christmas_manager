@@ -217,3 +217,48 @@ class DeleteDecorUseCase @Inject constructor(private val crafts: CraftRepository
         return AppResult.Success(Unit)
     }
 }
+
+/** Copie d'un bricolage avec ses fournitures (photo comprise), sans son avancement. */
+class DuplicateCraftUseCase @Inject constructor(
+    private val crafts: CraftRepository,
+    private val photos: PhotoRepository,
+    private val time: TimeProvider,
+    private val ids: IdGenerator,
+) {
+    suspend operator fun invoke(id: String, newTitle: String): AppResult<Craft> {
+        val source = crafts.getCraft(id) ?: return AppResult.Failure(AppError.NotFound)
+        val now = time.now()
+        val copy = source.copy(
+            id = ids.newId(),
+            title = newTitle.trim().ifBlank { source.title },
+            photoPath = source.photoPath?.let { photos.copyPhoto(it) },
+            createdAt = now,
+            updatedAt = now,
+        )
+        crafts.saveCraft(copy)
+        crafts.getSupplies(id).forEach { crafts.saveSupply(it.copy(id = ids.newId(), craftId = copy.id)) }
+        return AppResult.Success(copy)
+    }
+}
+
+/** Copie d'une idée déco (photo comprise). */
+class DuplicateDecorUseCase @Inject constructor(
+    private val crafts: CraftRepository,
+    private val photos: PhotoRepository,
+    private val time: TimeProvider,
+    private val ids: IdGenerator,
+) {
+    suspend operator fun invoke(id: String, newTitle: String): AppResult<DecorIdea> {
+        val source = crafts.getDecor(id) ?: return AppResult.Failure(AppError.NotFound)
+        val now = time.now()
+        val copy = source.copy(
+            id = ids.newId(),
+            title = newTitle.trim(),
+            photoPath = source.photoPath?.let { photos.copyPhoto(it) },
+            createdAt = now,
+            updatedAt = now,
+        )
+        crafts.saveDecor(copy)
+        return AppResult.Success(copy)
+    }
+}
