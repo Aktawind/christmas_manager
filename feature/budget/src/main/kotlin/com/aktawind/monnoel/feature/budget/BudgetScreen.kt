@@ -131,7 +131,7 @@ fun BudgetRoute(viewModel: BudgetViewModel = hiltViewModel()) {
             items(overview.expenses, key = { it.id }) { expense ->
                 ExpenseRow(expense, state.readOnly, onClick = { editing = expense.id }, onPaid = { viewModel.setPaid(expense.id, it) })
             }
-            if (overview.history.count { it.plannedCents > 0 } >= 2) {
+            if (overview.history.count { it.spentCents > 0 } >= 2) {
                 item { YearsCard(overview.history) }
             }
         }
@@ -180,32 +180,42 @@ private fun SummaryCard(budget: YearBudget, readOnly: Boolean, onEditBudget: () 
         modifier = Modifier.widthIn(max = 840.dp).fillMaxWidth(),
     ) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                Figure(stringResource(R.string.budget_planned), formatEuro(budget.plannedCents), Modifier.weight(1f))
-                Figure(stringResource(R.string.budget_spent), formatEuro(budget.spentCents), Modifier.weight(1f))
-                // Sans budget global, on n'affiche pas de case « Budget ».
-                budget.globalBudgetCents?.let { Figure(stringResource(R.string.budget_global), formatEuro(it), Modifier.weight(1f)) }
-            }
+            // « Prévu » = ce qu'on a prévu de dépenser (budget global, sinon enveloppes et budgets) ;
+            // « Dépensé » = le réel.
+            val expected = budget.expectedCents
             val global = budget.globalBudgetCents
-            if (global != null && global > 0) {
-                val margin = budget.marginCents ?: 0
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                expected?.let { Figure(stringResource(R.string.budget_planned), formatEuro(it), Modifier.weight(1f)) }
+                Figure(stringResource(R.string.budget_spent), formatEuro(budget.spentCents), Modifier.weight(1f))
+            }
+            if (expected != null && expected > 0) {
+                val left = expected - budget.spentCents
                 // Dépassement : seule la couleur de la barre change, sans message.
                 LinearProgressIndicator(
-                    progress = { (budget.plannedCents.toFloat() / global).coerceIn(0f, 1f) },
-                    color = if (margin < 0) colors.overBudget else colors.gold,
+                    progress = { (budget.spentCents.toFloat() / expected).coerceIn(0f, 1f) },
+                    color = if (left < 0) colors.overBudget else colors.gold,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                if (margin >= 0) {
+                if (left >= 0) {
                     Text(
-                        stringResource(R.string.budget_margin, formatEuro(margin)),
+                        stringResource(R.string.budget_margin, formatEuro(left)),
                         color = colors.secondaryText,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-            } else {
-                Text(stringResource(R.string.budget_none), color = colors.secondaryText, style = MaterialTheme.typography.bodyMedium)
             }
+            Text(
+                stringResource(
+                    when {
+                        global != null -> R.string.budget_from_global
+                        expected != null -> R.string.budget_from_posts
+                        else -> R.string.budget_none
+                    },
+                ),
+                color = colors.secondaryText,
+                style = MaterialTheme.typography.bodySmall,
+            )
             if (!readOnly) {
                 TextButton(onClick = onEditBudget) {
                     Text(stringResource(if (global == null) R.string.budget_set else R.string.budget_change))
@@ -241,7 +251,7 @@ private fun BreakdownCard(budget: YearBudget) {
             description = stringResource(R.string.breakdown_description),
         )
         // Seuls les postes qui ont des montants apparaissent.
-        budget.posts.filter { it.plannedCents > 0 || it.spentCents > 0 }.forEach { PostRow(it) }
+        budget.posts.filter { it.plannedCents > 0 || it.spentCents > 0 || it.budgetCents != null }.forEach { PostRow(it) }
     }
 }
 
@@ -257,27 +267,30 @@ private fun PostRow(post: PostBudget) {
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f),
             )
+            // « Prévu » = le budget renseigné (enveloppes, budgets des calendriers) ; sinon le dépensé seul.
+            val budgetCents = post.budgetCents
             Text(
-                stringResource(R.string.post_amounts, formatEuro(post.plannedCents), formatEuro(post.spentCents)),
+                if (budgetCents != null) {
+                    stringResource(R.string.post_amounts, formatEuro(budgetCents), formatEuro(post.spentCents))
+                } else {
+                    stringResource(R.string.post_spent_only, formatEuro(post.spentCents))
+                },
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        val budgetLine = post.budgetCents?.let {
-            stringResource(if (post.post == BudgetPost.GIFTS) R.string.post_envelopes else R.string.post_budgets, formatEuro(it))
-        }
-        if (budgetLine != null) {
+        val budgetCents = post.budgetCents
+        if (budgetCents != null) {
             Text(
-                budgetLine,
+                stringResource(if (post.post == BudgetPost.GIFTS) R.string.post_envelopes else R.string.post_budgets),
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.secondaryText,
                 modifier = Modifier.padding(start = 22.dp),
             )
-            // Une fine barre : prévu / budget du poste, plus orangée s'il est dépassé.
-            val budgetCents = post.budgetCents ?: 0
+            // Une fine barre : dépensé / prévu du poste, plus orangée s'il est dépassé.
             if (budgetCents > 0) {
                 LinearProgressIndicator(
-                    progress = { (post.plannedCents.toFloat() / budgetCents).coerceIn(0f, 1f) },
-                    color = if (post.overCents != null) colors.overBudget else colors.gold,
+                    progress = { (post.spentCents.toFloat() / budgetCents).coerceIn(0f, 1f) },
+                    color = if (post.isOverSpent) colors.overBudget else colors.gold,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(start = 22.dp, top = 4.dp),
                 )
@@ -306,7 +319,7 @@ private fun ExpensesHeader(expenses: List<Expense>) {
         if (expenses.isNotEmpty()) {
             Text(
                 stringResource(
-                    R.string.post_amounts,
+                    R.string.expenses_amounts,
                     formatEuro(expenses.sumOf { it.amountCents }),
                     formatEuro(expenses.filter { it.paid }.sumOf { it.amountCents }),
                 ),
@@ -351,7 +364,7 @@ private fun YearsCard(history: List<YearBudget>) {
             modifier = Modifier.semantics { heading() },
         )
         YearBars(
-            bars = history.takeLast(6).map { YearBar(it.year.toString(), it.plannedCents, formatEuro(it.plannedCents)) },
+            bars = history.takeLast(6).map { YearBar(it.year.toString(), it.spentCents, formatEuro(it.spentCents)) },
             color = BudgetPost.GIFTS.chartColor(),
         )
     }

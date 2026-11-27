@@ -30,10 +30,10 @@
     <string name="gifts_offered">« %1$s » ajouté aux cadeaux 🎁</string>
     <string name="budget_planned">Prévu</string>
     <string name="budget_spent">Dépensé</string>
-    <string name="budget_envelopes">Enveloppes</string>
+    <string name="budget_total">Total des cadeaux</string>
     <string name="budget_count">Cadeaux</string>
-    <string name="envelope_progress">%1$s prévus sur %2$s</string>
-    <string name="envelope_none">%1$s prévus</string>
+    <string name="envelope_progress">%1$s de cadeaux · prévu %2$s</string>
+    <string name="envelope_none">%1$s de cadeaux</string>
     <string name="person_gift_count">Cadeaux cette année : %1$d</string>
     <string name="persons_empty_title">Pour qui sont les cadeaux ?</string>
     <string name="persons_empty_message">Ajoute les personnes à qui tu offres : tu les retrouveras chaque année.</string>

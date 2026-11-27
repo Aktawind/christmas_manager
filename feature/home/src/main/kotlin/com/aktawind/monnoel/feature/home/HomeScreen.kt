@@ -469,27 +469,25 @@ private fun BudgetSummaryCard(budget: YearBudget, onOpen: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() },
             )
+            // « Prévu » = budget global, sinon enveloppes et budgets ; « dépensé » = le réel.
+            val expected = budget.expectedCents
             Text(
-                stringResource(R.string.home_budget_line, formatEuro(budget.plannedCents), formatEuro(budget.spentCents)),
+                if (expected != null) {
+                    stringResource(R.string.home_budget_line, formatEuro(expected), formatEuro(budget.spentCents))
+                } else {
+                    stringResource(R.string.home_budget_spent, formatEuro(budget.spentCents))
+                },
                 style = MaterialTheme.typography.bodyLarge,
             )
-            val global = budget.globalBudgetCents
-            val margin = budget.marginCents
-            if (global != null && margin != null) {
+            if (expected != null && expected > 0) {
+                val left = expected - budget.spentCents
                 LinearProgressIndicator(
-                    progress = { if (global > 0) (budget.plannedCents.toFloat() / global).coerceIn(0f, 1f) else 1f },
-                    color = if (margin < 0) colors.overBudget else colors.gold,
+                    progress = { (budget.spentCents.toFloat() / expected).coerceIn(0f, 1f) },
+                    color = if (left < 0) colors.overBudget else colors.gold,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Text(
-                    if (margin >= 0) {
-                        stringResource(R.string.home_budget_margin, formatEuro(global), formatEuro(margin))
-                    } else {
-                        stringResource(R.string.home_budget_only, formatEuro(global))
-                    },
-                    color = colors.secondaryText,
-                )
+                if (left >= 0) Text(stringResource(R.string.home_budget_left, formatEuro(left)), color = colors.secondaryText)
             }
         }
     }

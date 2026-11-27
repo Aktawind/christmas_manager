@@ -94,6 +94,10 @@ class YearBudgetTest {
         assertEquals(4_500, budget.post(BudgetPost.OTHER).spentCents)
         assertEquals(33_900, budget.plannedCents)
         assertEquals(26_100, budget.marginCents)
+        // « Prévu » à l'écran : le budget global, sinon la somme des enveloppes et budgets.
+        assertEquals(60_000, budget.expectedCents)
+        assertEquals(9_000, computeYearBudget(edition.copy(plannedBudgetCents = null), source, LocalDate.of(2026, 11, 16)).expectedCents)
+        assertEquals(false, gifts.isOverSpent)
         // Le jour du repas, il compte comme dépensé.
         assertEquals(20_000, computeYearBudget(edition, source, LocalDate.of(2026, 12, 24)).post(BudgetPost.MEALS).spentCents)
     }

@@ -66,8 +66,8 @@
     <string name="home_crafts_progress">%1$d sur %2$d terminés</string>
     <string name="home_budget_title">Les comptes</string>
     <string name="home_budget_line">Prévu %1$s · dépensé %2$s</string>
-    <string name="home_budget_only">Budget %1$s</string>
-    <string name="home_budget_margin">Budget %1$s · encore %2$s de marge</string>
+    <string name="home_budget_spent">Dépensé %1$s</string>
+    <string name="home_budget_left">Encore %1$s avant d’atteindre le prévu</string>
     <string name="home_table_title">La table de fête</string>
     <string name="home_table_empty">Aucun repas prévu pour l’instant : réveillon, déjeuner du 25… ?</string>
     <plurals name="home_table_guests">

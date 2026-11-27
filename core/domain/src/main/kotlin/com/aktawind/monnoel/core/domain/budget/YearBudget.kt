@@ -17,10 +17,17 @@ import java.time.LocalDate
 /** Les grands postes du budget de Noël. */
 enum class BudgetPost { GIFTS, ADVENT, MEALS, CRAFTS, OTHER }
 
-/** Un poste : prévu, déjà dépensé, et le budget qu'on s'est fixé (s'il y en a un). */
+/**
+ * Un poste : [plannedCents] = coût total noté (prix des cadeaux, cases…), [spentCents] = déjà
+ * dépensé, [budgetCents] = ce qu'on a prévu de dépenser (enveloppes, budgets), s'il y en a un.
+ * À l'écran, « Prévu » désigne ce budget (choix de l'utilisatrice).
+ */
 data class PostBudget(val post: BudgetPost, val plannedCents: Long, val spentCents: Long, val budgetCents: Long?) {
     /** De combien le prévu dépasse le budget (null si pas de budget ou pas de dépassement). */
     val overCents: Long? get() = budgetCents?.let { plannedCents - it }?.takeIf { it > 0 }
+
+    /** Le dépensé dépasse le budget prévu. */
+    val isOverSpent: Boolean get() = budgetCents != null && spentCents > budgetCents
 }
 
 /** Le budget d'un Noël, calculé à partir des autres modules (aucune double saisie). */
@@ -30,6 +37,9 @@ data class YearBudget(val editionId: String, val year: Int, val globalBudgetCent
 
     /** Marge restante dans le budget global par rapport au prévu (négative = dépassement). */
     val marginCents: Long? get() = globalBudgetCents?.let { it - plannedCents }
+
+    /** Ce qu'on a prévu de dépenser : le budget global, sinon la somme des budgets des postes. */
+    val expectedCents: Long? get() = globalBudgetCents ?: posts.mapNotNull { it.budgetCents }.takeIf { it.isNotEmpty() }?.sum()
 
     fun post(post: BudgetPost): PostBudget = posts.first { it.post == post }
 }

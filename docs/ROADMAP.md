@@ -178,6 +178,7 @@ Pas de dates ni de priorités (ADR 0006).
 | A-030 | Accueil : résumé des calendriers (x prêts · y en préparation · z à acheter) | 🧪 |
 | A-031 | Calendrier : « Dépensé · Budget » (le prévu, en doublon, est retiré) | 🧪 |
 | M-010 | Types de repas : « Réveillon » et « Déjeuner de Noël » | 🧪 |
+| B-011 | Les comptes : « Prévu » = vos budgets (global, sinon enveloppes et budgets de calendrier), « Dépensé » = le réel ; postes sans budget : dépensé seul | 🧪 |
 | B-010 | Dépassement de budget : barre d'un orange un peu plus foncé, sans note sous la carte | 🧪 |
 
 ## v0.10.0 — La boîte à souvenirs 📖

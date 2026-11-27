@@ -29,3 +29,17 @@ et que les repas comptent comme dépensés une fois leur date passée.
 
 - Les budgets par catégorie de cadeaux du cahier des charges ne sont pas repris : enveloppes
   par personne et budgets de calendrier suffisent pour l'instant.
+
+## Révision (v0.9.0, retour utilisatrice)
+
+« Prévu » affichait le coût total noté (déjà payé compris) et faisait doublon avec « Dépensé ».
+Désormais, partout (Les comptes, accueil, en-tête Cadeaux) :
+
+- **Prévu** = ce qu'on a prévu de dépenser : le budget global s'il existe, sinon la somme des
+  enveloppes et des budgets de calendrier. Sans aucun budget, la case n'apparaît pas.
+- **Dépensé** = le réel (inchangé). Les barres comparent dépensé / prévu ; un dépassement ne
+  change que la couleur.
+- Un poste sans budget n'affiche que son dépensé. Le coût total des cadeaux reste visible dans
+  l'onglet Cadeaux (« Total des cadeaux », « 42,90 € de cadeaux · prévu 60,00 € »).
+- Le graphique des années montre le dépensé de chaque Noël.
+

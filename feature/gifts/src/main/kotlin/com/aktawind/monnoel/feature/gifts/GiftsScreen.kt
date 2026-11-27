@@ -324,9 +324,10 @@ private fun BudgetCard(state: GiftsUiState) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(Modifier.padding(20.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            BudgetFigure(R.string.budget_planned, formatEuro(state.budget.plannedCents))
+            // « Prévu » = les enveloppes ; « Total des cadeaux » = la somme de leurs prix.
+            if (state.budget.envelopesCents > 0) BudgetFigure(R.string.budget_planned, formatEuro(state.budget.envelopesCents))
             BudgetFigure(R.string.budget_spent, formatEuro(state.budget.spentCents))
-            BudgetFigure(R.string.budget_envelopes, formatEuro(state.budget.envelopesCents))
+            BudgetFigure(R.string.budget_total, formatEuro(state.budget.plannedCents))
             BudgetFigure(R.string.budget_count, state.gifts.size.toString())
         }
     }
